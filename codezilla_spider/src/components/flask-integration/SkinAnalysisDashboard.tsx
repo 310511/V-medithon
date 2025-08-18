@@ -224,9 +224,9 @@ export function SkinAnalysisDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-gray-900 dark:to-indigo-950">
       {/* Enhanced Header */}
-      <div className="border-b bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
+      <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm sticky top-0 z-10 dark:border-gray-700">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -235,8 +235,8 @@ export function SkinAnalysisDashboard() {
                   <Camera className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">AI Skin Analysis</h1>
-                  <p className="text-sm text-gray-600">Advanced skin lesion analysis with machine learning</p>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">AI Skin Analysis</h1>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Advanced skin lesion analysis with machine learning</p>
                 </div>
               </div>
             </div>
@@ -262,14 +262,14 @@ export function SkinAnalysisDashboard() {
       {/* Main Content */}
       <div className="container mx-auto px-6 py-6">
         {error && (
-          <Alert className="border-red-200 bg-red-50 mb-6 animate-in slide-in-from-top-2">
+          <Alert className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 mb-6 animate-in slide-in-from-top-2">
             <AlertTriangle className="h-4 w-4" />
-            <AlertDescription className="text-red-800">{error}</AlertDescription>
+            <AlertDescription className="text-red-800 dark:text-red-300">{error}</AlertDescription>
           </Alert>
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
             <TabsTrigger value="basic" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
               <Brain className="h-4 w-4 mr-2" />
               Basic Analysis
@@ -283,9 +283,9 @@ export function SkinAnalysisDashboard() {
           <TabsContent value="basic" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Image Upload */}
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-gray-900">
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
                     <Upload className="h-5 w-5 text-blue-600" />
                     Upload Image
                   </CardTitle>

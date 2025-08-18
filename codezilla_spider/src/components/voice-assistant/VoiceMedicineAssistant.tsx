@@ -198,13 +198,13 @@ export const VoiceMedicineAssistant: React.FC<VoiceAssistantProps> = ({ classNam
             Voice Medicine Assistant
           </h1>
         </div>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
           Speak your symptoms and get instant medicine recommendations with stock availability
         </p>
       </div>
 
       {/* Voice Control Panel */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-0 shadow-lg">
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 border-0 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Mic className="w-5 h-5" />

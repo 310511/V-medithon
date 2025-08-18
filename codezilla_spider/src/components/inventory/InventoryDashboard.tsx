@@ -262,12 +262,12 @@ const InventoryDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950">
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Header Section */}
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-3xl opacity-10"></div>
-          <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-white/20 shadow-xl">
+          <div className="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-gray-700/20 shadow-xl">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
               <div className="space-y-2">
                 <div className="flex items-center space-x-3">
@@ -278,7 +278,7 @@ const InventoryDashboard: React.FC = () => {
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                       Inventory Management
                     </h1>
-                    <p className="text-lg text-muted-foreground">
+                    <p className="text-lg text-muted-foreground dark:text-gray-300">
                       Comprehensive medical supply tracking and automation
                     </p>
                   </div>
@@ -288,7 +288,7 @@ const InventoryDashboard: React.FC = () => {
                 <Button 
                   onClick={runAlertCheck} 
                   variant="outline" 
-                  className="bg-white/50 backdrop-blur-sm border-blue-200 hover:bg-blue-50"
+                  className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/50"
                 >
                   <Zap className="w-4 h-4 mr-2" />
                   Check Alerts

@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
     <title>MedChain - Blockchain Medical Inventory System</title>
     <meta name="description" content="Secure, transparent, blockchain-powered inventory management for healthcare facilities with automated alerts and audit trails." />
     <meta name="author" content="MedChain Technologies" />
@@ -19,6 +20,15 @@
   </head>
 
   <body>
+    <script>
+      // Prevent flash of unstyled content by setting theme before page loads
+      (function() {
+        const savedTheme = localStorage.getItem('medchain-theme');
+        const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+        document.documentElement.classList.add(theme);
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

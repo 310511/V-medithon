@@ -3,12 +3,13 @@ import { StatsGrid } from "@/components/dashboard/StatsGrid";
 import { InventoryTable } from "@/components/dashboard/InventoryTable";
 import { BlockchainActivity } from "@/components/dashboard/BlockchainActivity";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
+import { InventoryAnalytics } from "@/components/dashboard/InventoryAnalytics";
 
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import heroImage from "@/assets/medical-hero.jpg";
+
 import { 
   ArrowRight, 
   Shield, 
@@ -26,7 +27,8 @@ import {
   Target,
   Award,
   Clock,
-  DollarSign
+  DollarSign,
+  Heart
 } from "lucide-react";
 
 const Index = () => {
@@ -37,7 +39,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 overflow-hidden">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Animated Background */}
@@ -59,11 +61,11 @@ const Index = () => {
                   <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
                     Blockchain-Powered
                   </span>
-                  <span className="block text-4xl lg:text-6xl font-bold text-gray-800 mt-2">
+                  <span className="block text-4xl lg:text-6xl font-bold text-gray-800 dark:text-gray-200 mt-2">
                     Medical Inventory
                   </span>
                 </h1>
-                <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
+                <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl">
                   Secure, transparent, and automated inventory management for healthcare facilities. 
                   Every transaction recorded on the blockchain for complete audit trails.
                 </p>
@@ -98,26 +100,99 @@ const Index = () => {
             
             <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'}`}>
               <div className="relative">
+                {/* Animated Pulse Background */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-3xl blur-3xl opacity-20 animate-pulse"></div>
-                <img 
-                  src={heroImage} 
-                  alt="Medical inventory management dashboard" 
-                  className="relative rounded-3xl shadow-2xl max-w-full h-auto transform hover:scale-105 transition-transform duration-500"
-                />
+                
+                {/* Main Pulse Container */}
+                <div className="relative w-96 h-96 mx-auto">
+                  {/* Purple Blue Pulse Rings */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-blue-600 opacity-20 animate-pulse-ring"></div>
+                  <div className="absolute inset-4 rounded-full bg-gradient-to-r from-purple-400 to-blue-500 opacity-30 animate-pulse-ring" style={{ animationDelay: '0.3s' }}></div>
+                  <div className="absolute inset-8 rounded-full bg-gradient-to-r from-purple-300 to-blue-400 opacity-40 animate-pulse-ring" style={{ animationDelay: '0.6s' }}></div>
+                  
+                  {/* Core Heart with Pulse Animation */}
+                  <div className="absolute inset-16 rounded-full bg-gradient-to-r from-purple-600 to-blue-700 flex items-center justify-center shadow-2xl animate-pulse-core">
+                    <div className="text-center text-white">
+                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 mx-auto backdrop-blur-sm animate-pulse-glow">
+                        <Heart className="w-8 h-8 text-white fill-current" />
+                      </div>
+                      <h3 className="text-lg font-bold mb-2">Life Pulse</h3>
+                      <p className="text-sm opacity-90">Healthcare Connected</p>
+                    </div>
+                  </div>
+                  
+                  {/* Purple Blue Floating Elements */}
+                  <div className="absolute top-4 left-4 w-8 h-8 bg-purple-400 rounded-full animate-float" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="absolute top-8 right-8 w-6 h-6 bg-blue-400 rounded-full animate-float" style={{ animationDelay: '0.4s' }}></div>
+                  <div className="absolute bottom-8 left-8 w-6 h-6 bg-purple-300 rounded-full animate-float" style={{ animationDelay: '0.6s' }}></div>
+                  <div className="absolute bottom-4 right-4 w-8 h-8 bg-blue-300 rounded-full animate-float" style={{ animationDelay: '0.8s' }}></div>
+                  
+                  {/* Purple Blue Data Flow Points */}
+                  <div className="absolute top-1/2 left-0 w-3 h-3 bg-purple-400 rounded-full animate-data-flow"></div>
+                  <div className="absolute top-1/2 right-0 w-3 h-3 bg-blue-400 rounded-full animate-data-flow" style={{ animationDelay: '0.3s' }}></div>
+                  <div className="absolute left-1/2 top-0 w-3 h-3 bg-purple-300 rounded-full animate-data-flow" style={{ animationDelay: '0.6s' }}></div>
+                  <div className="absolute left-1/2 bottom-0 w-3 h-3 bg-blue-300 rounded-full animate-data-flow" style={{ animationDelay: '0.9s' }}></div>
+                  
+                  {/* Purple Blue Connection Lines */}
+                  <svg className="absolute inset-0 w-full h-full" style={{ zIndex: -1 }}>
+                    <line x1="50%" y1="50%" x2="0" y2="50%" stroke="url(#purpleGradient)" strokeWidth="2" opacity="0.3" className="animate-pulse" />
+                    <line x1="50%" y1="50%" x2="100%" y2="50%" stroke="url(#blueGradient)" strokeWidth="2" opacity="0.3" className="animate-pulse" style={{ animationDelay: '0.3s' }} />
+                    <line x1="50%" y1="50%" x2="50%" y2="0" stroke="url(#purpleLightGradient)" strokeWidth="2" opacity="0.3" className="animate-pulse" style={{ animationDelay: '0.6s' }} />
+                    <line x1="50%" y1="50%" x2="50%" y2="100%" stroke="url(#blueLightGradient)" strokeWidth="2" opacity="0.3" className="animate-pulse" style={{ animationDelay: '0.9s' }} />
+                    
+                    <defs>
+                      <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0" />
+                        <stop offset="100%" stopColor="#8B5CF6" stopOpacity="1" />
+                      </linearGradient>
+                      <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#3B82F6" stopOpacity="0" />
+                        <stop offset="100%" stopColor="#3B82F6" stopOpacity="1" />
+                      </linearGradient>
+                      <linearGradient id="purpleLightGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0" />
+                        <stop offset="100%" stopColor="#C4B5FD" stopOpacity="1" />
+                      </linearGradient>
+                      <linearGradient id="blueLightGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#93C5FD" stopOpacity="0" />
+                        <stop offset="100%" stopColor="#93C5FD" stopOpacity="1" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                
+                {/* Stats Cards Around Pulse */}
+                <div className="absolute -top-8 -left-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Live</span>
+                  </div>
+                  <p className="text-lg font-bold text-gray-900 dark:text-gray-100">1,247</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Items Tracked</p>
+                </div>
+                
+                <div className="absolute -bottom-8 -right-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-purple-600" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Secure</span>
+                  </div>
+                  <p className="text-lg font-bold text-gray-900 dark:text-gray-100">100%</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Blockchain</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white/50 backdrop-blur-sm">
+             {/* Features Section */}
+       <section className="py-20 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
               Why Choose MedChain?
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               Experience the future of healthcare inventory management with cutting-edge blockchain technology
             </p>
           </div>
@@ -163,7 +238,7 @@ const Index = () => {
             ].map((feature, index) => (
               <Card 
                 key={index}
-                className={`group hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer border-0 bg-white/80 backdrop-blur-sm ${
+                className={`group hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm ${
                   isVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-10'
                 }`}
                 style={{ animationDelay: `${index * 200}ms` }}
@@ -172,10 +247,10 @@ const Index = () => {
                   <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
                     <feature.icon className="w-8 h-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl font-bold text-gray-800">{feature.title}</CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-center leading-relaxed">{feature.description}</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-center leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -214,7 +289,7 @@ const Index = () => {
         <div className="space-y-12">
           {/* Stats Overview */}
           <section className={`transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Dashboard Overview</h2>
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-8 text-center">Dashboard Overview</h2>
             <StatsGrid />
           </section>
 
@@ -231,6 +306,11 @@ const Index = () => {
               <BlockchainActivity />
             </div>
           </div>
+
+          {/* Inventory Analytics Dashboard */}
+          <section className={`transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <InventoryAnalytics />
+          </section>
         </div>
       </main>
 
@@ -265,13 +345,13 @@ const Index = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-white/50 backdrop-blur-sm">
+      <section className="py-20 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
               Trusted by Healthcare Leaders
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               See what healthcare professionals are saying about MedChain
             </p>
           </div>
@@ -302,7 +382,7 @@ const Index = () => {
             ].map((testimonial, index) => (
               <Card 
                 key={index}
-                className={`group hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer border-0 bg-white/80 backdrop-blur-sm ${
+                className={`group hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm ${
                   isVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-10'
                 }`}
                 style={{ animationDelay: `${index * 300}ms` }}
@@ -313,11 +393,11 @@ const Index = () => {
                       <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
                     ))}
                   </div>
-                  <p className="text-gray-600 mb-6 italic">"{testimonial.content}"</p>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 italic">"{testimonial.content}"</p>
                   <div>
-                    <div className="font-semibold text-gray-800">{testimonial.name}</div>
-                    <div className="text-sm text-gray-500">{testimonial.role}</div>
-                    <div className="text-sm text-blue-600">{testimonial.hospital}</div>
+                    <div className="font-semibold text-gray-800 dark:text-gray-200">{testimonial.name}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</div>
+                    <div className="text-sm text-blue-600 dark:text-blue-400">{testimonial.hospital}</div>
                   </div>
                 </CardContent>
               </Card>

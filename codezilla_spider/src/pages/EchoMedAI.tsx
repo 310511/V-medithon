@@ -32,8 +32,7 @@ const EchoMedAI = () => {
   const [activeTab, setActiveTab] = useState("assistant");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-red-50 to-orange-50">
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-red-50 to-orange-50 dark:from-pink-950 dark:via-red-950 dark:to-orange-950">
       
       {/* Hero Section */}
       <section className="relative py-16 px-6">
@@ -53,12 +52,12 @@ const EchoMedAI = () => {
               <span className="bg-gradient-to-r from-pink-600 via-red-600 to-orange-600 bg-clip-text text-transparent">
                 EchoMed AI
               </span>
-              <span className="block text-3xl lg:text-4xl font-bold text-gray-800 mt-2">
+              <span className="block text-3xl lg:text-4xl font-bold text-gray-800 dark:text-gray-200 mt-2">
                 Your Personal Health Assistant
               </span>
             </h1>
             
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
               Experience compassionate AI-powered healthcare guidance. Get instant medical insights, 
               symptom analysis, and personalized health recommendations with our advanced AI assistant.
             </p>
@@ -72,13 +71,13 @@ const EchoMedAI = () => {
               { number: "50K+", label: "Users Helped", icon: Users },
               { number: "150+", label: "Countries", icon: Globe }
             ].map((stat, index) => (
-              <Card key={index} className="text-center border-0 bg-white/80 backdrop-blur-sm">
+              <Card key={index} className="text-center border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-center mb-3">
                     <stat.icon className="w-6 h-6 text-pink-600" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-800 mb-1">{stat.number}</div>
-                  <div className="text-sm text-gray-600">{stat.label}</div>
+                  <div className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-1">{stat.number}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</div>
                 </CardContent>
               </Card>
             ))}
@@ -114,7 +113,7 @@ const EchoMedAI = () => {
             </TabsList>
 
             <TabsContent value="assistant" className="space-y-6">
-              <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-xl">
+              <Card className="border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-2xl">
                     <Heart className="w-6 h-6 text-pink-600" />

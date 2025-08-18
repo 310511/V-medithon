@@ -28,6 +28,7 @@ import Settings from "./pages/Settings";
 import EchoMedAI from "./pages/EchoMedAI";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { Header } from "@/components/layout/Header";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const queryClient = new QueryClient();
 
@@ -80,23 +81,25 @@ const AppContent = () => {
 
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <BlockchainProvider>
-        <InventoryProvider>
-          <NotificationProvider>
-            <InfiniteMemoryProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                  <AppContent />
-                </BrowserRouter>
-              </TooltipProvider>
-            </InfiniteMemoryProvider>
-          </NotificationProvider>
-        </InventoryProvider>
-      </BlockchainProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <BlockchainProvider>
+          <InventoryProvider>
+            <NotificationProvider>
+              <InfiniteMemoryProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <AppContent />
+                  </BrowserRouter>
+                </TooltipProvider>
+              </InfiniteMemoryProvider>
+            </NotificationProvider>
+          </InventoryProvider>
+        </BlockchainProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   </ErrorBoundary>
 );
 

@@ -175,9 +175,9 @@ export const MLPredictionsDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background dark:bg-gray-900">
       {/* Header */}
-      <div className="border-b bg-card shadow-card">
+      <div className="border-b bg-card shadow-card dark:bg-gray-800 dark:border-gray-700">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -185,7 +185,7 @@ export const MLPredictionsDashboard: React.FC = () => {
                 <Brain className="h-8 w-8 text-primary" />
                 <div>
                   <h1 className="text-2xl font-bold text-foreground">ML Predictions Dashboard</h1>
-                  <p className="text-sm text-muted-foreground">AI-powered medicine restocking predictions</p>
+                  <p className="text-sm text-muted-foreground dark:text-gray-300">AI-powered medicine restocking predictions</p>
                 </div>
               </div>
             </div>
@@ -201,7 +201,7 @@ export const MLPredictionsDashboard: React.FC = () => {
               </Button>
               
               {lastUpdated && (
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground dark:text-gray-300">
                   Last updated: {new Date(lastUpdated).toLocaleString()}
                 </span>
               )}
@@ -216,48 +216,48 @@ export const MLPredictionsDashboard: React.FC = () => {
           <>
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2">
                     <Package className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Total Items</p>
+                      <p className="text-sm text-muted-foreground dark:text-gray-300">Total Items</p>
                       <p className="text-2xl font-bold">{results.summary?.total_items}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-red-600" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Urgent Restocking</p>
+                      <p className="text-sm text-muted-foreground dark:text-gray-300">Urgent Restocking</p>
                       <p className="text-2xl font-bold text-red-600">{results.summary?.urgent_restocking}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-yellow-600" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Moderate Restocking</p>
+                      <p className="text-sm text-muted-foreground dark:text-gray-300">Moderate Restocking</p>
                       <p className="text-2xl font-bold text-yellow-600">{results.summary?.moderate_restocking}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5 text-green-600" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Safe Stock Levels</p>
+                      <p className="text-sm text-muted-foreground dark:text-gray-300">Safe Stock Levels</p>
                       <p className="text-2xl font-bold text-green-600">{results.summary?.safe_stock_levels}</p>
                     </div>
                   </div>
@@ -267,7 +267,7 @@ export const MLPredictionsDashboard: React.FC = () => {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-4 dark:bg-gray-800">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="urgent">Urgent</TabsTrigger>
                 <TabsTrigger value="moderate">Moderate</TabsTrigger>
@@ -277,7 +277,7 @@ export const MLPredictionsDashboard: React.FC = () => {
               <TabsContent value="overview" className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Urgent Items */}
-                  <Card>
+                  <Card className="dark:bg-gray-800 dark:border-gray-700">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5 text-red-600" />
@@ -287,14 +287,14 @@ export const MLPredictionsDashboard: React.FC = () => {
                     <CardContent className="space-y-4">
                       {results.predictions?.urgent.length ? (
                         results.predictions.urgent.map((item, index) => (
-                          <div key={index} className="border rounded-lg p-4 bg-red-50">
+                          <div key={index} className="border rounded-lg p-4 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
                             <div className="flex items-center justify-between mb-2">
                               <h4 className="font-semibold">{item.item_name}</h4>
                               <Badge variant="destructive">
                                 {item.prediction.days_until_stockout} days left
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground mb-2">{item.prediction.category}</p>
+                            <p className="text-sm text-muted-foreground dark:text-gray-300 mb-2">{item.prediction.category}</p>
                             <div className="space-y-2">
                               <div className="flex justify-between text-sm">
                                 <span>Current Stock:</span>

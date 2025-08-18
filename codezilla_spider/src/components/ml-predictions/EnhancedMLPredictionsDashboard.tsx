@@ -212,9 +212,9 @@ export const EnhancedMLPredictionsDashboard: React.FC = () => {
   };
 
   const getRiskLevel = (riskScore: number) => {
-    if (riskScore >= 70) return { level: "High", color: "text-red-600", bg: "bg-red-50" };
-    if (riskScore >= 40) return { level: "Medium", color: "text-yellow-600", bg: "bg-yellow-50" };
-    return { level: "Low", color: "text-green-600", bg: "bg-green-50" };
+    if (riskScore >= 70) return { level: "High", color: "text-red-600", bg: "bg-red-50 dark:bg-red-950/30" };
+    if (riskScore >= 40) return { level: "Medium", color: "text-yellow-600", bg: "bg-yellow-50 dark:bg-yellow-950/30" };
+    return { level: "Low", color: "text-green-600", bg: "bg-green-50 dark:bg-green-950/30" };
   };
 
   const filteredPredictions = () => {
@@ -232,9 +232,9 @@ export const EnhancedMLPredictionsDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-950">
       {/* Enhanced Header */}
-      <div className="border-b bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
+      <div className="border-b bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -243,8 +243,8 @@ export const EnhancedMLPredictionsDashboard: React.FC = () => {
                   <Brain className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">AI Predictions Hub</h1>
-                  <p className="text-sm text-gray-600">Intelligent inventory forecasting & risk analysis</p>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">AI Predictions Hub</h1>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Intelligent inventory forecasting & risk analysis</p>
                 </div>
               </div>
             </div>
@@ -284,62 +284,62 @@ export const EnhancedMLPredictionsDashboard: React.FC = () => {
           <>
             {/* Enhanced Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Items</p>
-                      <p className="text-3xl font-bold text-gray-900">{results.summary?.total_items}</p>
-                      <p className="text-xs text-gray-500 mt-1">Analyzed for predictions</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Items</p>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{results.summary?.total_items}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Analyzed for predictions</p>
                     </div>
-                    <div className="p-3 bg-blue-100 rounded-full">
+                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
                       <Package className="h-6 w-6 text-blue-600" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Risk Score</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Risk Score</p>
                       <p className="text-3xl font-bold text-red-600">{results.summary?.risk_score?.toFixed(1)}%</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {getRiskLevel(results.summary?.risk_score || 0).level} Risk Level
                       </p>
                     </div>
-                    <div className="p-3 bg-red-100 rounded-full">
+                    <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
                       <AlertTriangle className="h-6 w-6 text-red-600" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Urgent Items</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Urgent Items</p>
                       <p className="text-3xl font-bold text-red-600">{results.summary?.urgent_restocking}</p>
-                      <p className="text-xs text-gray-500 mt-1">Need immediate attention</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Need immediate attention</p>
                     </div>
-                    <div className="p-3 bg-red-100 rounded-full">
+                    <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
                       <AlertCircle className="h-6 w-6 text-red-600" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Confidence</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Confidence</p>
                       <p className="text-3xl font-bold text-green-600">{(results.summary?.average_confidence || 0 * 100).toFixed(1)}%</p>
-                      <p className="text-xs text-gray-500 mt-1">Model accuracy</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Model accuracy</p>
                     </div>
-                    <div className="p-3 bg-green-100 rounded-full">
+                    <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
                       <Target className="h-6 w-6 text-green-600" />
                     </div>
                   </div>
@@ -356,16 +356,16 @@ export const EnhancedMLPredictionsDashboard: React.FC = () => {
                   placeholder="Search items or categories..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
               </div>
               
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Timeframe:</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Timeframe:</span>
                 <select
                   value={selectedTimeframe}
                   onChange={(e) => setSelectedTimeframe(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 >
                   <option value="7d">7 Days</option>
                   <option value="30d">30 Days</option>

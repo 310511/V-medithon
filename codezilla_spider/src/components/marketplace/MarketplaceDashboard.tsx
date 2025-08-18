@@ -365,12 +365,11 @@ export const MarketplaceDashboard: React.FC = () => {
               {filteredProducts.map((product) => (
                 <Card key={product.id} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-4">
-                    <div className="aspect-square bg-muted rounded-lg mb-4 flex items-center justify-center">
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
+                    <div className="aspect-square bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg mb-4 flex items-center justify-center">
+                      <div className="text-center">
+                        <Package className="h-12 w-12 text-blue-500 mx-auto mb-2" />
+                        <p className="text-xs text-muted-foreground font-medium">{product.category}</p>
+                      </div>
                     </div>
                     
                     <div className="space-y-2">
@@ -505,11 +504,9 @@ export const MarketplaceDashboard: React.FC = () => {
           {selectedProduct && (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <img
-                  src={selectedProduct.imageUrl}
-                  alt={selectedProduct.name}
-                  className="w-16 h-16 rounded-lg object-cover"
-                />
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg flex items-center justify-center">
+                  <Package className="h-8 w-8 text-blue-500" />
+                </div>
                 <div>
                   <h3 className="font-semibold">{selectedProduct.name}</h3>
                   <p className="text-sm text-muted-foreground">{selectedProduct.supplier}</p>

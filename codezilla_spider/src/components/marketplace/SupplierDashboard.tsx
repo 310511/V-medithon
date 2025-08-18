@@ -137,7 +137,7 @@ export const SupplierDashboard: React.FC = () => {
         price,
         supplier: address!,
         category: newProduct.category,
-        imageUrl: newProduct.imageUrl || "https://via.placeholder.com/150",
+        imageUrl: newProduct.imageUrl || "",
         blockchainVerified: false,
         inventoryLevel,
         contractAddress: address!
@@ -406,13 +406,13 @@ export const SupplierDashboard: React.FC = () => {
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="image" className="text-right">Image URL</Label>
+                      <Label htmlFor="image" className="text-right">Image URL (Optional)</Label>
                       <Input
                         id="image"
                         value={newProduct.imageUrl}
                         onChange={(e) => handleInputChange("imageUrl", e.target.value)}
                         className="col-span-3"
-                        placeholder="https://example.com/image.jpg"
+                        placeholder="Leave empty to use default placeholder"
                       />
                     </div>
                   </div>
@@ -435,12 +435,11 @@ export const SupplierDashboard: React.FC = () => {
               {products.map((product) => (
                 <Card key={product.id} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-4">
-                    <div className="aspect-square bg-muted rounded-lg mb-4 flex items-center justify-center">
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
+                    <div className="aspect-square bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 rounded-lg mb-4 flex items-center justify-center">
+                      <div className="text-center">
+                        <Package className="h-12 w-12 text-green-500 mx-auto mb-2" />
+                        <p className="text-xs text-muted-foreground font-medium">{product.category}</p>
+                      </div>
                     </div>
                     
                     <div className="space-y-2">

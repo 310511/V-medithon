@@ -232,10 +232,10 @@ export function InfiniteMemoryDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Enhanced Header */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 dark:border-gray-700/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="relative">
@@ -248,7 +248,7 @@ export function InfiniteMemoryDashboard() {
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Infinite Memory
                 </h1>
-                <p className="text-slate-600 font-medium">AI Cognitive Companion</p>
+                <p className="text-slate-600 dark:text-slate-300 font-medium">AI Cognitive Companion</p>
               </div>
             </div>
             
@@ -256,10 +256,10 @@ export function InfiniteMemoryDashboard() {
             <div className="flex items-center space-x-3">
               <div className={`flex items-center space-x-2 px-4 py-2 rounded-full ${
                 backendStatus === 'connected' 
-                  ? 'bg-green-100 text-green-700 border border-green-200' 
+                  ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700' 
                   : backendStatus === 'disconnected'
-                  ? 'bg-red-100 text-red-700 border border-red-200'
-                  : 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                  ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700'
+                  : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700'
               }`}>
                 {backendStatus === 'connected' ? (
                   <Wifi className="h-4 w-4" />
@@ -278,7 +278,7 @@ export function InfiniteMemoryDashboard() {
                 size="sm" 
                 onClick={testBackendConnection}
                 disabled={backendStatus === 'testing'}
-                className="border-slate-200 hover:bg-slate-50"
+                className="border-slate-200 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-800"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Test Connection
@@ -289,31 +289,31 @@ export function InfiniteMemoryDashboard() {
 
         {/* Error Alert */}
         {state.error && (
-          <Alert className="border-red-200 bg-red-50/80 backdrop-blur-sm">
+          <Alert className="border-red-200 dark:border-red-800 bg-red-50/80 dark:bg-red-900/20 backdrop-blur-sm">
             <AlertTriangle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800 font-medium">
+            <AlertDescription className="text-red-800 dark:text-red-300 font-medium">
               {state.error}
             </AlertDescription>
           </Alert>
         )}
 
         {/* Enhanced Tabs */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/20">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="p-6">
-            <TabsList className="grid w-full grid-cols-4 bg-slate-100/50 p-1 rounded-xl">
-              <TabsTrigger value="conversation" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg">
+            <TabsList className="grid w-full grid-cols-4 bg-slate-100/50 dark:bg-gray-800/50 p-1 rounded-xl">
+              <TabsTrigger value="conversation" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-lg">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Conversation
               </TabsTrigger>
-              <TabsTrigger value="memory-query" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg">
+              <TabsTrigger value="memory-query" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-lg">
                 <Search className="h-4 w-4 mr-2" />
                 Memory Query
               </TabsTrigger>
-              <TabsTrigger value="tasks" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg">
+              <TabsTrigger value="tasks" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-lg">
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Tasks
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg">
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-lg">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Analytics
               </TabsTrigger>
@@ -321,15 +321,15 @@ export function InfiniteMemoryDashboard() {
 
             {/* Enhanced Conversation Tab */}
             <TabsContent value="conversation" className="space-y-6 mt-6">
-              <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2 text-blue-900">
+                  <CardTitle className="flex items-center space-x-2 text-blue-900 dark:text-blue-100">
                     <div className="p-2 bg-blue-100 rounded-lg">
                       <MessageSquare className="h-5 w-5 text-blue-600" />
                     </div>
                     <span>Process New Information</span>
                   </CardTitle>
-                  <CardDescription className="text-blue-700">
+                  <CardDescription className="text-blue-700 dark:text-blue-300">
                     Share information with your AI companion to build your memory
                   </CardDescription>
                 </CardHeader>
@@ -339,7 +339,7 @@ export function InfiniteMemoryDashboard() {
                       placeholder="Type your message here..."
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
-                      className="flex-1 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
+                      className="flex-1 border-blue-200 dark:border-blue-700 focus:border-blue-400 dark:focus:border-blue-500 focus:ring-blue-400 dark:focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
                       rows={3}
                     />
                     <Button 
@@ -361,7 +361,7 @@ export function InfiniteMemoryDashboard() {
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={backendStatus !== 'connected'}
-                      className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                      className="border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/50"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Upload Image
@@ -379,7 +379,7 @@ export function InfiniteMemoryDashboard() {
                           placeholder="Image caption..."
                           value={imageCaption}
                           onChange={(e) => setImageCaption(e.target.value)}
-                          className="w-48 border-blue-200 focus:border-blue-400"
+                          className="w-48 border-blue-200 dark:border-blue-700 focus:border-blue-400 dark:focus:border-blue-500 dark:bg-gray-800 dark:text-white"
                         />
                         <Button onClick={handleProcessImage} size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
                           <Image className="h-4 w-4 mr-2" />
@@ -392,7 +392,7 @@ export function InfiniteMemoryDashboard() {
               </Card>
 
               {/* Enhanced Conversation History */}
-              <Card className="border-0 shadow-lg">
+              <Card className="border-0 shadow-lg dark:bg-gray-800/50">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <div className="p-2 bg-slate-100 rounded-lg">

@@ -223,9 +223,9 @@ export function EnhancedMedicineAIDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-gray-900 dark:to-indigo-950">
       {/* Enhanced Header */}
-      <div className="border-b bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
+      <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm sticky top-0 z-10 dark:border-gray-700">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -234,8 +234,8 @@ export function EnhancedMedicineAIDashboard() {
                   <Pill className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">AI Medicine Assistant</h1>
-                  <p className="text-sm text-gray-600">Intelligent symptom analysis & medicine recommendations</p>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">AI Medicine Assistant</h1>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Intelligent symptom analysis & medicine recommendations</p>
                 </div>
               </div>
             </div>
