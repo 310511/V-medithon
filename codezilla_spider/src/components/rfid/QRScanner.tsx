@@ -124,37 +124,59 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     const video = videoRef.current;
     const canvas = canvasRef.current;
     
-    if (!video || !canvas) return;
+    if (!video || !canvas) {
+      console.log('Video or canvas not available for QR detection');
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      console.log('Canvas context not available');
+      return;
+    }
+
+    console.log('Starting QR detection loop...');
+    console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+    console.log('Video ready state:', video.readyState);
 
     const detectQR = () => {
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        // Set canvas dimensions to match video
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        // Draw video frame to canvas
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Get image data for QR detection
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
-        // Detect QR code
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "dontInvert",
-        });
-        
-        if (code) {
-          console.log('QR Code detected:', code.data);
+      try {
+        if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
+          // Set canvas dimensions to match video
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
           
-          // Prevent duplicate scans
-          if (code.data !== lastScannedCode) {
-            setLastScannedCode(code.data);
-            onScanSuccess(code.data, code);
+          // Draw video frame to canvas
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          // Get image data for QR detection
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          
+          // Detect QR code with multiple inversion attempts
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "attemptBoth",
+          });
+          
+          if (code) {
+            console.log('QR Code detected:', code.data);
+            console.log('QR Code bounds:', code.location);
+            
+            // Prevent duplicate scans
+            if (code.data !== lastScannedCode) {
+              setLastScannedCode(code.data);
+              onScanSuccess(code.data, code);
+              return; // Stop detection after successful scan
+            }
           }
+        } else {
+          console.log('Video not ready for QR detection:', {
+            readyState: video.readyState,
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight
+          });
         }
+      } catch (error) {
+        console.error('Error in QR detection loop:', error);
       }
       
       // Continue detection loop
@@ -341,18 +363,25 @@ export const QRScanner: React.FC<QRScannerProps> = ({
 
       setCameraPermission(true);
       setScanError(null);
-      setIsVideoReady(true);
       console.log('Camera started successfully for QR scanning');
       
-      // Add a small delay to ensure video is fully ready
-      setTimeout(() => {
-        if (video.readyState >= 2) {
+      // Wait for video to be fully ready before enabling QR detection
+      const checkVideoReady = () => {
+        if (video.readyState >= 2 && video.videoWidth > 0) {
           console.log('Video is ready for QR scanning');
+          console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
           setIsVideoReady(true);
         } else {
-          console.warn('Video may not be fully ready yet');
+          console.log('Video not ready yet, checking again...', {
+            readyState: video.readyState,
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight
+          });
+          setTimeout(checkVideoReady, 500);
         }
-      }, 1000);
+      };
+      
+      checkVideoReady();
       
     } catch (error) {
       console.error('Failed to start camera:', error);
@@ -476,27 +505,81 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     setScanResult(null);
 
     try {
+      console.log('Processing uploaded file:', file.name);
+      
       // Create a preview URL
       const imageUrl = URL.createObjectURL(file);
       setUploadedImage(imageUrl);
 
-      // For now, we'll just show the image preview
-      // QR code scanning from uploaded images would require a separate library
-      console.log('File uploaded:', file.name);
-      setScanError('QR code scanning from uploaded images is not yet implemented. Please use the camera scanner.');
-      onScanError?.('File scan not implemented');
+      // Create canvas to process the image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Set canvas size to match image
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        // Draw image to canvas
+        ctx?.drawImage(img, 0, 0);
+        
+        // Get image data for QR detection
+        const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+        
+        if (imageData) {
+          // Detect QR code in uploaded image
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+          });
+          
+          if (code) {
+            console.log('QR Code detected in uploaded image:', code.data);
+            onScanSuccess(code.data, code);
+          } else {
+            console.log('No QR code found in uploaded image');
+            setScanError('No QR code found in the uploaded image. Please ensure the image contains a clear QR code.');
+            onScanError?.('No QR code found');
+          }
+        }
+        
+        setIsUploading(false);
+      };
+      
+      img.onerror = () => {
+        console.error('Failed to load uploaded image');
+        setScanError('Failed to load the uploaded image. Please try a different image.');
+        onScanError?.('Image load failed');
+        setIsUploading(false);
+      };
+      
+      img.src = imageUrl;
       
     } catch (error) {
-      console.error('Error handling uploaded file:', error);
+      console.error('Error processing uploaded file:', error);
       setScanError('Failed to process uploaded image.');
       onScanError?.('File processing failed');
-    } finally {
       setIsUploading(false);
     }
   };
 
   const triggerFileUpload = () => {
     fileInputRef.current?.click();
+  };
+
+  // Test function to generate a sample QR code data
+  const generateTestQRData = () => {
+    const testData = {
+      rfid_tag_id: 'RFID_TEST_' + Math.random().toString(36).substr(2, 5),
+      item_name: 'Test Medical Supply',
+      item_id: 'ITEM_TEST_' + Math.random().toString(36).substr(2, 5),
+      timestamp: new Date().toISOString(),
+      checksum: Math.random().toString(36).substr(2, 8)
+    };
+    
+    // Simulate QR code detection
+    onScanSuccess(JSON.stringify(testData), testData);
+    console.log('Test QR data generated:', testData);
   };
 
   return (
@@ -582,6 +665,16 @@ export const QRScanner: React.FC<QRScannerProps> = ({
           >
             <Camera className="w-4 h-4" />
             Test Camera
+          </Button>
+          
+          <Button
+            onClick={generateTestQRData}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <QrCode className="w-4 h-4" />
+            Test QR
           </Button>
         </div>
       </div>
@@ -718,6 +811,14 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                     <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                       <Play className="w-3 h-3" />
                       Ready
+                    </div>
+                  )}
+                  
+                  {/* QR Detection Active Indicator */}
+                  {isDetecting && (
+                    <div className="absolute top-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 animate-pulse">
+                      <QrCode className="w-3 h-3" />
+                      Scanning
                     </div>
                   )}
                 </div>
