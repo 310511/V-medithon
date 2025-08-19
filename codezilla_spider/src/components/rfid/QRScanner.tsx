@@ -54,6 +54,8 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   const [isVideoReady, setIsVideoReady] = useState<boolean>(false);
   const [isDetecting, setIsDetecting] = useState<boolean>(false);
   const [lastScannedCode, setLastScannedCode] = useState<string | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [isCapturing, setIsCapturing] = useState<boolean>(false);
   const scannerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -438,6 +440,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
       setCameraPermission(null);
       setScanError(null);
       setIsVideoReady(false);
+      setCapturedImage(null);
       onScanningChange(false);
     } catch (error) {
       console.error('Error stopping camera:', error);
@@ -449,6 +452,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     setScanResult(null);
     setScanError(null);
     setUploadedImage(null);
+    setCapturedImage(null);
     setIsVideoReady(false);
   };
 
@@ -567,6 +571,63 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     fileInputRef.current?.click();
   };
 
+  // Capture current camera frame and scan for QR code
+  const captureAndScan = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    
+    if (!video || !canvas) {
+      console.log('Video or canvas not available for capture');
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.log('Canvas context not available');
+      return;
+    }
+
+    setIsCapturing(true);
+    console.log('Capturing current camera frame...');
+
+    try {
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Draw current video frame to canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Convert canvas to image URL for preview
+      const imageUrl = canvas.toDataURL('image/png');
+      setCapturedImage(imageUrl);
+      
+      // Get image data for QR detection
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      
+      // Detect QR code in captured image
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "attemptBoth",
+      });
+      
+      if (code) {
+        console.log('QR Code detected in captured image:', code.data);
+        onScanSuccess(code.data, code);
+      } else {
+        console.log('No QR code found in captured image');
+        setScanError('No QR code found in the captured image. Please ensure the QR code is clearly visible and try again.');
+        onScanError?.('No QR code found in captured image');
+      }
+      
+    } catch (error) {
+      console.error('Error capturing and scanning image:', error);
+      setScanError('Failed to capture and scan image.');
+      onScanError?.('Capture and scan failed');
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
   // Test function to generate a sample QR code data
   const generateTestQRData = () => {
     const testData = {
@@ -585,96 +646,131 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   return (
     <div className="space-y-4">
       {/* Scanner Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Camera className="w-5 h-5 text-blue-600" />
-          <span className="font-medium">QR Code Scanner</span>
-          {isScanning && (
-            <Badge className="bg-green-100 text-green-800 animate-pulse">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-ping"></div>
-              Live
-            </Badge>
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Camera className="w-5 h-5 text-blue-600" />
+            <span className="font-medium">QR Code Scanner</span>
+            {isScanning && (
+              <Badge className="bg-green-100 text-green-800 animate-pulse">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-ping"></div>
+                Live
+              </Badge>
+            )}
+          </div>
+        </div>
+        
+        {/* Main Action Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          {!isScanning ? (
+            <>
+              <Button
+                onClick={() => onScanningChange(true)}
+                disabled={isInitializing}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 h-10"
+              >
+                {isInitializing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    <span className="hidden sm:inline">Starting...</span>
+                    <span className="sm:hidden">Starting</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Start QR Scan</span>
+                    <span className="sm:hidden">Start</span>
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={triggerFileUpload}
+                disabled={isUploading}
+                variant="outline"
+                className="h-10"
+              >
+                {isUploading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span className="hidden sm:inline">Scanning...</span>
+                    <span className="sm:hidden">Scanning</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    <span className="hidden sm:inline">Upload QR</span>
+                    <span className="sm:hidden">Upload</span>
+                  </>
+                )}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                onClick={captureAndScan}
+                disabled={isCapturing || !isVideoReady}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 h-10"
+              >
+                {isCapturing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    <span className="hidden sm:inline">Capturing...</span>
+                    <span className="sm:hidden">Capturing</span>
+                  </>
+                ) : (
+                  <>
+                    <Camera className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Ready</span>
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={() => onScanningChange(false)}
+                variant="destructive"
+                className="h-10"
+              >
+                <Square className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Stop QR Scan</span>
+                <span className="sm:hidden">Stop</span>
+              </Button>
+            </>
           )}
         </div>
         
-        <div className="flex gap-2">
-          {!isScanning ? (
-            <Button
-              onClick={() => onScanningChange(true)}
-              disabled={isInitializing}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700"
-            >
-              {isInitializing ? (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Starting...
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4 mr-2" />
-                  Start QR Scan
-                </>
-              )}
-            </Button>
-          ) : (
-            <Button
-              onClick={() => onScanningChange(false)}
-              variant="destructive"
-              className="gap-2"
-            >
-              <Square className="w-4 h-4" />
-              Stop QR Scan
-            </Button>
-          )}
-          
-          <Button
-            onClick={triggerFileUpload}
-            disabled={isUploading}
-            variant="outline"
-            className="gap-2"
-          >
-            {isUploading ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                Scanning...
-              </>
-            ) : (
-              <>
-                <Upload className="w-4 h-4" />
-                Upload QR
-              </>
-            )}
-          </Button>
-          
+        {/* Secondary Action Buttons */}
+        <div className="grid grid-cols-3 gap-2">
           <Button
             onClick={resetScanner}
             variant="outline"
-            className="gap-2"
+            size="sm"
+            className="h-8 text-xs"
           >
-            <RefreshCw className="w-4 h-4" />
-            Reset
+            <RefreshCw className="w-3 h-3 mr-1" />
+            <span className="hidden sm:inline">Reset</span>
+            <span className="sm:hidden">Reset</span>
           </Button>
-          
-
           
           <Button
             onClick={testCameraAccess}
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="h-8 text-xs"
           >
-            <Camera className="w-4 h-4" />
-            Test Camera
+            <Camera className="w-3 h-3 mr-1" />
+            <span className="hidden sm:inline">Test Camera</span>
+            <span className="sm:hidden">Test Cam</span>
           </Button>
           
           <Button
             onClick={generateTestQRData}
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="h-8 text-xs"
           >
-            <QrCode className="w-4 h-4" />
-            Test QR
+            <QrCode className="w-3 h-3 mr-1" />
+            <span className="hidden sm:inline">Test QR</span>
+            <span className="sm:hidden">Test QR</span>
           </Button>
         </div>
       </div>
@@ -691,8 +787,8 @@ export const QRScanner: React.FC<QRScannerProps> = ({
       {/* Camera Selection */}
       {availableCameras.length > 1 && (
         <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Camera className="w-4 h-4 text-blue-600" />
                 <span className="text-sm font-medium text-blue-800">Select Camera</span>
@@ -700,7 +796,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
               <select
                 value={selectedCamera}
                 onChange={(e) => setSelectedCamera(e.target.value)}
-                className="text-sm border border-blue-300 rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="text-sm border border-blue-300 rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
                 disabled={isScanning}
               >
                 <option value="environment">
@@ -721,26 +817,21 @@ export const QRScanner: React.FC<QRScannerProps> = ({
       )}
 
       {/* Status Indicators */}
-      <div className="flex gap-2 flex-wrap">
-        <Badge variant={cameraPermission === true ? "default" : "secondary"} className="gap-1">
+      <div className="grid grid-cols-3 gap-2">
+        <Badge variant={cameraPermission === true ? "default" : "secondary"} className="gap-1 text-xs justify-center">
           <Camera className="w-3 h-3" />
-          {cameraPermission === true ? "Camera Active" : "Camera Access"}
+          <span className="hidden sm:inline">{cameraPermission === true ? "Camera Active" : "Camera Access"}</span>
+          <span className="sm:hidden">{cameraPermission === true ? "Active" : "Access"}</span>
         </Badge>
-        <Badge variant={isVideoReady ? "default" : "secondary"} className="gap-1">
+        <Badge variant={isVideoReady ? "default" : "secondary"} className="gap-1 text-xs justify-center">
           <Play className="w-3 h-3" />
-          {isVideoReady ? "Video Ready" : "Video Loading"}
+          <span className="hidden sm:inline">{isVideoReady ? "Video Ready" : "Video Loading"}</span>
+          <span className="sm:hidden">{isVideoReady ? "Ready" : "Loading"}</span>
         </Badge>
-        <Badge variant={isDetecting ? "default" : "secondary"} className="gap-1">
-          <QrCode className="w-3 h-3" />
-          {isDetecting ? "Detecting QR" : "QR Detection"}
-        </Badge>
-        <Badge variant={isScanning ? "default" : "secondary"} className="gap-1">
-          <QrCode className="w-3 h-3" />
-          {isScanning ? "QR Detection" : "QR Detection"}
-        </Badge>
-        <Badge variant={isScanning ? "default" : "secondary"} className="gap-1">
+        <Badge variant={isScanning ? "default" : "secondary"} className="gap-1 text-xs justify-center">
           <RefreshCw className="w-3 h-3" />
-          {isScanning ? "Real-time" : "Ready"}
+          <span className="hidden sm:inline">{isScanning ? "Real-time" : "Ready"}</span>
+          <span className="sm:hidden">{isScanning ? "Live" : "Ready"}</span>
         </Badge>
       </div>
 
@@ -786,6 +877,27 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                     className="absolute top-0 left-0 w-full h-full opacity-0 pointer-events-none"
                     style={{ zIndex: -1 }}
                   />
+                  
+                  {/* Captured Image Preview */}
+                  {capturedImage && (
+                    <div className="absolute inset-0 bg-black rounded-lg overflow-hidden">
+                      <img 
+                        src={capturedImage} 
+                        alt="Captured QR Code" 
+                        className="w-full h-full object-contain"
+                      />
+                      <div className="absolute top-2 right-2">
+                        <Button
+                          onClick={() => setCapturedImage(null)}
+                          size="sm"
+                          variant="destructive"
+                          className="h-8 w-8 p-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 {/* QR Code Overlay */}
@@ -828,13 +940,13 @@ export const QRScanner: React.FC<QRScannerProps> = ({
               <div className="text-center space-y-2">
                 <p className="text-sm font-medium text-blue-700">
                   {uploadedImage ? "Analyzing uploaded image..." : 
-                   isDetecting ? "Scanning for QR codes..." :
-                   isVideoReady ? "Camera ready! Point at QR code" : "Initializing camera..."}
+                   isCapturing ? "Capturing and scanning..." :
+                   isVideoReady ? "Camera ready! Position QR code and click Ready" : "Initializing camera..."}
                 </p>
                 <p className="text-xs text-blue-600">
                   {uploadedImage ? "Processing image for QR code detection" : 
-                   isDetecting ? "Position QR code within the scanning frame" :
-                   isVideoReady ? "Hold steady and center the QR code in the frame" : "Please wait while camera initializes"}
+                   isCapturing ? "Processing captured image for QR detection" :
+                   isVideoReady ? "Center the QR code in the frame and click the Ready button to capture" : "Please wait while camera initializes"}
                 </p>
               </div>
             </div>
