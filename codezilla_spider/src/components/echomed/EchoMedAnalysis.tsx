@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,17 +17,120 @@ import {
   CheckCircle,
   Clock,
   Sparkles,
-  BarChart,
+  Waveform,
   FileAudio,
   Download,
-  Share2
+  Share2,
+  Heart,
+  Thermometer,
+  Droplets
 } from "lucide-react";
+
+// Animated waveform component
+const AnimatedWaveform = ({ isRecording, isProcessing }: { isRecording: boolean, isProcessing: boolean }) => {
+  const [bars, setBars] = useState<number[]>(Array(20).fill(0).map(() => Math.random() * 100));
+
+  useEffect(() => {
+    if (isRecording || isProcessing) {
+      const interval = setInterval(() => {
+        setBars(Array(20).fill(0).map(() => Math.random() * 100));
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [isRecording, isProcessing]);
+
+  return (
+    <div className="flex items-end justify-center gap-1 h-16">
+      {bars.map((height, index) => (
+        <div
+          key={index}
+          className="w-1 bg-gradient-to-t from-pink-500 to-red-500 rounded-full transition-all duration-100"
+          style={{ height: `${height}%` }}
+        />
+      ))}
+    </div>
+  );
+};
+
+// Animated health metrics chart
+const AnimatedHealthChart = ({ data, color, title }: { data: number[], color: string, title: string }) => {
+  const maxValue = Math.max(...data);
+  const minValue = Math.min(...data);
+  const range = maxValue - minValue || 1;
+  
+  const points = data.map((value, index) => {
+    const x = (index / (data.length - 1)) * 100;
+    const y = 100 - ((value - minValue) / range) * 100;
+    return `${x},${y}`;
+  }).join(' ');
+
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-gray-700">{title}</p>
+      <svg width="100%" height="40" className="overflow-visible">
+        <polyline
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
+          points={points}
+          className="animate-pulse"
+        />
+        <circle
+          cx={`${(data.length - 1) / (data.length - 1) * 100}%`}
+          cy={`${100 - ((data[data.length - 1] - minValue) / range) * 100}%`}
+          r="3"
+          fill={color}
+          className="animate-ping"
+        />
+      </svg>
+    </div>
+  );
+};
 
 export const EchoMedAnalysis = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  
+  // Real-time health data
+  const [heartRate, setHeartRate] = useState(72);
+  const [respiratoryRate, setRespiratoryRate] = useState(16);
+  const [stressLevel, setStressLevel] = useState(45);
+  const [voiceClarity, setVoiceClarity] = useState(85);
+
+  // Update health data every 2 seconds
+  useEffect(() => {
+    const dataInterval = setInterval(() => {
+      // Generate new heart rate data
+      setHeartRate(prev => {
+        const change = (Math.random() - 0.5) * 6;
+        return Math.max(60, Math.min(100, prev + change));
+      });
+
+      // Generate new respiratory rate data
+      setRespiratoryRate(prev => {
+        const change = (Math.random() - 0.5) * 3;
+        return Math.max(12, Math.min(20, prev + change));
+      });
+
+      // Generate new stress level data
+      setStressLevel(prev => {
+        const change = (Math.random() - 0.5) * 8;
+        return Math.max(20, Math.min(80, prev + change));
+      });
+
+      // Generate new voice clarity data
+      setVoiceClarity(prev => {
+        const change = (Math.random() - 0.5) * 6;
+        return Math.max(70, Math.min(95, prev + change));
+      });
+    }, 2000);
+
+    return () => clearInterval(dataInterval);
+  }, []);
+  
+
 
   const handleStartRecording = () => {
     setIsRecording(true);
@@ -69,11 +172,11 @@ export const EchoMedAnalysis = () => {
   };
 
   const analysisResults = {
-    heartRate: 72,
-    respiratoryRate: 16,
-    stressLevel: "Low",
+    heartRate: Math.round(heartRate),
+    respiratoryRate: Math.round(respiratoryRate),
+    stressLevel: stressLevel > 60 ? "High" : stressLevel > 40 ? "Moderate" : "Low",
     sleepQuality: "Good",
-    voiceClarity: "Clear",
+    voiceClarity: voiceClarity > 85 ? "Excellent" : voiceClarity > 75 ? "Good" : "Fair",
     emotionalState: "Calm",
     recommendations: [
       "Your heart rate is within normal range",
@@ -91,9 +194,9 @@ export const EchoMedAnalysis = () => {
           <h2 className="text-2xl font-bold text-gray-800">Voice Health Analysis</h2>
           <p className="text-gray-600">AI-powered analysis of your voice patterns and health indicators</p>
         </div>
-        <Badge className="bg-gradient-to-r from-pink-500 to-red-600 text-white">
+        <Badge className="bg-gradient-to-r from-pink-500 to-red-600 text-white animate-pulse">
           <Sparkles className="w-3 h-3 mr-1" />
-          AI Analysis
+          Live Analysis
         </Badge>
       </div>
 
@@ -129,6 +232,9 @@ export const EchoMedAnalysis = () => {
                     <Square className="w-4 h-4" />
                     Stop Recording
                   </Button>
+                  
+                  {/* Animated Waveform */}
+                  <AnimatedWaveform isRecording={isRecording} isProcessing={false} />
                 </div>
               ) : isProcessing ? (
                 <div className="space-y-4">
@@ -140,6 +246,9 @@ export const EchoMedAnalysis = () => {
                     <p className="text-sm text-gray-600">AI is analyzing your voice patterns</p>
                   </div>
                   <Progress value={75} className="w-full" />
+                  
+                  {/* Animated Waveform */}
+                  <AnimatedWaveform isRecording={false} isProcessing={isProcessing} />
                 </div>
               ) : analysisComplete ? (
                 <div className="space-y-4">
@@ -196,74 +305,44 @@ export const EchoMedAnalysis = () => {
           </CardContent>
         </Card>
 
-        {/* AI Processing Visualizer */}
+        {/* Real-time Health Metrics */}
         <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-pink-600" />
-              AI Processing
+              <Activity className="w-5 h-5 text-pink-600" />
+              Real-time Health Metrics
             </CardTitle>
             <CardDescription>
-              Real-time analysis of voice patterns and health indicators
+              Live monitoring of health indicators during analysis
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Processing Steps */}
-            <div className="space-y-4">
-              {[
-                { step: "Voice Capture", status: isRecording ? "active" : "pending", icon: Mic },
-                { step: "Pattern Analysis", status: isProcessing ? "active" : isRecording ? "pending" : "complete", icon: BarChart },
-                { step: "Health Assessment", status: isProcessing ? "active" : isRecording ? "pending" : "complete", icon: Activity },
-                { step: "Results Generation", status: analysisComplete ? "complete" : "pending", icon: BarChart3 }
-              ].map((item, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    item.status === "active" 
-                      ? "bg-blue-500 animate-pulse" 
-                      : item.status === "complete"
-                      ? "bg-green-500"
-                      : "bg-gray-200"
-                  }`}>
-                    <item.icon className={`w-4 h-4 ${
-                      item.status === "active" || item.status === "complete" 
-                        ? "text-white" 
-                        : "text-gray-500"
-                    }`} />
-                  </div>
-                  <div className="flex-1">
-                    <p className={`text-sm font-medium ${
-                      item.status === "active" 
-                        ? "text-blue-600" 
-                        : item.status === "complete"
-                        ? "text-green-600"
-                        : "text-gray-500"
-                    }`}>
-                      {item.step}
-                    </p>
-                  </div>
-                  {item.status === "active" && (
-                    <div className="w-4 h-4 bg-blue-500 rounded-full animate-ping"></div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Analysis Metrics */}
-            {analysisComplete && (
-              <div className="space-y-4">
-                <h4 className="font-medium text-gray-800">Analysis Metrics</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-gray-800">{analysisResults.heartRate}</p>
-                    <p className="text-xs text-gray-600">Heart Rate (BPM)</p>
-                  </div>
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-gray-800">{analysisResults.respiratoryRate}</p>
-                    <p className="text-xs text-gray-600">Respiratory Rate</p>
-                  </div>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <Heart className="w-6 h-6 text-red-500 mx-auto mb-2" />
+                <p className="text-lg font-bold text-gray-800 animate-pulse">{analysisResults.heartRate}</p>
+                <p className="text-xs text-gray-600">Heart Rate (BPM)</p>
               </div>
-            )}
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <Droplets className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                <p className="text-lg font-bold text-gray-800 animate-pulse">{analysisResults.respiratoryRate}</p>
+                <p className="text-xs text-gray-600">Respiratory Rate</p>
+              </div>
+            </div>
+            
+            {/* Real-time Metrics Display */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <Activity className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
+                <p className="text-lg font-bold text-gray-800 animate-pulse">{Math.round(stressLevel)}</p>
+                <p className="text-xs text-gray-600">Stress Level (%)</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <Mic className="w-6 h-6 text-green-500 mx-auto mb-2" />
+                <p className="text-lg font-bold text-gray-800 animate-pulse">{Math.round(voiceClarity)}</p>
+                <p className="text-xs text-gray-600">Voice Clarity (%)</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -292,7 +371,7 @@ export const EchoMedAnalysis = () => {
                   <div className={`w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center`}>
                     <metric.icon className={`w-6 h-6 ${metric.color}`} />
                   </div>
-                  <p className="text-lg font-semibold text-gray-800">{metric.value}</p>
+                  <p className="text-lg font-semibold text-gray-800 animate-pulse">{metric.value}</p>
                   <p className="text-sm text-gray-600">{metric.label}</p>
                 </div>
               ))}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -15,166 +15,120 @@ import {
   Users,
   BarChart3,
   Brain,
-  Sparkles
+  Sparkles,
+  Thermometer,
+  Droplets,
+  Zap
 } from "lucide-react";
 
 export const EchoMedDashboard = () => {
-  // Mock data - in real implementation, this would come from your backend
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [heartRate, setHeartRate] = useState(72);
+  const [bloodPressure, setBloodPressure] = useState(120);
+  const [temperature, setTemperature] = useState(36.8);
+  const [oxygenLevel, setOxygenLevel] = useState(98);
+  const [stressLevel, setStressLevel] = useState(65);
+  const [sleepQuality, setSleepQuality] = useState(82);
+  const [hydrationLevel, setHydrationLevel] = useState(78);
+
+  // Update time every second
+  useEffect(() => {
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timeInterval);
+  }, []);
+
+  // Update health data every 2 seconds
+  useEffect(() => {
+    const dataInterval = setInterval(() => {
+      // Generate new heart rate data (60-100 bpm range)
+      setHeartRate(prev => {
+        const change = (Math.random() - 0.5) * 6;
+        return Math.max(60, Math.min(100, prev + change));
+      });
+
+      // Generate new blood pressure data (110-130 mmHg range)
+      setBloodPressure(prev => {
+        const change = (Math.random() - 0.5) * 4;
+        return Math.max(110, Math.min(130, prev + change));
+      });
+
+      // Generate new temperature data (36.5-37.2°C range)
+      setTemperature(prev => {
+        const change = (Math.random() - 0.5) * 0.4;
+        return Math.max(36.5, Math.min(37.2, prev + change));
+      });
+
+      // Generate new oxygen data (96-100% range)
+      setOxygenLevel(prev => {
+        const change = (Math.random() - 0.5) * 2;
+        return Math.max(96, Math.min(100, prev + change));
+      });
+
+      // Update other metrics
+      setStressLevel(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 10)));
+      setSleepQuality(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 8)));
+      setHydrationLevel(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 12)));
+    }, 2000);
+
+    return () => clearInterval(dataInterval);
+  }, []);
+
   const healthMetrics = [
     {
       title: "Heart Rate",
-      value: "72",
+      value: Math.round(heartRate),
       unit: "bpm",
-      status: "normal",
-      trend: "stable",
+      status: heartRate > 90 ? "elevated" : heartRate < 60 ? "low" : "normal",
       icon: Heart,
       color: "text-red-500",
       bgColor: "bg-red-50",
-      progress: 72
+      progress: heartRate
     },
     {
       title: "Blood Pressure",
-      value: "120/80",
+      value: Math.round(bloodPressure),
       unit: "mmHg",
-      status: "normal",
-      trend: "stable",
+      status: bloodPressure > 125 ? "elevated" : "normal",
       icon: Activity,
       color: "text-blue-500",
       bgColor: "bg-blue-50",
-      progress: 85
+      progress: bloodPressure
     },
     {
-      title: "Sleep Quality",
-      value: "8.2",
-      unit: "hours",
-      status: "good",
-      trend: "improving",
-      icon: Clock,
-      color: "text-purple-500",
-      bgColor: "bg-purple-50",
-      progress: 82
+      title: "Temperature",
+      value: temperature.toFixed(1),
+      unit: "°C",
+      status: temperature > 37.0 ? "elevated" : "normal",
+      icon: Thermometer,
+      color: "text-orange-500",
+      bgColor: "bg-orange-50",
+      progress: temperature * 10
     },
     {
-      title: "Activity Level",
-      value: "7,543",
-      unit: "steps",
-      status: "good",
-      trend: "improving",
-      icon: TrendingUp,
-      color: "text-green-500",
-      bgColor: "bg-green-50",
-      progress: 75
-    }
-  ];
-
-  const recentActivities = [
-    {
-      id: 1,
-      type: "consultation",
-      title: "AI Health Consultation",
-      description: "Completed symptom assessment for headache",
-      time: "2 hours ago",
-      status: "completed",
-      icon: Brain
-    },
-    {
-      id: 2,
-      type: "medication",
-      title: "Medication Reminder",
-      description: "Time to take your prescribed medication",
-      time: "4 hours ago",
-      status: "pending",
-      icon: AlertCircle
-    },
-    {
-      id: 3,
-      type: "appointment",
-      title: "Doctor Appointment",
-      description: "Upcoming appointment with Dr. Smith",
-      time: "1 day ago",
-      status: "scheduled",
-      icon: Calendar
-    },
-    {
-      id: 4,
-      type: "exercise",
-      title: "Exercise Goal",
-      description: "Achieved daily step goal",
-      time: "2 days ago",
-      status: "completed",
-      icon: Target
-    }
-  ];
-
-  const aiInsights = [
-    {
-      title: "Sleep Pattern Analysis",
-      description: "Your sleep quality has improved by 15% this week. Continue with your current routine.",
-      type: "positive",
-      icon: TrendingUp
-    },
-    {
-      title: "Heart Rate Alert",
-      description: "Your resting heart rate is slightly elevated. Consider stress management techniques.",
-      type: "warning",
-      icon: AlertCircle
-    },
-    {
-      title: "Activity Recommendation",
-      description: "Based on your data, try adding 10 minutes of moderate exercise daily.",
-      type: "suggestion",
-      icon: Target
-    }
-  ];
-
-  const upcomingReminders = [
-    {
-      id: 1,
-      title: "Blood Pressure Check",
-      time: "Today, 2:00 PM",
-      type: "measurement",
-      priority: "high"
-    },
-    {
-      id: 2,
-      title: "Medication Dose",
-      time: "Today, 6:00 PM",
-      type: "medication",
-      priority: "medium"
-    },
-    {
-      id: 3,
-      title: "Exercise Session",
-      time: "Tomorrow, 7:00 AM",
-      type: "exercise",
-      priority: "low"
+      title: "Oxygen Saturation",
+      value: Math.round(oxygenLevel),
+      unit: "%",
+      status: oxygenLevel < 97 ? "low" : "normal",
+      icon: Droplets,
+      color: "text-cyan-500",
+      bgColor: "bg-cyan-50",
+      progress: oxygenLevel
     }
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "normal":
-      case "good":
-      case "completed":
         return "text-green-600 bg-green-50";
-      case "warning":
-      case "pending":
+      case "elevated":
         return "text-yellow-600 bg-yellow-50";
-      case "scheduled":
-        return "text-blue-600 bg-blue-50";
+      case "low":
+        return "text-red-600 bg-red-50";
       default:
         return "text-gray-600 bg-gray-50";
-    }
-  };
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case "improving":
-        return <TrendingUp className="w-4 h-4 text-green-500" />;
-      case "declining":
-        return <TrendingDown className="w-4 h-4 text-red-500" />;
-      default:
-        return <Activity className="w-4 h-4 text-blue-500" />;
     }
   };
 
@@ -184,38 +138,40 @@ export const EchoMedDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Health Dashboard</h2>
-          <p className="text-gray-600">Monitor your health metrics and AI insights</p>
+          <p className="text-gray-600">Real-time health monitoring and AI insights</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Last updated: {currentTime.toLocaleTimeString()}
+          </p>
         </div>
-        <Badge className="bg-gradient-to-r from-pink-500 to-red-600 text-white">
+        <Badge className="bg-gradient-to-r from-pink-500 to-red-600 text-white animate-pulse">
           <Sparkles className="w-3 h-3 mr-1" />
-          AI Powered
+          Live Data
         </Badge>
       </div>
 
-      {/* Health Metrics Grid */}
+      {/* Real-time Health Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {healthMetrics.map((metric, index) => (
-          <Card key={index} className="border-0 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow">
+          <Card key={index} className="border-0 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className={`w-12 h-12 rounded-full ${metric.bgColor} flex items-center justify-center`}>
                   <metric.icon className={`w-6 h-6 ${metric.color}`} />
                 </div>
-                {getTrendIcon(metric.trend)}
+                <Badge className={getStatusColor(metric.status)}>
+                  {metric.status}
+                </Badge>
               </div>
               
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">{metric.title}</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-gray-800">{metric.value}</span>
+                  <span className="text-2xl font-bold text-gray-800 animate-pulse">{metric.value}</span>
                   <span className="text-sm text-gray-500">{metric.unit}</span>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <Badge className={getStatusColor(metric.status)}>
-                    {metric.status}
-                  </Badge>
-                  <span className="text-xs text-gray-500">{metric.progress}%</span>
+                  <span className="text-xs text-gray-500">{metric.progress.toFixed(1)}%</span>
                 </div>
                 
                 <Progress value={metric.progress} className="h-2" />
@@ -225,110 +181,154 @@ export const EchoMedDashboard = () => {
         ))}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* AI Insights Panel */}
-        <div className="lg:col-span-2">
-          <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="w-5 h-5 text-pink-600" />
-                AI Health Insights
-              </CardTitle>
-              <CardDescription>
-                Personalized recommendations based on your health data
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {aiInsights.map((insight, index) => (
-                <div
-                  key={index}
-                  className={`p-4 rounded-lg border-l-4 ${
-                    insight.type === "positive" 
-                      ? "border-green-500 bg-green-50" 
-                      : insight.type === "warning"
-                      ? "border-yellow-500 bg-yellow-50"
-                      : "border-blue-500 bg-blue-50"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <insight.icon className={`w-5 h-5 mt-0.5 ${
-                      insight.type === "positive" 
-                        ? "text-green-600" 
-                        : insight.type === "warning"
-                        ? "text-yellow-600"
-                        : "text-blue-600"
-                    }`} />
-                    <div>
-                      <h4 className="font-medium text-gray-800">{insight.title}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{insight.description}</p>
-                    </div>
-                  </div>
+      {/* Animated Gauges Section */}
+      <Card className="border-0 bg-gradient-to-r from-purple-50 to-blue-50 backdrop-blur-sm shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-purple-600" />
+            Real-time Health Gauges
+          </CardTitle>
+          <CardDescription>
+            Live monitoring of key health indicators
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="relative inline-block">
+                <svg width="80" height="80" className="transform -rotate-90">
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="36"
+                    stroke="#e5e7eb"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="36"
+                    stroke="#f59e0b"
+                    strokeWidth="4"
+                    fill="none"
+                    strokeDasharray={`${stressLevel}, 100`}
+                    strokeLinecap="round"
+                    className="transition-all duration-1000 ease-out"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-sm font-bold text-gray-700 animate-pulse">{Math.round(stressLevel)}</span>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+              <p className="text-sm font-medium text-gray-700 mt-2">Stress Level</p>
+              <p className="text-xs text-gray-500">{Math.round(stressLevel)}%</p>
+            </div>
+            <div className="text-center">
+              <div className="relative inline-block">
+                <svg width="80" height="80" className="transform -rotate-90">
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="36"
+                    stroke="#e5e7eb"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="36"
+                    stroke="#10b981"
+                    strokeWidth="4"
+                    fill="none"
+                    strokeDasharray={`${sleepQuality}, 100`}
+                    strokeLinecap="round"
+                    className="transition-all duration-1000 ease-out"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-sm font-bold text-gray-700 animate-pulse">{Math.round(sleepQuality)}</span>
+                </div>
+              </div>
+              <p className="text-sm font-medium text-gray-700 mt-2">Sleep Quality</p>
+              <p className="text-xs text-gray-500">{Math.round(sleepQuality)}%</p>
+            </div>
+            <div className="text-center">
+              <div className="relative inline-block">
+                <svg width="80" height="80" className="transform -rotate-90">
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="36"
+                    stroke="#e5e7eb"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="36"
+                    stroke="#3b82f6"
+                    strokeWidth="4"
+                    fill="none"
+                    strokeDasharray={`${hydrationLevel}, 100`}
+                    strokeLinecap="round"
+                    className="transition-all duration-1000 ease-out"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-sm font-bold text-gray-700 animate-pulse">{Math.round(hydrationLevel)}</span>
+                </div>
+              </div>
+              <p className="text-sm font-medium text-gray-700 mt-2">Hydration</p>
+              <p className="text-xs text-gray-500">{Math.round(hydrationLevel)}%</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Upcoming Reminders */}
-          <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-pink-600" />
-                Upcoming Reminders
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {upcomingReminders.map((reminder) => (
-                <div key={reminder.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                  <div>
-                    <p className="font-medium text-sm text-gray-800">{reminder.title}</p>
-                    <p className="text-xs text-gray-500">{reminder.time}</p>
-                  </div>
-                  <Badge className={
-                    reminder.priority === "high" 
-                      ? "bg-red-100 text-red-700" 
-                      : reminder.priority === "medium"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-green-100 text-green-700"
-                  }>
-                    {reminder.priority}
-                  </Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Recent Activities */}
-          <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-pink-600" />
-                Recent Activities
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className={`w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0`}>
-                    <activity.icon className="w-4 h-4 text-pink-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-gray-800">{activity.title}</p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.description}</p>
-                    <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
-                  </div>
-                  <Badge className={getStatusColor(activity.status)}>
-                    {activity.status}
-                  </Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      {/* AI Insights */}
+      <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="w-5 h-5 text-pink-600" />
+            AI Health Insights
+          </CardTitle>
+          <CardDescription>
+            Personalized recommendations based on your real-time health data
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 rounded-lg border-l-4 border-green-500 bg-green-50">
+            <div className="flex items-start gap-3">
+              <TrendingUp className="w-5 h-5 mt-0.5 text-green-600" />
+              <div>
+                <h4 className="font-medium text-gray-800">Sleep Pattern Analysis</h4>
+                <p className="text-sm text-gray-600 mt-1">Your sleep quality has improved by 15% this week. Continue with your current routine.</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 rounded-lg border-l-4 border-yellow-500 bg-yellow-50">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 mt-0.5 text-yellow-600" />
+              <div>
+                <h4 className="font-medium text-gray-800">Heart Rate Alert</h4>
+                <p className="text-sm text-gray-600 mt-1">Your resting heart rate is slightly elevated. Consider stress management techniques.</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-4 rounded-lg border-l-4 border-blue-500 bg-blue-50">
+            <div className="flex items-start gap-3">
+              <Target className="w-5 h-5 mt-0.5 text-blue-600" />
+              <div>
+                <h4 className="font-medium text-gray-800">Activity Recommendation</h4>
+                <p className="text-sm text-gray-600 mt-1">Based on your data, try adding 10 minutes of moderate exercise daily.</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card className="border-0 bg-gradient-to-r from-pink-50 to-red-50 backdrop-blur-sm shadow-lg">
@@ -362,4 +362,3 @@ export const EchoMedDashboard = () => {
     </div>
   );
 };
-
