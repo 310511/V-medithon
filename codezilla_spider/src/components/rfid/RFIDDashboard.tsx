@@ -38,7 +38,18 @@ import {
   SignalHigh,
   SignalMedium,
   SignalLow,
-  X
+  X,
+  QrCode,
+  Camera,
+  Database,
+  Network,
+
+  Scan,
+  Hash,
+  Link,
+  Globe,
+  Server,
+  Info
 } from "lucide-react";
 
 interface RFIDTag {
@@ -67,6 +78,26 @@ interface MedicalSupply {
   rfid_tag?: string;
 }
 
+interface MempoolTransaction {
+  txid: string;
+  rfid_tag_id: string;
+  item_name: string;
+  action: "scan" | "update" | "assign" | "remove";
+  timestamp: string;
+  status: "pending" | "confirmed" | "failed";
+  block_height?: number;
+  fee: number;
+  size: number;
+}
+
+interface QRCodeData {
+  rfid_tag_id: string;
+  item_name: string;
+  item_id: string;
+  timestamp: string;
+  checksum: string;
+}
+
 const RFIDDashboard: React.FC = () => {
   const [rfidTags, setRfidTags] = useState<RFIDTag[]>([]);
   const [supplies, setSupplies] = useState<MedicalSupply[]>([]);
@@ -83,10 +114,21 @@ const RFIDDashboard: React.FC = () => {
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
   const [quickActionMessage, setQuickActionMessage] = useState("");
   const [isPerformingQuickAction, setIsPerformingQuickAction] = useState(false);
+  const [mempoolTransactions, setMempoolTransactions] = useState<MempoolTransaction[]>([]);
+  const [isScanningQR, setIsScanningQR] = useState(false);
+  const [scannedQRData, setScannedQRData] = useState<QRCodeData | null>(null);
+  const [isMempoolLoading, setIsMempoolLoading] = useState(false);
+  const [mempoolStats, setMempoolStats] = useState({
+    pending: 0,
+    confirmed: 0,
+    failed: 0,
+    totalFees: 0
+  });
 
   useEffect(() => {
     fetchRFIDData();
     loadAnalyticsData();
+    fetchMempoolTransactions();
   }, []);
 
   const fetchRFIDData = async () => {
@@ -308,6 +350,100 @@ const RFIDDashboard: React.FC = () => {
       console.error("Error loading analytics data:", error);
     } finally {
       setIsLoadingAnalytics(false);
+    }
+  };
+
+  // Mempool tracking functions
+  const fetchMempoolTransactions = async () => {
+    try {
+      setIsMempoolLoading(true);
+      
+      // Simulate fetching mempool transactions
+      const mockTransactions: MempoolTransaction[] = [
+        {
+          txid: "0x1234567890abcdef",
+          rfid_tag_id: "RFID_001",
+          item_name: "Paracetamol 500mg",
+          action: "scan",
+          timestamp: new Date().toISOString(),
+          status: "pending",
+          fee: 0.0001,
+          size: 256
+        },
+        {
+          txid: "0xabcdef1234567890",
+          rfid_tag_id: "RFID_002",
+          item_name: "Ibuprofen 400mg",
+          action: "update",
+          timestamp: new Date(Date.now() - 300000).toISOString(),
+          status: "confirmed",
+          block_height: 123456,
+          fee: 0.0002,
+          size: 512
+        }
+      ];
+      
+      setMempoolTransactions(mockTransactions);
+      
+      // Calculate mempool stats
+      const stats = {
+        pending: mockTransactions.filter(tx => tx.status === 'pending').length,
+        confirmed: mockTransactions.filter(tx => tx.status === 'confirmed').length,
+        failed: mockTransactions.filter(tx => tx.status === 'failed').length,
+        totalFees: mockTransactions.reduce((sum, tx) => sum + tx.fee, 0)
+      };
+      
+      setMempoolStats(stats);
+      
+    } catch (error) {
+      console.error("Error fetching mempool transactions:", error);
+    } finally {
+      setIsMempoolLoading(false);
+    }
+  };
+
+  // QR Code scanning functions
+  const startQRScan = () => {
+    setIsScanningQR(true);
+    // Simulate QR code scanning
+    setTimeout(() => {
+      const mockQRData: QRCodeData = {
+        rfid_tag_id: "RFID_003",
+        item_name: "Aspirin 100mg",
+        item_id: "ITEM_003",
+        timestamp: new Date().toISOString(),
+        checksum: "abc123def456"
+      };
+      setScannedQRData(mockQRData);
+      setIsScanningQR(false);
+    }, 2000);
+  };
+
+  const processScannedQR = async (qrData: QRCodeData) => {
+    try {
+      // Process the scanned QR code data
+      const response = await fetch("/api/rfid/scan-qr", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(qrData),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setQuickActionMessage(`✅ QR Code processed: ${result.message}`);
+        await fetchRFIDData(); // Refresh data
+        setScannedQRData(null);
+      } else {
+        setQuickActionMessage("❌ Failed to process QR code");
+      }
+      
+      setTimeout(() => setQuickActionMessage(""), 3000);
+    } catch (error) {
+      console.error("Error processing QR code:", error);
+      setQuickActionMessage("❌ Error processing QR code");
+      setTimeout(() => setQuickActionMessage(""), 3000);
     }
   };
 
@@ -563,7 +699,7 @@ const RFIDDashboard: React.FC = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
               <div className="px-6 py-4">
-                <TabsList className="grid w-full grid-cols-4 bg-white/50 backdrop-blur-sm">
+                <TabsList className="grid w-full grid-cols-6 bg-white/50 backdrop-blur-sm">
                   <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
                     Overview
                   </TabsTrigger>
@@ -572,6 +708,12 @@ const RFIDDashboard: React.FC = () => {
                   </TabsTrigger>
                   <TabsTrigger value="supplies" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
                     Supplies
+                  </TabsTrigger>
+                  <TabsTrigger value="mempool" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+                    Mempool
+                  </TabsTrigger>
+                  <TabsTrigger value="qr-scan" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+                    QR Scan
                   </TabsTrigger>
                   <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
                     Analytics
@@ -592,41 +734,41 @@ const RFIDDashboard: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg">
+                      <div className="flex items-center justify-between p-4 bg-white/70 rounded-lg border border-green-200 shadow-sm">
                         <div className="flex items-center space-x-3">
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                          <span className="font-medium">Active Tags</span>
+                          <CheckCircle className="w-6 h-6 text-green-600" />
+                          <span className="font-semibold text-gray-800 text-base">Active Tags</span>
                         </div>
                         <div className="text-right">
-                          <div className="text-lg font-semibold text-green-600">{activeRFIDTags.length}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {((activeRFIDTags.length / rfidTags.length) * 100).toFixed(1)}%
+                          <div className="text-2xl font-bold text-green-700">{activeRFIDTags.length}</div>
+                          <div className="text-sm font-medium text-gray-600">
+                            {rfidTags.length > 0 ? ((activeRFIDTags.length / rfidTags.length) * 100).toFixed(1) : '0'}%
                           </div>
                         </div>
                       </div>
                       
-                      <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg">
+                      <div className="flex items-center justify-between p-4 bg-white/70 rounded-lg border border-red-200 shadow-sm">
                         <div className="flex items-center space-x-3">
-                          <XCircle className="w-5 h-5 text-red-600" />
-                          <span className="font-medium">Lost/Damaged</span>
+                          <XCircle className="w-6 h-6 text-red-600" />
+                          <span className="font-semibold text-gray-800 text-base">Lost/Damaged</span>
                         </div>
                         <div className="text-right">
-                          <div className="text-lg font-semibold text-red-600">{lostRFIDTags.length}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {((lostRFIDTags.length / rfidTags.length) * 100).toFixed(1)}%
+                          <div className="text-2xl font-bold text-red-700">{lostRFIDTags.length}</div>
+                          <div className="text-sm font-medium text-gray-600">
+                            {rfidTags.length > 0 ? ((lostRFIDTags.length / rfidTags.length) * 100).toFixed(1) : '0'}%
                           </div>
                         </div>
                       </div>
                       
-                      <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg">
+                      <div className="flex items-center justify-between p-4 bg-white/70 rounded-lg border border-orange-200 shadow-sm">
                         <div className="flex items-center space-x-3">
-                          <Package className="w-5 h-5 text-orange-600" />
-                          <span className="font-medium">Unassigned Supplies</span>
+                          <Package className="w-6 h-6 text-orange-600" />
+                          <span className="font-semibold text-gray-800 text-base">Unassigned Supplies</span>
                         </div>
                         <div className="text-right">
-                          <div className="text-lg font-semibold text-orange-600">{suppliesWithoutRFID.length}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {((suppliesWithoutRFID.length / supplies.length) * 100).toFixed(1)}%
+                          <div className="text-2xl font-bold text-orange-700">{suppliesWithoutRFID.length}</div>
+                          <div className="text-sm font-medium text-gray-600">
+                            {supplies.length > 0 ? ((suppliesWithoutRFID.length / supplies.length) * 100).toFixed(1) : '0'}%
                           </div>
                         </div>
                       </div>
@@ -644,27 +786,37 @@ const RFIDDashboard: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {rfidTags.slice(0, 5).map((tag) => (
-                        <div key={tag.tag_id} className="flex items-center justify-between p-3 bg-white/50 rounded-lg">
+                      {rfidTags.length > 0 ? (
+                        rfidTags.slice(0, 5).map((tag) => (
+                          <div key={tag.tag_id} className="flex items-center justify-between p-4 bg-white/70 rounded-lg border border-gray-200 shadow-sm">
                           <div className="flex items-center space-x-3">
-                            <div className={`w-3 h-3 rounded-full ${
+                              <div className={`w-4 h-4 rounded-full ${
                               tag.status === 'active' ? 'bg-green-500' : 
                               tag.status === 'lost' ? 'bg-red-500' : 
                               tag.status === 'damaged' ? 'bg-orange-500' : 'bg-gray-500'
                             }`}></div>
                             <div>
-                              <div className="font-medium">{tag.item_name}</div>
-                              <div className="text-sm text-muted-foreground">{tag.tag_id}</div>
+                                <div className="font-semibold text-gray-800 text-base">{tag.item_name}</div>
+                                <div className="text-sm text-gray-600 font-mono">{tag.tag_id}</div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-medium">{tag.status}</div>
-                            <div className="text-xs text-muted-foreground">
+                              <div className="text-sm font-semibold text-gray-800 capitalize">{tag.status}</div>
+                              <div className="text-xs text-gray-600 font-medium">
                               {new Date(tag.generated_at).toLocaleDateString()}
                             </div>
                           </div>
                         </div>
-                      ))}
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
+                            <Activity className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <p className="text-gray-600 font-medium">No RFID activity yet</p>
+                          <p className="text-sm text-gray-500 mt-1">RFID tags will appear here when added</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -908,6 +1060,292 @@ const RFIDDashboard: React.FC = () => {
                   </Card>
                 ))}
               </div>
+            </TabsContent>
+
+            <TabsContent value="mempool" className="p-6 space-y-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold">Mempool Transaction Tracking</h3>
+                  <p className="text-muted-foreground">Monitor RFID transactions in the blockchain mempool</p>
+                </div>
+                <div className="flex space-x-2">
+                  <Button 
+                    onClick={fetchMempoolTransactions} 
+                    disabled={isMempoolLoading}
+                    variant="outline"
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700"
+                  >
+                    {isMempoolLoading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <Database className="w-4 h-4 mr-2" />
+                        Refresh Mempool
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Mempool Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-yellow-700">Pending</p>
+                        <p className="text-2xl font-bold text-yellow-800">{mempoolStats.pending}</p>
+                      </div>
+                      <Clock className="w-8 h-8 text-yellow-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-green-700">Confirmed</p>
+                        <p className="text-2xl font-bold text-green-800">{mempoolStats.confirmed}</p>
+                      </div>
+                      <CheckCircle className="w-8 h-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-red-700">Failed</p>
+                        <p className="text-2xl font-bold text-red-800">{mempoolStats.failed}</p>
+                      </div>
+                      <XCircle className="w-8 h-8 text-red-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-blue-700">Total Fees</p>
+                        <p className="text-2xl font-bold text-blue-800">{mempoolStats.totalFees.toFixed(4)} BTC</p>
+                      </div>
+                      <Hash className="w-8 h-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Mempool Transactions Table */}
+              <Card className="bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Database className="w-5 h-5" />
+                    <span>Mempool Transactions</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Transaction ID</TableHead>
+                          <TableHead>RFID Tag</TableHead>
+                          <TableHead>Item</TableHead>
+                          <TableHead>Action</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Fee</TableHead>
+                          <TableHead>Timestamp</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {mempoolTransactions.map((tx) => (
+                          <TableRow key={tx.txid}>
+                            <TableCell className="font-mono text-xs">{tx.txid.substring(0, 16)}...</TableCell>
+                            <TableCell>{tx.rfid_tag_id}</TableCell>
+                            <TableCell>{tx.item_name}</TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                tx.action === 'scan' ? 'default' :
+                                tx.action === 'update' ? 'secondary' :
+                                tx.action === 'assign' ? 'outline' : 'destructive'
+                              }>
+                                {tx.action}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                tx.status === 'pending' ? 'secondary' :
+                                tx.status === 'confirmed' ? 'default' : 'destructive'
+                              }>
+                                {tx.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{tx.fee.toFixed(6)} BTC</TableCell>
+                            <TableCell>{new Date(tx.timestamp).toLocaleString()}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="qr-scan" className="p-6 space-y-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold">QR Code Scanner</h3>
+                  <p className="text-muted-foreground">Scan QR codes to get RFID tag information</p>
+                </div>
+                <Button 
+                  onClick={startQRScan}
+                  disabled={isScanningQR}
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700"
+                >
+                  {isScanningQR ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Scanning...
+                    </>
+                  ) : (
+                    <>
+                      <QrCode className="w-4 h-4 mr-2" />
+                      Start QR Scan
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {/* QR Scanner Interface */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-green-700">
+                      <Camera className="w-5 h-5" />
+                      <span>QR Code Scanner</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isScanningQR ? (
+                      <div className="text-center py-8">
+                        <div className="w-32 h-32 mx-auto mb-4 bg-green-200 rounded-lg flex items-center justify-center animate-pulse">
+                          <QrCode className="w-16 h-16 text-green-600" />
+                        </div>
+                        <p className="text-green-700 font-medium">Scanning for QR codes...</p>
+                        <p className="text-sm text-green-600 mt-2">Point camera at QR code</p>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="w-32 h-32 mx-auto mb-4 bg-gray-200 rounded-lg flex items-center justify-center">
+                          <QrCode className="w-16 h-16 text-gray-400" />
+                        </div>
+                        <p className="text-gray-600">Click "Start QR Scan" to begin</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-blue-700">
+                      <Radio className="w-5 h-5" />
+                      <span>Scanned Data</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {scannedQRData ? (
+                      <div className="space-y-4">
+                        <div className="p-4 bg-white/50 rounded-lg">
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">RFID Tag ID:</span>
+                            <span className="font-mono">{scannedQRData.rfid_tag_id}</span>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-white/50 rounded-lg">
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">Item Name:</span>
+                            <span>{scannedQRData.item_name}</span>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-white/50 rounded-lg">
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">Item ID:</span>
+                            <span>{scannedQRData.item_id}</span>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-white/50 rounded-lg">
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">Timestamp:</span>
+                            <span>{new Date(scannedQRData.timestamp).toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-white/50 rounded-lg">
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium">Checksum:</span>
+                            <span className="font-mono text-xs">{scannedQRData.checksum}</span>
+                          </div>
+                        </div>
+                        <Button 
+                          onClick={() => processScannedQR(scannedQRData)}
+                          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+                        >
+                          <Link className="w-4 h-4 mr-2" />
+                          Process QR Data
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-blue-200 rounded-full flex items-center justify-center">
+                          <Radio className="w-8 h-8 text-blue-600" />
+                        </div>
+                        <p className="text-blue-700">No QR data scanned yet</p>
+                        <p className="text-sm text-blue-600 mt-2">Scan a QR code to see data here</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* QR Code Instructions */}
+              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2 text-purple-700">
+                    <Info className="w-5 h-5" />
+                    <span>QR Code Instructions</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-white/50 rounded-lg">
+                      <div className="w-12 h-12 mx-auto mb-3 bg-purple-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold">1</span>
+                      </div>
+                      <h4 className="font-medium text-purple-700">Point Camera</h4>
+                      <p className="text-sm text-purple-600 mt-1">Aim your camera at the QR code on the RFID tag</p>
+                    </div>
+                    <div className="text-center p-4 bg-white/50 rounded-lg">
+                      <div className="w-12 h-12 mx-auto mb-3 bg-purple-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold">2</span>
+                      </div>
+                      <h4 className="font-medium text-purple-700">Scan Code</h4>
+                      <p className="text-sm text-purple-600 mt-1">The system will automatically detect and read the QR code</p>
+                    </div>
+                    <div className="text-center p-4 bg-white/50 rounded-lg">
+                      <div className="w-12 h-12 mx-auto mb-3 bg-purple-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold">3</span>
+                      </div>
+                      <h4 className="font-medium text-purple-700">Process Data</h4>
+                      <p className="text-sm text-purple-600 mt-1">Review and process the RFID information</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="analytics" className="p-6 space-y-6">

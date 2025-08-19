@@ -248,3 +248,4 @@ const EchoMedAIAssistant = () => {
 };
 
 export { EchoMedAIAssistant };
+

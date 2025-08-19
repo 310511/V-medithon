@@ -1,0 +1,174 @@
+version: '3.8'
+
+services:
+  # CodeZilla Spider Backend (Main Backend)
+  codezilla-backend:
+    build:
+      context: ./codezilla_spider/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./codezilla_spider/backend:/app
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - postgres
+    networks:
+      - medchain-network
+
+  # MedHive Backend
+  medhive-backend:
+    build:
+      context: ./MedHive/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./MedHive/backend:/app
+    environment:
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=medhive
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - ASTRA_DB_ID=${ASTRA_DB_ID}
+      - ASTRA_DB_REGION=${ASTRA_DB_REGION}
+      - ASTRA_DB_APPLICATION_TOKEN=${ASTRA_DB_APPLICATION_TOKEN}
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+    depends_on:
+      - postgres
+      - mlflow
+    networks:
+      - medchain-network
+
+  # MedHive Agent Backend
+  medhive-agent:
+    build:
+      context: ./MedHive-Agent/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./MedHive-Agent/backend:/app
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    networks:
+      - medchain-network
+
+  # MedHive FL Server
+  fl-server:
+    build:
+      context: ./MedHive-FLServer
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./MedHive-FLServer:/app
+    environment:
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=medhive
+    depends_on:
+      - postgres
+    networks:
+      - medchain-network
+
+  # Symptom Analysis Backend
+  symptom-analysis:
+    build:
+      context: ./MedHive-ModelHive/SymptomAnalysis
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./MedHive-ModelHive/SymptomAnalysis:/app
+    networks:
+      - medchain-network
+
+  # Pneumonia X-Ray Backend
+  pneumonia-xray:
+    build:
+      context: ./MedHive-ModelHive/PneumoniaXRay
+      dockerfile: Dockerfile
+    ports:
+      - "7861:7861"
+    volumes:
+      - ./MedHive-ModelHive/PneumoniaXRay:/app
+    networks:
+      - medchain-network
+
+  # Breast Cancer Backend
+  breast-cancer:
+    build:
+      context: ./MedHive-ModelHive/BreastCancer
+      dockerfile: Dockerfile
+    ports:
+      - "7862:7862"
+    volumes:
+      - ./MedHive-ModelHive/BreastCancer:/app
+    networks:
+      - medchain-network
+
+  # Flask Integration Server
+  flask-integration:
+    build:
+      context: ./codezilla_spider/backend
+      dockerfile: Dockerfile.flask
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./codezilla_spider/backend:/app
+    environment:
+      - PYTHONPATH=/app
+    networks:
+      - medchain-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./MedHive/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=medhive
+    ports:
+      - "5432:5432"
+    networks:
+      - medchain-network
+
+  # MLflow Tracking Server
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.8.0
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    command: mlflow server --host 0.0.0.0 --backend-store-uri postgresql://postgres:postgres@postgres/mlflow
+    depends_on:
+      - postgres
+    networks:
+      - medchain-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - medchain-network
+
+volumes:
+  postgres_data:
+  mlflow_data:
+
+networks:
+  medchain-network:
+    driver: bridge
+
