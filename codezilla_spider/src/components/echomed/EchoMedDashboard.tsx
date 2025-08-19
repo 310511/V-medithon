@@ -20,9 +20,15 @@ import {
   Droplets,
   Zap
 } from "lucide-react";
+import { HealthChart } from "../health-charts/HealthChart";
+import { ChartModal } from "../health-charts/ChartModal";
 
 export const EchoMedDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedChart, setSelectedChart] = useState<string | null>(null);
+  const [modalData, setModalData] = useState<any>(null);
+  
+  // Health data state
   const [heartRate, setHeartRate] = useState(72);
   const [bloodPressure, setBloodPressure] = useState(120);
   const [temperature, setTemperature] = useState(36.8);
@@ -30,6 +36,21 @@ export const EchoMedDashboard = () => {
   const [stressLevel, setStressLevel] = useState(65);
   const [sleepQuality, setSleepQuality] = useState(82);
   const [hydrationLevel, setHydrationLevel] = useState(78);
+
+  // Historical data for charts
+  const [heartRateHistory, setHeartRateHistory] = useState<number[]>([72, 75, 73, 78, 76, 74, 77, 75, 73, 76, 74, 78]);
+  const [bloodPressureHistory, setBloodPressureHistory] = useState<number[]>([120, 118, 122, 119, 121, 117, 123, 120, 118, 121, 119, 122]);
+  const [temperatureHistory, setTemperatureHistory] = useState<number[]>([36.8, 36.9, 37.0, 36.7, 36.8, 37.1, 36.9, 37.0, 36.8, 36.9, 37.0, 36.8]);
+  const [oxygenHistory, setOxygenHistory] = useState<number[]>([98, 97, 99, 98, 97, 98, 99, 98, 97, 98, 99, 98]);
+
+  // Convert history arrays to chart data format
+  const convertToChartData = (history: number[], metricName: string) => {
+    const now = new Date();
+    return history.map((value, index) => ({
+      timestamp: new Date(now.getTime() - (history.length - index - 1) * 2000).toISOString(),
+      value: value
+    }));
+  };
 
   // Update time every second
   useEffect(() => {
@@ -71,10 +92,68 @@ export const EchoMedDashboard = () => {
       setStressLevel(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 10)));
       setSleepQuality(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 8)));
       setHydrationLevel(prev => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 12)));
+
+      // Update historical data
+      setHeartRateHistory(prev => [...prev.slice(1), heartRate]);
+      setBloodPressureHistory(prev => [...prev.slice(1), bloodPressure]);
+      setTemperatureHistory(prev => [...prev.slice(1), temperature]);
+      setOxygenHistory(prev => [...prev.slice(1), oxygenLevel]);
     }, 2000);
 
     return () => clearInterval(dataInterval);
-  }, []);
+  }, [heartRate, bloodPressure, temperature, oxygenLevel]);
+
+  // Metric configurations
+  const metrics = {
+    heartRate: {
+      title: "Heart Rate",
+      unit: "bpm",
+      color: "#ef4444",
+      icon: Heart,
+      minValue: 50,
+      maxValue: 120,
+      threshold: {
+        warning: 90,
+        critical: 100
+      }
+    },
+    bloodPressure: {
+      title: "Blood Pressure",
+      unit: "mmHg",
+      color: "#3b82f6",
+      icon: Activity,
+      minValue: 100,
+      maxValue: 140,
+      threshold: {
+        warning: 130,
+        critical: 140
+      }
+    },
+    temperature: {
+      title: "Body Temperature",
+      unit: "°C",
+      color: "#f97316",
+      icon: Thermometer,
+      minValue: 36.0,
+      maxValue: 38.0,
+      threshold: {
+        warning: 37.5,
+        critical: 38.0
+      }
+    },
+    oxygenLevel: {
+      title: "Oxygen Saturation",
+      unit: "%",
+      color: "#06b6d4",
+      icon: Droplets,
+      minValue: 90,
+      maxValue: 100,
+      threshold: {
+        warning: 95,
+        critical: 92
+      }
+    }
+  };
 
   const healthMetrics = [
     {
@@ -83,9 +162,11 @@ export const EchoMedDashboard = () => {
       unit: "bpm",
       status: heartRate > 90 ? "elevated" : heartRate < 60 ? "low" : "normal",
       icon: Heart,
-      color: "text-red-500",
+      color: "#ef4444",
       bgColor: "bg-red-50",
-      progress: heartRate
+      progress: heartRate,
+      history: heartRateHistory,
+      trend: heartRate > heartRateHistory[heartRateHistory.length - 2] ? "up" : "down"
     },
     {
       title: "Blood Pressure",
@@ -93,9 +174,11 @@ export const EchoMedDashboard = () => {
       unit: "mmHg",
       status: bloodPressure > 125 ? "elevated" : "normal",
       icon: Activity,
-      color: "text-blue-500",
+      color: "#3b82f6",
       bgColor: "bg-blue-50",
-      progress: bloodPressure
+      progress: bloodPressure,
+      history: bloodPressureHistory,
+      trend: bloodPressure > bloodPressureHistory[bloodPressureHistory.length - 2] ? "up" : "down"
     },
     {
       title: "Temperature",
@@ -103,9 +186,11 @@ export const EchoMedDashboard = () => {
       unit: "°C",
       status: temperature > 37.0 ? "elevated" : "normal",
       icon: Thermometer,
-      color: "text-orange-500",
+      color: "#f97316",
       bgColor: "bg-orange-50",
-      progress: temperature * 10
+      progress: temperature * 10,
+      history: temperatureHistory,
+      trend: temperature > temperatureHistory[temperatureHistory.length - 2] ? "up" : "down"
     },
     {
       title: "Oxygen Saturation",
@@ -113,9 +198,11 @@ export const EchoMedDashboard = () => {
       unit: "%",
       status: oxygenLevel < 97 ? "low" : "normal",
       icon: Droplets,
-      color: "text-cyan-500",
+      color: "#06b6d4",
       bgColor: "bg-cyan-50",
-      progress: oxygenLevel
+      progress: oxygenLevel,
+      history: oxygenHistory,
+      trend: oxygenLevel > oxygenHistory[oxygenHistory.length - 2] ? "up" : "down"
     }
   ];
 
@@ -130,6 +217,18 @@ export const EchoMedDashboard = () => {
       default:
         return "text-gray-600 bg-gray-50";
     }
+  };
+
+  const getTrendIcon = (trend: string) => {
+    return trend === "up" ? 
+      <TrendingUp className="w-4 h-4 text-red-500" /> : 
+      <TrendingDown className="w-4 h-4 text-green-500" />;
+  };
+
+  // Handle chart click
+  const handleChartClick = (data: any, metricKey: string) => {
+    setModalData({ data, metricKey });
+    setSelectedChart(metricKey);
   };
 
   return (
@@ -152,18 +251,21 @@ export const EchoMedDashboard = () => {
       {/* Real-time Health Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {healthMetrics.map((metric, index) => (
-          <Card key={index} className="border-0 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card key={index} className="border-0 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 rounded-full ${metric.bgColor} flex items-center justify-center`}>
-                  <metric.icon className={`w-6 h-6 ${metric.color}`} />
+                <div className={`w-12 h-12 rounded-full ${metric.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <metric.icon className={`w-6 h-6`} style={{ color: metric.color }} />
                 </div>
-                <Badge className={getStatusColor(metric.status)}>
-                  {metric.status}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  {getTrendIcon(metric.trend)}
+                  <Badge className={getStatusColor(metric.status)}>
+                    {metric.status}
+                  </Badge>
+                </div>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <p className="text-sm text-gray-600">{metric.title}</p>
                 <div className="flex items-baseline gap-1">
                   <span className="text-2xl font-bold text-gray-800 animate-pulse">{metric.value}</span>
@@ -181,108 +283,86 @@ export const EchoMedDashboard = () => {
         ))}
       </div>
 
-      {/* Animated Gauges Section */}
+      {/* Modern Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Heart Rate Chart */}
+        <HealthChart
+          data={convertToChartData(heartRateHistory, 'heartRate')}
+          metric={metrics.heartRate}
+          type="line"
+          height={300}
+          onPointClick={(data) => handleChartClick(data, 'heartRate')}
+        />
+
+        {/* Blood Pressure Chart */}
+        <HealthChart
+          data={convertToChartData(bloodPressureHistory, 'bloodPressure')}
+          metric={metrics.bloodPressure}
+          type="area"
+          height={300}
+          onPointClick={(data) => handleChartClick(data, 'bloodPressure')}
+        />
+
+        {/* Temperature Chart */}
+        <HealthChart
+          data={convertToChartData(temperatureHistory, 'temperature')}
+          metric={metrics.temperature}
+          type="line"
+          height={300}
+          onPointClick={(data) => handleChartClick(data, 'temperature')}
+        />
+
+        {/* Oxygen Level Chart */}
+        <HealthChart
+          data={convertToChartData(oxygenHistory, 'oxygenLevel')}
+          metric={metrics.oxygenLevel}
+          type="area"
+          height={300}
+          onPointClick={(data) => handleChartClick(data, 'oxygenLevel')}
+        />
+      </div>
+
+      {/* Health Gauges Section */}
       <Card className="border-0 bg-gradient-to-r from-purple-50 to-blue-50 backdrop-blur-sm shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-purple-600" />
-            Real-time Health Gauges
+            Health Indicators
           </CardTitle>
           <CardDescription>
-            Live monitoring of key health indicators
+            Live monitoring of key health indicators with enhanced visualizations
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="relative inline-block">
-                <svg width="80" height="80" className="transform -rotate-90">
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    stroke="#e5e7eb"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    stroke="#f59e0b"
-                    strokeWidth="4"
-                    fill="none"
-                    strokeDasharray={`${stressLevel}, 100`}
-                    strokeLinecap="round"
-                    className="transition-all duration-1000 ease-out"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-bold text-gray-700 animate-pulse">{Math.round(stressLevel)}</span>
+                <div className="w-24 h-24 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
+                  <span className="text-white text-xl font-bold">{Math.round(stressLevel)}%</span>
                 </div>
+                <div className="absolute inset-0 rounded-full border-4 border-yellow-200 animate-ping opacity-30"></div>
               </div>
               <p className="text-sm font-medium text-gray-700 mt-2">Stress Level</p>
-              <p className="text-xs text-gray-500">{Math.round(stressLevel)}%</p>
             </div>
+            
             <div className="text-center">
               <div className="relative inline-block">
-                <svg width="80" height="80" className="transform -rotate-90">
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    stroke="#e5e7eb"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    stroke="#10b981"
-                    strokeWidth="4"
-                    fill="none"
-                    strokeDasharray={`${sleepQuality}, 100`}
-                    strokeLinecap="round"
-                    className="transition-all duration-1000 ease-out"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-bold text-gray-700 animate-pulse">{Math.round(sleepQuality)}</span>
+                <div className="w-24 h-24 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center">
+                  <span className="text-white text-xl font-bold">{Math.round(sleepQuality)}%</span>
                 </div>
+                <div className="absolute inset-0 rounded-full border-4 border-green-200 animate-ping opacity-30"></div>
               </div>
               <p className="text-sm font-medium text-gray-700 mt-2">Sleep Quality</p>
-              <p className="text-xs text-gray-500">{Math.round(sleepQuality)}%</p>
             </div>
+            
             <div className="text-center">
               <div className="relative inline-block">
-                <svg width="80" height="80" className="transform -rotate-90">
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    stroke="#e5e7eb"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    stroke="#3b82f6"
-                    strokeWidth="4"
-                    fill="none"
-                    strokeDasharray={`${hydrationLevel}, 100`}
-                    strokeLinecap="round"
-                    className="transition-all duration-1000 ease-out"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-bold text-gray-700 animate-pulse">{Math.round(hydrationLevel)}</span>
+                <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-400 to-cyan-500 flex items-center justify-center">
+                  <span className="text-white text-xl font-bold">{Math.round(hydrationLevel)}%</span>
                 </div>
+                <div className="absolute inset-0 rounded-full border-4 border-blue-200 animate-ping opacity-30"></div>
               </div>
               <p className="text-sm font-medium text-gray-700 mt-2">Hydration</p>
-              <p className="text-xs text-gray-500">{Math.round(hydrationLevel)}%</p>
             </div>
           </div>
         </CardContent>
@@ -340,25 +420,39 @@ export const EchoMedDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button className="p-4 rounded-lg bg-white/80 backdrop-blur-sm hover:bg-white transition-colors text-center">
-              <Heart className="w-6 h-6 text-pink-600 mx-auto mb-2" />
+            <button className="p-4 rounded-lg bg-white/80 backdrop-blur-sm hover:bg-white transition-colors text-center group">
+              <Heart className="w-6 h-6 text-pink-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-medium">Record Symptoms</p>
             </button>
-            <button className="p-4 rounded-lg bg-white/80 backdrop-blur-sm hover:bg-white transition-colors text-center">
-              <BarChart3 className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+            <button className="p-4 rounded-lg bg-white/80 backdrop-blur-sm hover:bg-white transition-colors text-center group">
+              <BarChart3 className="w-6 h-6 text-blue-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-medium">View Reports</p>
             </button>
-            <button className="p-4 rounded-lg bg-white/80 backdrop-blur-sm hover:bg-white transition-colors text-center">
-              <Users className="w-6 h-6 text-green-600 mx-auto mb-2" />
+            <button className="p-4 rounded-lg bg-white/80 backdrop-blur-sm hover:bg-white transition-colors text-center group">
+              <Users className="w-6 h-6 text-green-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-medium">Book Appointment</p>
             </button>
-            <button className="p-4 rounded-lg bg-white/80 backdrop-blur-sm hover:bg-white transition-colors text-center">
-              <Brain className="w-6 h-6 text-purple-600 mx-auto mb-2" />
+            <button className="p-4 rounded-lg bg-white/80 backdrop-blur-sm hover:bg-white transition-colors text-center group">
+              <Brain className="w-6 h-6 text-purple-600 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-medium">AI Consultation</p>
             </button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Chart Modal */}
+      {modalData && (
+        <ChartModal
+          isOpen={!!selectedChart}
+          onClose={() => {
+            setSelectedChart(null);
+            setModalData(null);
+          }}
+          data={modalData.data}
+          metric={metrics[modalData.metricKey as keyof typeof metrics]}
+          type={modalData.metricKey === 'bloodPressure' || modalData.metricKey === 'oxygenLevel' ? 'area' : 'line'}
+        />
+      )}
     </div>
   );
 };
