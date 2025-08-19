@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import jsQR from 'jsqr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -50,9 +51,14 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [isVideoReady, setIsVideoReady] = useState<boolean>(false);
+  const [isDetecting, setIsDetecting] = useState<boolean>(false);
+  const [lastScannedCode, setLastScannedCode] = useState<string | null>(null);
   const scannerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   // Detect available cameras
   useEffect(() => {
@@ -78,6 +84,88 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     };
   }, [cameraStream]);
 
+  // Auto-start camera when scanning is enabled
+  useEffect(() => {
+    const handleScanningChange = async () => {
+      if (isScanning && !cameraStream && !isInitializing) {
+        console.log('Auto-starting camera for QR scanning...');
+        await startCamera();
+      } else if (!isScanning && cameraStream) {
+        console.log('Stopping camera as scanning is disabled...');
+        await stopCamera();
+      }
+    };
+    
+    handleScanningChange();
+  }, [isScanning, cameraStream, isInitializing]);
+
+  // QR Code detection loop
+  useEffect(() => {
+    if (isVideoReady && isScanning && videoRef.current && canvasRef.current) {
+      setIsDetecting(true);
+      startQRDetection();
+    } else {
+      setIsDetecting(false);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    }
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [isVideoReady, isScanning]);
+
+  const startQRDetection = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    
+    if (!video || !canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const detectQR = () => {
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        // Set canvas dimensions to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Draw video frame to canvas
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Get image data for QR detection
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        
+        // Detect QR code
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        
+        if (code) {
+          console.log('QR Code detected:', code.data);
+          
+          // Prevent duplicate scans
+          if (code.data !== lastScannedCode) {
+            setLastScannedCode(code.data);
+            onScanSuccess(code.data, code);
+          }
+        }
+      }
+      
+      // Continue detection loop
+      if (isDetecting && isScanning) {
+        animationFrameRef.current = requestAnimationFrame(detectQR);
+      }
+    };
+    
+    detectQR();
+  };
+
   const onScanSuccess = (decodedText: string, decodedResult: any) => {
     try {
       console.log('QR Code detected:', decodedText);
@@ -88,13 +176,20 @@ export const QRScanner: React.FC<QRScannerProps> = ({
         qrData = JSON.parse(decodedText);
       } catch {
         // If not JSON, create a structured object from the text
+        // Extract RFID information from the text
+        const parts = decodedText.split('|');
         qrData = {
-          rfid_tag_id: decodedText.substring(0, 8) || 'RFID_' + Math.random().toString(36).substr(2, 5),
-          item_name: decodedText.substring(8, 20) || 'Unknown Item',
-          item_id: 'ITEM_' + Math.random().toString(36).substr(2, 5),
+          rfid_tag_id: parts[0] || 'RFID_' + Math.random().toString(36).substr(2, 5),
+          item_name: parts[1] || 'Unknown Item',
+          item_id: parts[2] || 'ITEM_' + Math.random().toString(36).substr(2, 5),
           timestamp: new Date().toISOString(),
-          checksum: Math.random().toString(36).substr(2, 8)
+          checksum: parts[3] || Math.random().toString(36).substr(2, 8)
         };
+      }
+
+      // Validate the QR data
+      if (!qrData.rfid_tag_id || !qrData.item_name) {
+        throw new Error('Invalid QR code: Missing required RFID information');
       }
 
       setScanResult(qrData);
@@ -102,6 +197,13 @@ export const QRScanner: React.FC<QRScannerProps> = ({
       
       // Call the callback with the scanned data
       onQRCodeScanned(qrData);
+      
+      // Stop scanning after successful detection
+      setIsDetecting(false);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
       
     } catch (error) {
       console.error('Error processing QR code:', error);
@@ -126,85 +228,160 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     onScanningChange(true);
 
     try {
-      console.log('Starting camera...');
+      console.log('Starting camera for QR scanning...');
       
-      // Request camera permissions
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: {
-          facingMode: selectedCamera === 'environment' ? { ideal: "environment" } : 
-                     selectedCamera === 'user' ? { ideal: "user" } : undefined,
-          deviceId: selectedCamera !== 'environment' && selectedCamera !== 'user' ? 
-                   { exact: selectedCamera } : undefined,
-          width: { ideal: 1280, min: 640 },
-          height: { ideal: 720, min: 480 },
-          frameRate: { ideal: 30, min: 10 }
+      // Clear the container first
+      if (scannerRef.current) {
+        scannerRef.current.innerHTML = '';
+      }
+      
+      // Create video element with proper styling
+      const video = document.createElement('video');
+      video.id = 'qr-reader';
+      video.style.width = '100%';
+      video.style.height = '100%';
+      video.style.objectFit = 'cover';
+      video.style.borderRadius = '8px';
+      video.autoplay = true;
+      video.playsInline = true;
+      video.muted = true;
+      video.controls = false;
+      
+      // Add video to container
+      scannerRef.current.appendChild(video);
+      videoRef.current = video;
+      
+      // Request camera permissions with proper fallback
+      let stream: MediaStream;
+      try {
+        // First try with environment mode for mobile back camera
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: "environment",
+            width: { ideal: 1280, min: 640 },
+            height: { ideal: 720, min: 480 },
+            frameRate: { ideal: 30, min: 10 }
+          }
+        });
+        console.log('Camera stream obtained with environment mode');
+      } catch (environmentError) {
+        console.log('Environment mode failed, trying fallback:', environmentError);
+        try {
+          // Fallback to basic video mode
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            video: {
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 },
+              frameRate: { ideal: 30, min: 10 }
+            }
+          });
+          console.log('Camera stream obtained with fallback mode');
+        } catch (fallbackError) {
+          console.log('Fallback mode failed, trying basic video:', fallbackError);
+          // Final fallback to basic video
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          console.log('Camera stream obtained with basic video mode');
         }
-      });
+      }
 
       console.log('Camera stream obtained:', stream);
+      console.log('Stream tracks:', stream.getTracks().map(t => ({ kind: t.kind, label: t.label })));
       
       // Store the stream
       setCameraStream(stream);
       
-      // Create video element if it doesn't exist
-      let video = videoRef.current;
-      if (!video) {
-        video = document.createElement('video');
-        video.id = 'qr-reader';
-        video.style.width = '100%';
-        video.style.height = '100%';
-        video.style.objectFit = 'cover';
-        video.autoplay = true;
-        video.playsInline = true;
-        video.muted = true;
-        video.controls = false;
-        
-        if (scannerRef.current) {
-          scannerRef.current.innerHTML = '';
-          scannerRef.current.appendChild(video);
-        }
-        videoRef.current = video;
-      }
-
       // Set the stream as source
       video.srcObject = stream;
       
       // Wait for video to load and start playing
       await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
-          reject(new Error('Video loading timeout'));
-        }, 5000);
+          reject(new Error('Video loading timeout - camera may not be available'));
+        }, 15000); // Increased timeout to 15 seconds
         
         video.onloadedmetadata = () => {
-          console.log('Video metadata loaded');
+          console.log('Video metadata loaded, attempting to play...');
+          console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+          
           video.play().then(() => {
             console.log('Video started playing successfully');
+            console.log('Video is paused:', video.paused);
+            console.log('Video ready state:', video.readyState);
             clearTimeout(timeout);
             resolve(true);
           }).catch((error) => {
             console.error('Failed to play video:', error);
             clearTimeout(timeout);
-            reject(error);
+            reject(new Error(`Video playback failed: ${error.message}`));
           });
         };
         
         video.onerror = (error) => {
           console.error('Video error:', error);
           clearTimeout(timeout);
-          reject(error);
+          reject(new Error('Video element encountered an error'));
+        };
+        
+        video.oncanplay = () => {
+          console.log('Video can start playing');
+        };
+        
+        video.onplaying = () => {
+          console.log('Video is now playing');
+        };
+        
+        video.onloadeddata = () => {
+          console.log('Video data loaded');
+        };
+        
+        video.oncanplaythrough = () => {
+          console.log('Video can play through without buffering');
         };
       });
 
       setCameraPermission(true);
       setScanError(null);
-      console.log('Camera started successfully');
+      setIsVideoReady(true);
+      console.log('Camera started successfully for QR scanning');
+      
+      // Add a small delay to ensure video is fully ready
+      setTimeout(() => {
+        if (video.readyState >= 2) {
+          console.log('Video is ready for QR scanning');
+          setIsVideoReady(true);
+        } else {
+          console.warn('Video may not be fully ready yet');
+        }
+      }, 1000);
       
     } catch (error) {
       console.error('Failed to start camera:', error);
       setCameraPermission(false);
-      setScanError(`Failed to start camera: ${error.message}`);
-      onScanError?.(`Camera start failed: ${error.message}`);
+      
+      // Provide user-friendly error messages
+      let errorMessage = 'Failed to start camera';
+      if (error.name === 'NotAllowedError') {
+        errorMessage = 'Camera access denied. Please allow camera permissions and try again.';
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = 'No camera found. Please check if your device has a camera.';
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = 'Camera is already in use by another application.';
+      } else if (error.name === 'OverconstrainedError') {
+        errorMessage = 'Camera does not meet the required specifications.';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Camera initialization timed out. Please try again.';
+      } else {
+        errorMessage = `Camera error: ${error.message}`;
+      }
+      
+      setScanError(errorMessage);
+      onScanError?.(errorMessage);
       onScanningChange(false);
+      
+      // Clear the container on error
+      if (scannerRef.current) {
+        scannerRef.current.innerHTML = '';
+      }
     } finally {
       setIsInitializing(false);
     }
@@ -231,6 +408,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
       
       setCameraPermission(null);
       setScanError(null);
+      setIsVideoReady(false);
       onScanningChange(false);
     } catch (error) {
       console.error('Error stopping camera:', error);
@@ -242,32 +420,48 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     setScanResult(null);
     setScanError(null);
     setUploadedImage(null);
+    setIsVideoReady(false);
   };
 
   // Test camera access function
   const testCameraAccess = async () => {
     try {
       console.log('Testing camera access...');
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: {
-          facingMode: selectedCamera === 'environment' ? { ideal: "environment" } : 
-                     selectedCamera === 'user' ? { ideal: "user" } : undefined,
-          deviceId: selectedCamera !== 'environment' && selectedCamera !== 'user' ? 
-                   { exact: selectedCamera } : undefined,
-          width: { ideal: 1280, min: 640 },
-          height: { ideal: 720, min: 480 },
-          frameRate: { ideal: 30, min: 10 }
-        }
-      });
       
-      console.log('Camera test successful:', stream);
-      alert('Camera access test successful! Camera is working.');
+      // Test with environment mode first
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "environment" } 
+        });
+        console.log('Camera test successful with environment mode:', stream);
+        stream.getTracks().forEach(track => track.stop());
+        alert('✅ Camera test successful! Back camera is working properly.');
+        return;
+      } catch (environmentError) {
+        console.log('Environment mode test failed, trying basic video:', environmentError);
+      }
       
-      // Stop the test stream
+      // Fallback to basic video test
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      console.log('Camera test successful with basic video:', stream);
       stream.getTracks().forEach(track => track.stop());
+      alert('✅ Camera test successful! Camera is working properly.');
+      
     } catch (error) {
       console.error('Camera test failed:', error);
-      alert(`Camera test failed: ${error.message}`);
+      let errorMessage = 'Camera test failed';
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = '❌ Camera access denied. Please allow camera permissions.';
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = '❌ No camera found on this device.';
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = '❌ Camera is already in use by another application.';
+      } else {
+        errorMessage = `❌ Camera test failed: ${error.message}`;
+      }
+      
+      alert(errorMessage);
     }
   };
 
@@ -286,20 +480,16 @@ export const QRScanner: React.FC<QRScannerProps> = ({
       const imageUrl = URL.createObjectURL(file);
       setUploadedImage(imageUrl);
 
-      // Create Html5Qrcode instance for file scanning
-      const qrCode = new Html5Qrcode("qr-reader");
-      
-      // Scan the uploaded image
-      const result = await qrCode.scanFile(file, true);
-      console.log('File scan result:', result);
-      
-      // Process the result
-      onScanSuccess(result, null);
+      // For now, we'll just show the image preview
+      // QR code scanning from uploaded images would require a separate library
+      console.log('File uploaded:', file.name);
+      setScanError('QR code scanning from uploaded images is not yet implemented. Please use the camera scanner.');
+      onScanError?.('File scan not implemented');
       
     } catch (error) {
-      console.error('Error scanning uploaded file:', error);
-      setScanError('Failed to scan uploaded image. Please ensure it contains a valid QR code.');
-      onScanError?.('File scan failed');
+      console.error('Error handling uploaded file:', error);
+      setScanError('Failed to process uploaded image.');
+      onScanError?.('File processing failed');
     } finally {
       setIsUploading(false);
     }
@@ -327,7 +517,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
         <div className="flex gap-2">
           {!isScanning ? (
             <Button
-              onClick={startCamera}
+              onClick={() => onScanningChange(true)}
               disabled={isInitializing}
               className="bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700"
             >
@@ -339,18 +529,18 @@ export const QRScanner: React.FC<QRScannerProps> = ({
               ) : (
                 <>
                   <Play className="w-4 h-4 mr-2" />
-                  Start Camera
+                  Start QR Scan
                 </>
               )}
             </Button>
           ) : (
             <Button
-              onClick={stopCamera}
+              onClick={() => onScanningChange(false)}
               variant="destructive"
               className="gap-2"
             >
               <Square className="w-4 h-4" />
-              Stop Camera
+              Stop QR Scan
             </Button>
           )}
           
@@ -443,6 +633,14 @@ export const QRScanner: React.FC<QRScannerProps> = ({
           <Camera className="w-3 h-3" />
           {cameraPermission === true ? "Camera Active" : "Camera Access"}
         </Badge>
+        <Badge variant={isVideoReady ? "default" : "secondary"} className="gap-1">
+          <Play className="w-3 h-3" />
+          {isVideoReady ? "Video Ready" : "Video Loading"}
+        </Badge>
+        <Badge variant={isDetecting ? "default" : "secondary"} className="gap-1">
+          <QrCode className="w-3 h-3" />
+          {isDetecting ? "Detecting QR" : "QR Detection"}
+        </Badge>
         <Badge variant={isScanning ? "default" : "secondary"} className="gap-1">
           <QrCode className="w-3 h-3" />
           {isScanning ? "QR Detection" : "QR Detection"}
@@ -487,8 +685,15 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                 <div 
                   id="qr-reader" 
                   ref={scannerRef}
-                  className="w-full aspect-square bg-black rounded-lg overflow-hidden"
-                />
+                  className="w-full aspect-square bg-black rounded-lg overflow-hidden relative"
+                >
+                  {/* Hidden canvas for QR detection */}
+                  <canvas
+                    ref={canvasRef}
+                    className="absolute top-0 left-0 w-full h-full opacity-0 pointer-events-none"
+                    style={{ zIndex: -1 }}
+                  />
+                </div>
                 
                 {/* QR Code Overlay */}
                 <div className="absolute inset-0 pointer-events-none">
@@ -507,16 +712,28 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Video Ready Indicator */}
+                  {isVideoReady && (
+                    <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                      <Play className="w-3 h-3" />
+                      Ready
+                    </div>
+                  )}
                 </div>
               </div>
               
               {/* Scanning Instructions */}
               <div className="text-center space-y-2">
                 <p className="text-sm font-medium text-blue-700">
-                  {uploadedImage ? "Analyzing uploaded image..." : "Point camera at QR code"}
+                  {uploadedImage ? "Analyzing uploaded image..." : 
+                   isDetecting ? "Scanning for QR codes..." :
+                   isVideoReady ? "Camera ready! Point at QR code" : "Initializing camera..."}
                 </p>
                 <p className="text-xs text-blue-600">
-                  {uploadedImage ? "Processing image for QR code detection" : "Hold steady for best results"}
+                  {uploadedImage ? "Processing image for QR code detection" : 
+                   isDetecting ? "Position QR code within the scanning frame" :
+                   isVideoReady ? "Hold steady and center the QR code in the frame" : "Please wait while camera initializes"}
                 </p>
               </div>
             </div>
@@ -544,9 +761,9 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                 Start the camera or upload a QR code image
               </p>
               <div className="flex gap-2 justify-center">
-                <Button onClick={startCamera} size="sm">
+                <Button onClick={() => onScanningChange(true)} size="sm">
                   <Camera className="w-4 h-4 mr-2" />
-                  Start Camera
+                  Start QR Scan
                 </Button>
                 <Button onClick={triggerFileUpload} variant="outline" size="sm">
                   <Upload className="w-4 h-4 mr-2" />

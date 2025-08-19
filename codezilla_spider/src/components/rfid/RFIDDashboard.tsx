@@ -409,9 +409,73 @@ const RFIDDashboard: React.FC = () => {
     setIsScanningQR(true);
   };
 
-  const handleQRCodeScanned = (qrData: QRCodeData) => {
+  const handleQRCodeScanned = async (qrData: QRCodeData) => {
+    console.log('QR Code scanned:', qrData);
     setScannedQRData(qrData);
     setIsScanningQR(false);
+    
+    // Automatically add the scanned RFID tag to the data
+    try {
+      const newRFIDTag: RFIDTag = {
+        tag_id: qrData.rfid_tag_id,
+        item_id: qrData.item_id,
+        item_name: qrData.item_name,
+        generated_at: qrData.timestamp,
+        checksum: qrData.checksum,
+        status: 'active',
+        last_scan: new Date().toISOString(),
+        location: 'Scanned via QR',
+        battery_level: 85, // Default battery level
+        signal_strength: 'high' as const
+      };
+      
+      // Add to local state immediately for instant feedback
+      setRfidTags(prevTags => {
+        // Check if tag already exists
+        const existingTagIndex = prevTags.findIndex(tag => tag.tag_id === qrData.rfid_tag_id);
+        if (existingTagIndex >= 0) {
+          // Update existing tag
+          const updatedTags = [...prevTags];
+          updatedTags[existingTagIndex] = {
+            ...updatedTags[existingTagIndex],
+            last_scan: new Date().toISOString(),
+            status: 'active'
+          };
+          return updatedTags;
+        } else {
+          // Add new tag
+          return [...prevTags, newRFIDTag];
+        }
+      });
+      
+      // Show success message
+      setQuickActionMessage(`✅ RFID Tag "${qrData.item_name}" added successfully!`);
+      setTimeout(() => setQuickActionMessage(""), 3000);
+      
+      // Optionally send to backend
+      try {
+        const response = await fetch("/api/rfid/tags", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newRFIDTag),
+        });
+        
+        if (response.ok) {
+          console.log('RFID tag saved to backend');
+        } else {
+          console.warn('Failed to save RFID tag to backend');
+        }
+      } catch (error) {
+        console.warn('Backend save failed, but tag is added locally:', error);
+      }
+      
+    } catch (error) {
+      console.error('Error processing scanned QR data:', error);
+      setQuickActionMessage("❌ Error processing scanned data");
+      setTimeout(() => setQuickActionMessage(""), 3000);
+    }
   };
 
   const handleQRScanError = (error: string) => {
