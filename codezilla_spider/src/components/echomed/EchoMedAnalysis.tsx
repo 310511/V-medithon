@@ -15,7 +15,6 @@ import {
   CheckCircle,
   Clock,
   Sparkles,
-  Waveform,
   Download,
   Share2,
   Heart,
@@ -64,7 +63,7 @@ const AnimatedWaveform = ({ isRecording, isProcessing }: { isRecording: boolean,
           <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-slate-200/50">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
-                <Waveform className="w-3 h-3 text-pink-600" />
+                                 <Activity className="w-3 h-3 text-pink-600" />
                 <span className="text-xs font-mono text-slate-700">
                   {Math.round(Math.random() * 2000 + 1000)} Hz
                 </span>

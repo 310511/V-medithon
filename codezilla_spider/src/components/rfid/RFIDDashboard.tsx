@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { QRScanner } from "./QRScanner";
+import { QRCodeGenerator } from "./QRCodeGenerator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -405,18 +407,16 @@ const RFIDDashboard: React.FC = () => {
   // QR Code scanning functions
   const startQRScan = () => {
     setIsScanningQR(true);
-    // Simulate QR code scanning
-    setTimeout(() => {
-      const mockQRData: QRCodeData = {
-        rfid_tag_id: "RFID_003",
-        item_name: "Aspirin 100mg",
-        item_id: "ITEM_003",
-        timestamp: new Date().toISOString(),
-        checksum: "abc123def456"
-      };
-      setScannedQRData(mockQRData);
-      setIsScanningQR(false);
-    }, 2000);
+  };
+
+  const handleQRCodeScanned = (qrData: QRCodeData) => {
+    setScannedQRData(qrData);
+    setIsScanningQR(false);
+  };
+
+  const handleQRScanError = (error: string) => {
+    console.error('QR Scan Error:', error);
+    setIsScanningQR(false);
   };
 
   const processScannedQR = async (qrData: QRCodeData) => {
@@ -698,24 +698,48 @@ const RFIDDashboard: React.FC = () => {
         <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
-              <div className="px-6 py-4">
-                <TabsList className="grid w-full grid-cols-6 bg-white/50 backdrop-blur-sm">
-                  <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+              <div className="px-2 sm:px-4 py-4">
+                <TabsList className="flex w-full justify-center items-center bg-white/50 backdrop-blur-sm rounded-xl p-1 shadow-sm border border-gray-200/50 overflow-hidden flex-nowrap">
+                  <TabsTrigger 
+                    value="overview" 
+                    className="flex-1 min-w-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ease-in-out rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-gray-100 data-[state=active]:hover:bg-gradient-to-r data-[state=active]:hover:from-blue-600 data-[state=active]:hover:to-purple-600 whitespace-nowrap"
+                  >
                     Overview
                   </TabsTrigger>
-                  <TabsTrigger value="tags" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+                  <TabsTrigger 
+                    value="tags" 
+                    className="flex-1 min-w-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ease-in-out rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-gray-100 data-[state=active]:hover:bg-gradient-to-r data-[state=active]:hover:from-blue-600 data-[state=active]:hover:to-purple-600 whitespace-nowrap"
+                  >
                     RFID Tags
                   </TabsTrigger>
-                  <TabsTrigger value="supplies" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+                  <TabsTrigger 
+                    value="supplies" 
+                    className="flex-1 min-w-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ease-in-out rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-gray-100 data-[state=active]:hover:bg-gradient-to-r data-[state=active]:hover:from-blue-600 data-[state=active]:hover:to-purple-600 whitespace-nowrap"
+                  >
                     Supplies
                   </TabsTrigger>
-                  <TabsTrigger value="mempool" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+                  <TabsTrigger 
+                    value="mempool" 
+                    className="flex-1 min-w-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ease-in-out rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-gray-100 data-[state=active]:hover:bg-gradient-to-r data-[state=active]:hover:from-blue-600 data-[state=active]:hover:to-purple-600 whitespace-nowrap"
+                  >
                     Mempool
                   </TabsTrigger>
-                  <TabsTrigger value="qr-scan" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+                  <TabsTrigger 
+                    value="qr-scan" 
+                    className="flex-1 min-w-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ease-in-out rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-gray-100 data-[state=active]:hover:bg-gradient-to-r data-[state=active]:hover:from-blue-600 data-[state=active]:hover:to-purple-600 whitespace-nowrap"
+                  >
                     QR Scan
                   </TabsTrigger>
-                  <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+                  <TabsTrigger 
+                    value="qr-generator" 
+                    className="flex-1 min-w-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ease-in-out rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-gray-100 data-[state=active]:hover:bg-gradient-to-r data-[state=active]:hover:from-purple-600 data-[state=active]:hover:to-pink-600 whitespace-nowrap"
+                  >
+                    QR Generator
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="analytics" 
+                    className="flex-1 min-w-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ease-in-out rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-gray-100 data-[state=active]:hover:bg-gradient-to-r data-[state=active]:hover:from-blue-600 data-[state=active]:hover:to-purple-600 whitespace-nowrap"
+                  >
                     Analytics
                   </TabsTrigger>
                 </TabsList>
@@ -1232,22 +1256,12 @@ const RFIDDashboard: React.FC = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {isScanningQR ? (
-                      <div className="text-center py-8">
-                        <div className="w-32 h-32 mx-auto mb-4 bg-green-200 rounded-lg flex items-center justify-center animate-pulse">
-                          <QrCode className="w-16 h-16 text-green-600" />
-                        </div>
-                        <p className="text-green-700 font-medium">Scanning for QR codes...</p>
-                        <p className="text-sm text-green-600 mt-2">Point camera at QR code</p>
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <div className="w-32 h-32 mx-auto mb-4 bg-gray-200 rounded-lg flex items-center justify-center">
-                          <QrCode className="w-16 h-16 text-gray-400" />
-                        </div>
-                        <p className="text-gray-600">Click "Start QR Scan" to begin</p>
-                      </div>
-                    )}
+                    <QRScanner
+                      isScanning={isScanningQR}
+                      onScanningChange={setIsScanningQR}
+                      onQRCodeScanned={handleQRCodeScanned}
+                      onScanError={handleQRScanError}
+                    />
                   </CardContent>
                 </Card>
 
@@ -1312,40 +1326,17 @@ const RFIDDashboard: React.FC = () => {
                 </Card>
               </div>
 
-              {/* QR Code Instructions */}
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2 text-purple-700">
-                    <Info className="w-5 h-5" />
-                    <span>QR Code Instructions</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-white/50 rounded-lg">
-                      <div className="w-12 h-12 mx-auto mb-3 bg-purple-500 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold">1</span>
-                      </div>
-                      <h4 className="font-medium text-purple-700">Point Camera</h4>
-                      <p className="text-sm text-purple-600 mt-1">Aim your camera at the QR code on the RFID tag</p>
-                    </div>
-                    <div className="text-center p-4 bg-white/50 rounded-lg">
-                      <div className="w-12 h-12 mx-auto mb-3 bg-purple-500 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold">2</span>
-                      </div>
-                      <h4 className="font-medium text-purple-700">Scan Code</h4>
-                      <p className="text-sm text-purple-600 mt-1">The system will automatically detect and read the QR code</p>
-                    </div>
-                    <div className="text-center p-4 bg-white/50 rounded-lg">
-                      <div className="w-12 h-12 mx-auto mb-3 bg-purple-500 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold">3</span>
-                      </div>
-                      <h4 className="font-medium text-purple-700">Process Data</h4>
-                      <p className="text-sm text-purple-600 mt-1">Review and process the RFID information</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+
+                          </TabsContent>
+
+            <TabsContent value="qr-generator" className="p-6 space-y-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold">QR Code Generator</h3>
+                  <p className="text-muted-foreground">Generate QR codes for testing the scanner</p>
+                </div>
+              </div>
+              <QRCodeGenerator />
             </TabsContent>
 
             <TabsContent value="analytics" className="p-6 space-y-6">
