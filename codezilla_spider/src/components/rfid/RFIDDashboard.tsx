@@ -448,8 +448,29 @@ const RFIDDashboard: React.FC = () => {
         }
       });
       
+      // Add to mempool immediately for real-time tracking
+      const mempoolTransaction: MempoolTransaction = {
+        txid: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        rfid_tag_id: qrData.rfid_tag_id,
+        item_name: qrData.item_name,
+        action: 'scan',
+        timestamp: new Date().toISOString(),
+        status: 'pending',
+        fee: 0.0001, // Default fee
+        size: 256 // Default transaction size
+      };
+      
+      setMempoolTransactions(prevTransactions => [mempoolTransaction, ...prevTransactions]);
+      
+      // Update mempool stats
+      setMempoolStats(prevStats => ({
+        ...prevStats,
+        pending: prevStats.pending + 1,
+        totalFees: prevStats.totalFees + mempoolTransaction.fee
+      }));
+      
       // Show success message
-      setQuickActionMessage(`✅ RFID Tag "${qrData.item_name}" added successfully!`);
+      setQuickActionMessage(`✅ RFID Tag "${qrData.item_name}" scanned and added to mempool!`);
       setTimeout(() => setQuickActionMessage(""), 3000);
       
       // Optionally send to backend
@@ -485,6 +506,31 @@ const RFIDDashboard: React.FC = () => {
 
   const processScannedQR = async (qrData: QRCodeData) => {
     try {
+      setQuickActionMessage("🔄 Processing QR code data...");
+      
+      // Find the corresponding mempool transaction
+      const mempoolTx = mempoolTransactions.find(tx => 
+        tx.rfid_tag_id === qrData.rfid_tag_id && tx.action === 'scan'
+      );
+      
+      if (mempoolTx) {
+        // Update mempool transaction status to confirmed
+        setMempoolTransactions(prevTransactions => 
+          prevTransactions.map(tx => 
+            tx.txid === mempoolTx.txid 
+              ? { ...tx, status: 'confirmed', block_height: Math.floor(Math.random() * 1000000) + 800000 }
+              : tx
+          )
+        );
+        
+        // Update mempool stats
+        setMempoolStats(prevStats => ({
+          ...prevStats,
+          pending: prevStats.pending - 1,
+          confirmed: prevStats.confirmed + 1
+        }));
+      }
+      
       // Process the scanned QR code data
       const response = await fetch("/api/rfid/scan-qr", {
         method: "POST",
@@ -496,7 +542,29 @@ const RFIDDashboard: React.FC = () => {
       
       if (response.ok) {
         const result = await response.json();
-        setQuickActionMessage(`✅ QR Code processed: ${result.message}`);
+        setQuickActionMessage(`✅ QR Code processed and confirmed in mempool!`);
+        
+        // Add a new "update" transaction to mempool
+        const updateTransaction: MempoolTransaction = {
+          txid: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          rfid_tag_id: qrData.rfid_tag_id,
+          item_name: qrData.item_name,
+          action: 'update',
+          timestamp: new Date().toISOString(),
+          status: 'pending',
+          fee: 0.0002, // Higher fee for update
+          size: 512 // Larger transaction size
+        };
+        
+        setMempoolTransactions(prevTransactions => [updateTransaction, ...prevTransactions]);
+        
+        // Update mempool stats
+        setMempoolStats(prevStats => ({
+          ...prevStats,
+          pending: prevStats.pending + 1,
+          totalFees: prevStats.totalFees + updateTransaction.fee
+        }));
+        
         await fetchRFIDData(); // Refresh data
         setScannedQRData(null);
       } else {
@@ -1333,12 +1401,25 @@ const RFIDDashboard: React.FC = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2 text-blue-700">
                       <Radio className="w-5 h-5" />
-                      <span>Scanned Data</span>
+                      <span>Scanned Data & Mempool Status</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     {scannedQRData ? (
                       <div className="space-y-4">
+                        {/* Mempool Status Indicator */}
+                        <div className="p-3 bg-green-100 border border-green-300 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                              <span className="text-sm font-medium text-green-700">Added to Mempool</span>
+                            </div>
+                            <Badge variant="default" className="bg-green-500 text-white">
+                              Pending
+                            </Badge>
+                          </div>
+                        </div>
+
                         <div className="p-4 bg-white/50 rounded-lg">
                           <div className="flex justify-between text-sm">
                             <span className="font-medium">RFID Tag ID:</span>
@@ -1369,13 +1450,45 @@ const RFIDDashboard: React.FC = () => {
                             <span className="font-mono text-xs">{scannedQRData.checksum}</span>
                           </div>
                         </div>
-                        <Button 
-                          onClick={() => processScannedQR(scannedQRData)}
-                          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white"
-                        >
-                          <Link className="w-4 h-4 mr-2" />
-                          Process QR Data
-                        </Button>
+
+                        {/* Mempool Transaction Info */}
+                        {mempoolTransactions.find(tx => 
+                          tx.rfid_tag_id === scannedQRData.rfid_tag_id && tx.action === 'scan'
+                        ) && (
+                          <div className="p-3 bg-yellow-50 border border-yellow-300 rounded-lg">
+                            <div className="text-sm">
+                              <div className="flex justify-between mb-1">
+                                <span className="font-medium text-yellow-700">Mempool TX:</span>
+                                <span className="font-mono text-xs text-yellow-600">
+                                  {mempoolTransactions.find(tx => 
+                                    tx.rfid_tag_id === scannedQRData.rfid_tag_id && tx.action === 'scan'
+                                  )?.txid.substring(0, 12)}...
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs text-yellow-600">
+                                <span>Fee: 0.0001 BTC</span>
+                                <span>Size: 256 bytes</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={() => processScannedQR(scannedQRData)}
+                            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700"
+                          >
+                            <Link className="w-4 h-4 mr-2" />
+                            Process & Confirm
+                          </Button>
+                          <Button 
+                            onClick={() => setScannedQRData(null)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center py-8">

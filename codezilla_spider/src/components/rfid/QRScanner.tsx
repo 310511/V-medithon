@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import jsQR from 'jsqr';
 import { 
   Camera, 
   QrCode, 
@@ -53,6 +54,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   const scannerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Detect available cameras
   useEffect(() => {
@@ -286,15 +288,39 @@ export const QRScanner: React.FC<QRScannerProps> = ({
       const imageUrl = URL.createObjectURL(file);
       setUploadedImage(imageUrl);
 
-      // Create Html5Qrcode instance for file scanning
-      const qrCode = new Html5Qrcode("qr-reader");
+      // Create canvas to process the image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      await new Promise((resolve, reject) => {
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx?.drawImage(img, 0, 0);
+          resolve(true);
+        };
+        img.onerror = reject;
+        img.src = imageUrl;
+      });
+
+      // Get image data for QR detection
+      const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+      if (!imageData) {
+        throw new Error('Failed to get image data');
+      }
+
+      // Scan for QR code using jsQR
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
       
-      // Scan the uploaded image
-      const result = await qrCode.scanFile(file, true);
-      console.log('File scan result:', result);
-      
-      // Process the result
-      onScanSuccess(result, null);
+      if (code) {
+        console.log('QR Code detected in uploaded image:', code.data);
+        
+        // Process the result using the same logic as camera scan
+        onScanSuccess(code.data, code);
+      } else {
+        throw new Error('No QR code found in the uploaded image');
+      }
       
     } catch (error) {
       console.error('Error scanning uploaded file:', error);
@@ -485,30 +511,73 @@ export const QRScanner: React.FC<QRScannerProps> = ({
             <div className="space-y-4">
               {/* Scanner Container with Overlay */}
               <div className="relative w-full max-w-md mx-auto">
-                <div 
-                  id="qr-reader" 
-                  ref={scannerRef}
-                  className="w-full aspect-square bg-black rounded-lg overflow-hidden"
-                />
+                {uploadedImage ? (
+                  // Display uploaded image
+                  <div className="w-full aspect-square bg-black rounded-lg overflow-hidden relative">
+                    <img 
+                      src={uploadedImage} 
+                      alt="Uploaded QR Code" 
+                      className="w-full h-full object-contain"
+                    />
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      <Badge className="bg-green-500 text-white">
+                        <FileImage className="w-3 h-3 mr-1" />
+                        Uploaded
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          setUploadedImage(null);
+                          setScanResult(null);
+                          setScanError(null);
+                        }}
+                        className="w-6 h-6 p-0"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <div className="text-center text-white">
+                          <RefreshCw className="w-8 h-8 mx-auto mb-2 animate-spin" />
+                          <p className="text-sm">Scanning QR Code...</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  // Camera view
+                  <div 
+                    id="qr-reader" 
+                    ref={scannerRef}
+                    className="w-full aspect-square bg-black rounded-lg overflow-hidden"
+                  />
+                )}
                 
-                {/* QR Code Overlay */}
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-64 h-64 border-2 border-white rounded-lg relative">
-                      {/* Corner indicators */}
-                      <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-green-400"></div>
-                      <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-green-400"></div>
-                      <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-green-400"></div>
-                      <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-green-400"></div>
-                      
-                      {/* Center crosshair */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-1 h-8 bg-green-400 opacity-50"></div>
-                        <div className="absolute w-8 h-1 bg-green-400 opacity-50"></div>
+                {/* Hidden canvas for QR detection */}
+                <canvas ref={canvasRef} className="hidden" />
+                
+                {/* QR Code Overlay - only show for camera view */}
+                {!uploadedImage && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-64 h-64 border-2 border-white rounded-lg relative">
+                        {/* Corner indicators */}
+                        <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-green-400"></div>
+                        <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-green-400"></div>
+                        <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-green-400"></div>
+                        <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-green-400"></div>
+                        
+                        {/* Center crosshair */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-1 h-8 bg-green-400 opacity-50"></div>
+                          <div className="absolute w-8 h-1 bg-green-400 opacity-50"></div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
               
               {/* Scanning Instructions */}
