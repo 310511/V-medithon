@@ -13,7 +13,7 @@ load_dotenv()
 
 # Set OpenAI API key from environment variable
 if not os.environ.get('OPENAI_API_KEY'):
-    os.environ['OPENAI_API_KEY'] = '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'
+    os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
 
 # Set other required environment variables
 os.environ['AWS_ACCESS_KEY_ID'] = 'dummy'

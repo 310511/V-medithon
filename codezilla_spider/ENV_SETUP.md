@@ -12,7 +12,7 @@ Create a `.env` file in the `codezilla_spider` directory with the following cont
 
 ```env
 # OpenAI API Configuration
-OPENAI_API_KEY=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
+OPENAI_API_KEY=your_openai_api_key_here
 
 # Firebase Configuration
 VITE_FIREBASE_API_KEY=AIzaSyAePpEwxlOFgxVCn4tVeVIZ4xnVv-cdKUk
