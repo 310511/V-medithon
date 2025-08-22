@@ -1,10 +1,11 @@
-import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X } from "lucide-react";
+import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { NotificationPanel } from "@/components/ui/notification-panel";
 import { ProfileMenu } from "@/components/ui/profile-menu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 
 export const Header = () => {
@@ -12,6 +13,7 @@ export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userRole] = useState<"admin" | "manager" | "staff" | "supplier">("admin");
   const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
   
   // Close mobile menu when route changes
   useEffect(() => {
@@ -47,6 +49,7 @@ export const Header = () => {
     { to: "/infinite-memory", icon: Brain, label: "Infinite Memory", variant: "outline" as const },
     { to: "/ml-predictions", icon: TrendingUp, label: "ML Predictions", variant: "outline" as const },
     { to: "/medicine-recommendation", icon: Pill, label: "Enhanced Medicine AI", variant: "outline" as const },
+    { to: "/ai-medicine-recommendation", icon: Sparkles, label: "AI Medicine Recommendations", variant: "outline" as const },
     { to: "/echomed-ai", icon: Heart, label: "EchoMed AI", variant: "outline" as const },
     { to: "/inventory", icon: Package, label: "Inventory", variant: "outline" as const },
     { to: "/rfid", icon: Radio, label: "RFID", variant: "outline" as const },
@@ -95,28 +98,47 @@ export const Header = () => {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="relative hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400 transition-all duration-200 rounded-full p-2"
-            onClick={openPanel}
-          >
-            <Bell className="h-5 w-5" />
-            {(unreadCount > 0 || highPriorityCount > 0) && (
-              <span className="notification-badge absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
-                {unreadCount > 0 ? unreadCount : highPriorityCount}
-              </span>
-            )}
-          </Button>
+          {isAuthenticated && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400 transition-all duration-200 rounded-full p-2"
+              onClick={openPanel}
+            >
+              <Bell className="h-5 w-5" />
+              {(unreadCount > 0 || highPriorityCount > 0) && (
+                <span className="notification-badge absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
+                  {unreadCount > 0 ? unreadCount : highPriorityCount}
+                </span>
+              )}
+            </Button>
+          )}
           
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400 transition-all duration-200 rounded-full p-2"
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-          >
-            <User className="h-5 w-5" />
-          </Button>
+          {isAuthenticated ? (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400 transition-all duration-200 rounded-full p-2"
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+            >
+              <User className="h-5 w-5" />
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link to="/signin">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/signup">
+                <Button size="sm" className="gap-2">
+                  <UserPlus className="w-4 h-4" />
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </header>
 

@@ -15,8 +15,10 @@ import {
   Shield,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Sparkles
 } from "lucide-react";
+import { openAIService, AIHealthConsultationResponse } from '@/services/openaiService';
 
 interface Message {
   id: string;
@@ -49,12 +51,14 @@ const EchoMedEmergencyChat = () => {
     {
       id: 'welcome',
       role: 'assistant',
-      content: 'Hello! I\'m Dr. Echo, your EchoMed AI health assistant. I\'m currently operating in emergency mode with limited responses, but I\'ll do my best to help you with your health questions.',
+      content: 'Hello! I\'m Dr. Echo, your EchoMed AI health assistant. I\'m now powered by advanced AI to provide you with better health guidance and medicine recommendations.',
       timestamp: new Date(),
     },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isAIAvailable, setIsAIAvailable] = useState(true); // Assume AI is available
+  const [aiStatus, setAiStatus] = useState<'online' | 'offline'>('online');
 
   // Auto-scroll to the bottom when messages change
   useEffect(() => {
@@ -112,31 +116,77 @@ const EchoMedEmergencyChat = () => {
     setInputValue('');
     setIsTyping(true);
     
-    // Get response
-    const responseText = getResponse(inputValue);
-    
-    // Simulate typing effect
-    let currentResponse = '';
-    await simulateTyping(responseText, (text) => {
-      currentResponse = text;
-      setMessages((prev) => {
-        const newMessages = [...prev];
-        const lastMessage = newMessages[newMessages.length - 1];
-        if (lastMessage && lastMessage.role === 'assistant') {
-          lastMessage.content = text;
-        } else {
-          newMessages.push({
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: text,
-            timestamp: new Date(),
-          });
+    try {
+      let responseText: string;
+      
+      // Try to use OpenAI first
+      if (isAIAvailable) {
+        try {
+          // Prepare conversation history for context
+          const conversationHistory = messages
+            .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+            .slice(-10) // Last 10 messages for context
+            .map(msg => ({
+              role: msg.role,
+              content: msg.content
+            }));
+          
+          const aiResponse = await openAIService.getHealthConsultation(
+            inputValue,
+            'user-' + Date.now(),
+            conversationHistory
+          );
+          
+          if (aiResponse.success) {
+            responseText = aiResponse.response;
+            setAiStatus('online');
+          } else {
+            throw new Error('AI service failed');
+          }
+        } catch (aiError) {
+          console.warn('AI service unavailable, falling back to emergency mode:', aiError);
+          setAiStatus('offline');
+          responseText = getResponse(inputValue);
         }
-        return newMessages;
+      } else {
+        // Use emergency mode
+        responseText = getResponse(inputValue);
+      }
+      
+      // Simulate typing effect
+      let currentResponse = '';
+      await simulateTyping(responseText, (text) => {
+        currentResponse = text;
+        setMessages((prev) => {
+          const newMessages = [...prev];
+          const lastMessage = newMessages[newMessages.length - 1];
+          if (lastMessage && lastMessage.role === 'assistant') {
+            lastMessage.content = text;
+          } else {
+            newMessages.push({
+              id: (Date.now() + 1).toString(),
+              role: 'assistant',
+              content: text,
+              timestamp: new Date(),
+            });
+          }
+          return newMessages;
+        });
       });
-    });
-    
-    setIsTyping(false);
+      
+    } catch (error) {
+      console.error('Error processing message:', error);
+      // Fallback to emergency response
+      const fallbackResponse = getResponse(inputValue);
+      setMessages((prev) => [...prev, {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: fallbackResponse,
+        timestamp: new Date(),
+      }]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -161,17 +211,41 @@ const EchoMedEmergencyChat = () => {
       <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-            <AlertTriangle className="w-6 h-6" />
+            {aiStatus === 'online' ? (
+              <Sparkles className="w-6 h-6" />
+            ) : (
+              <AlertTriangle className="w-6 h-6" />
+            )}
           </div>
           <div>
-            <h3 className="font-semibold text-lg">Emergency Mode</h3>
-            <p className="text-sm text-orange-100">Offline Health Assistant</p>
+            <h3 className="font-semibold text-lg">
+              {aiStatus === 'online' ? 'AI-Powered Mode' : 'Emergency Mode'}
+            </h3>
+            <p className="text-sm text-orange-100">
+              {aiStatus === 'online' ? 'Advanced AI Health Assistant' : 'Offline Health Assistant'}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-            <Shield className="w-3 h-3 mr-1" />
-            Offline
+          <Badge 
+            variant="secondary" 
+            className={`${
+              aiStatus === 'online' 
+                ? 'bg-green-500/20 text-green-100 border-green-300/30' 
+                : 'bg-white/20 text-white border-white/30'
+            }`}
+          >
+            {aiStatus === 'online' ? (
+              <>
+                <Sparkles className="w-3 h-3 mr-1" />
+                AI Online
+              </>
+            ) : (
+              <>
+                <Shield className="w-3 h-3 mr-1" />
+                Offline
+              </>
+            )}
           </Badge>
         </div>
       </div>
@@ -204,7 +278,7 @@ const EchoMedEmergencyChat = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="font-semibold text-sm">
-                        {message.role === 'user' ? 'You' : 'Dr. Echo (Emergency)'}
+                        {message.role === 'user' ? 'You' : `Dr. Echo (${aiStatus === 'online' ? 'AI' : 'Emergency'})`}
                       </span>
                       <span className="text-xs opacity-70">
                         {message.timestamp.toLocaleTimeString()}

@@ -32,6 +32,9 @@ from medicine_recommendation_system import medicine_engine
 from services.alerts_service import alerts_service, AlertType, AlertStatus
 from services.purchase_order_service import purchase_order_service, PurchaseOrderStatus
 
+# Import OpenAI service
+from services.openai_service import openai_medicine_service
+
 app = FastAPI(title="Infinite Memory API - Improved", version="2.0.0")
 
 # Add CORS middleware
@@ -98,6 +101,23 @@ class CreatePurchaseOrderRequest(BaseModel):
     notes: Optional[str] = None
 
 class UpdatePurchaseOrderRequest(BaseModel):
+    order_id: str
+    status: str
+    notes: Optional[str] = None
+
+class OpenAIMedicineRecommendationRequest(BaseModel):
+    user_id: str
+    symptoms: str
+    include_ai_analysis: bool = True
+
+class OpenAIHealthConsultationRequest(BaseModel):
+    user_id: str
+    message: str
+    conversation_history: Optional[List[Dict[str, str]]] = None
+
+class OpenAIMedicalTextAnalysisRequest(BaseModel):
+    text: str
+    user_id: Optional[str] = None
     order_id: str
     status: PurchaseOrderStatus
     notes: Optional[str] = None
@@ -678,6 +698,41 @@ async def update_medicine_stock(request: UpdateStockRequest):
         return {"message": f"Stock updated for medicine {request.medicine_id}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Stock update error: {str(e)}")
+
+# OpenAI Medicine Recommendation Endpoints
+
+@app.post("/ai/medicine/recommend")
+async def ai_medicine_recommendations(request: OpenAIMedicineRecommendationRequest):
+    """Get AI-powered medicine recommendations using OpenAI"""
+    try:
+        result = await openai_medicine_service.get_medicine_recommendations(
+            request.symptoms, 
+            request.user_id
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI medicine recommendation error: {str(e)}")
+
+@app.post("/ai/health/consultation")
+async def ai_health_consultation(request: OpenAIHealthConsultationRequest):
+    """Get AI-powered health consultation using OpenAI"""
+    try:
+        result = await openai_medicine_service.get_health_consultation(
+            request.message,
+            request.conversation_history
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI health consultation error: {str(e)}")
+
+@app.post("/ai/medical/text-analysis")
+async def ai_medical_text_analysis(request: OpenAIMedicalTextAnalysisRequest):
+    """Analyze medical text using OpenAI"""
+    try:
+        result = await openai_medicine_service.analyze_medical_text(request.text)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI medical text analysis error: {str(e)}")
 
 # Inventory Management Endpoints
 
