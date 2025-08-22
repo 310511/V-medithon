@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -9,6 +9,7 @@ import { Eye, Package, Calendar, AlertCircle, ShoppingCart, Shield, ExternalLink
 import { useBlockchain } from "@/contexts/BlockchainContext";
 import { useInventory } from "@/contexts/InventoryContext";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const categories = [
   "Antibiotics",
@@ -26,6 +27,10 @@ export const InventoryTable = () => {
   const { inventoryItems, addInventoryItem, deleteInventoryItem } = useInventory();
   const [syncingItems, setSyncingItems] = useState<Set<number>>(new Set());
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  
+  console.log("InventoryTable rendered with items:", inventoryItems);
+  console.log("Current address:", address);
+  
   const [newItem, setNewItem] = useState({
     name: "",
     category: "",
@@ -37,14 +42,22 @@ export const InventoryTable = () => {
   });
 
   const handleListOnMarketplace = async (item: any) => {
-    if (!address) {
-      addAppNotification("Please connect your wallet to list items on the marketplace.", "error");
-      return;
-    }
-
-    setSyncingItems(prev => new Set(prev).add(item.id));
+    console.log("List button clicked for item:", item);
+    console.log("Current address:", address);
     
     try {
+      if (!address) {
+        console.log("No wallet address found, showing error notification");
+        toast.error("Please connect your wallet to list items on the marketplace.");
+        return;
+      }
+
+      console.log("Setting syncing state for item:", item.id);
+      setSyncingItems(prev => new Set(prev).add(item.id));
+      
+      console.log("Starting marketplace sync for:", item.name);
+      toast.info(`Listing ${item.name} on marketplace...`);
+      
       await syncInventoryToMarketplace({
         id: item.id.toString(),
         name: item.name,
@@ -57,7 +70,14 @@ export const InventoryTable = () => {
         price: item.price,
         blockchainVerified: item.blockchainVerified
       });
+      
+      console.log("Successfully listed item on marketplace");
+      toast.success(`${item.name} successfully listed on marketplace!`);
+    } catch (error) {
+      console.error("Error listing item on marketplace:", error);
+      toast.error(`Failed to list ${item.name} on marketplace. Please try again.`);
     } finally {
+      console.log("Clearing syncing state for item:", item.id);
       setSyncingItems(prev => {
         const newSet = new Set(prev);
         newSet.delete(item.id);
@@ -67,13 +87,17 @@ export const InventoryTable = () => {
   };
 
   const handleViewOnMarketplace = (item: any) => {
-    // TODO: Navigate to marketplace product page
+    console.log("View button clicked for item:", item);
+    // Navigate to marketplace product page
     console.log("View on marketplace:", item);
+    toast.info(`Viewing ${item.name} on marketplace`);
+    // You can add navigation logic here when marketplace page is ready
+    // navigate(`/marketplace/product/${item.id}`);
   };
 
   const handleAddItem = () => {
     if (!newItem.name || !newItem.category || !newItem.stock || !newItem.threshold || !newItem.supplier || !newItem.price) {
-      addAppNotification("Please fill in all required fields.", "error");
+      toast.error("Please fill in all required fields.");
       return;
     }
 
@@ -82,7 +106,7 @@ export const InventoryTable = () => {
     const price = parseFloat(newItem.price);
 
     if (isNaN(stock) || isNaN(threshold) || isNaN(price)) {
-      addAppNotification("Please enter valid numbers for stock, threshold, and price.", "error");
+      toast.error("Please enter valid numbers for stock, threshold, and price.");
       return;
     }
 
@@ -101,7 +125,7 @@ export const InventoryTable = () => {
     };
 
     addInventoryItem(newInventoryItem);
-    addAppNotification("Item added to inventory successfully!", "success");
+    toast.success("Item added to inventory successfully!");
     
     // Reset form
     setNewItem({
@@ -118,7 +142,7 @@ export const InventoryTable = () => {
 
   const handleDeleteItem = (itemId: number) => {
     deleteInventoryItem(itemId);
-    addAppNotification("Item removed from inventory.", "success");
+    toast.success("Item removed from inventory.");
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -132,10 +156,15 @@ export const InventoryTable = () => {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
-            Inventory Management
-          </CardTitle>
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Inventory Management
+            </CardTitle>
+            <CardDescription className="mt-2">
+              Manage your medical supplies and track inventory levels. Use <strong>List</strong> and <strong>View</strong> buttons to interact with marketplace.
+            </CardDescription>
+          </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
@@ -254,59 +283,70 @@ export const InventoryTable = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {inventoryItems.map((item) => (
-            <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-sm text-muted-foreground">{item.category}</p>
+          {inventoryItems && inventoryItems.length > 0 ? (
+            inventoryItems.map((item) => (
+              <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">{item.name}</p>
+                      <p className="text-sm text-muted-foreground">{item.category}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      item.status === 'critical' ? 'bg-red-100 text-red-800' :
+                      item.status === 'low' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {item.status}
+                    </span>
+                    <span>Stock: {item.stock}/{item.threshold}</span>
+                    <span>${item.price}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-sm">
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    item.status === 'critical' ? 'bg-red-100 text-red-800' :
-                    item.status === 'low' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    {item.status}
-                  </span>
-                  <span>Stock: {item.stock}/{item.threshold}</span>
-                  <span>${item.price}</span>
+                <div className="flex items-center gap-2">
+                  {item.blockchainVerified && (
+                    <Shield className="h-4 w-4 text-green-600" title="Blockchain Verified" />
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleListOnMarketplace(item)}
+                    disabled={syncingItems.has(item.id)}
+                    className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 hover:text-blue-800 transition-all duration-200"
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-1" />
+                    {syncingItems.has(item.id) ? "Syncing..." : "List"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewOnMarketplace(item)}
+                    className="bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700 hover:text-purple-800 transition-all duration-200"
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    View
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteItem(item.id)}
+                    className="bg-red-50 hover:bg-red-100 border-red-200 text-red-700 hover:text-red-800 transition-all duration-200"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {item.blockchainVerified && (
-                  <Shield className="h-4 w-4 text-green-600" title="Blockchain Verified" />
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleListOnMarketplace(item)}
-                  disabled={syncingItems.has(item.id)}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-1" />
-                  {syncingItems.has(item.id) ? "Syncing..." : "List"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleViewOnMarketplace(item)}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  View
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDeleteItem(item.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No inventory items found.</p>
+              <p className="text-sm">Add some items to get started.</p>
             </div>
-          ))}
+          )}
         </div>
       </CardContent>
     </Card>

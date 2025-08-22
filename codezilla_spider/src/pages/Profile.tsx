@@ -1,432 +1,562 @@
-import React, { useState } from "react";
-import { Header } from "@/components/layout/Header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   User, 
   Mail, 
   Phone, 
+  Building, 
   MapPin, 
   Calendar,
+  Settings, 
   Shield,
-  Settings,
   Bell,
-  Package,
-  TrendingUp,
-  Brain,
-  Pill,
-  Edit,
+  Globe,
   Save,
-  Camera
-} from "lucide-react";
+  Edit,
+  Camera,
+  BarChart3,
+  Activity,
+  TrendingUp,
+  Users,
+  Package
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
-const Profile = () => {
-  const [userRole] = useState<"admin" | "manager" | "staff" | "supplier">("admin");
+export const Profile: React.FC = () => {
+  const { user, updateProfile, signOut } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [form, setForm] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    organization: user?.organization || '',
+    department: user?.department || '',
+    position: user?.position || '',
+    dateOfBirth: user?.dateOfBirth || '',
+    address: {
+      street: user?.address?.street || '',
+      city: user?.address?.city || '',
+      state: user?.address?.state || '',
+      zipCode: user?.address?.zipCode || '',
+      country: user?.address?.country || ''
+    },
+    preferences: {
+      theme: user?.preferences?.theme || 'system',
+      notifications: user?.preferences?.notifications || true,
+      language: user?.preferences?.language || 'en'
+    }
+  });
 
-  const getUserInfo = () => {
-    switch (userRole) {
-      case "admin":
-        return {
-          name: "Admin User",
-          email: "admin@medchain.com",
-          phone: "+1 (555) 123-4567",
-          location: "System Headquarters",
-          avatar: "A",
-          role: "System Administrator",
-          color: "bg-red-500",
-          department: "IT Administration",
-          joinDate: "2023-01-15",
-          permissions: ["Full System Access", "User Management", "Security Settings", "Analytics"]
-        };
-      case "manager":
-        return {
-          name: "Manager User",
-          email: "manager@medchain.com",
-          phone: "+1 (555) 234-5678",
-          location: "Inventory Department",
-          avatar: "M",
-          role: "Inventory Manager",
-          color: "bg-blue-500",
-          department: "Inventory Management",
-          joinDate: "2023-03-20",
-          permissions: ["Inventory Management", "Staff Supervision", "Reports Access", "Settings Control"]
-        };
-      case "staff":
-        return {
-          name: "Staff User",
-          email: "staff@medchain.com",
-          phone: "+1 (555) 345-6789",
-          location: "Medical Ward A",
-          avatar: "S",
-          role: "Medical Staff",
-          color: "bg-green-500",
-          department: "Medical Services",
-          joinDate: "2023-06-10",
-          permissions: ["Patient Care", "Inventory Access", "Schedule Management", "Notifications"]
-        };
-      case "supplier":
-        return {
-          name: "Supplier User",
-          email: "supplier@medchain.com",
-          phone: "+1 (555) 456-7890",
-          location: "Pharmaceutical Corp",
-          avatar: "S",
-          role: "Medicine Supplier",
-          color: "bg-purple-500",
-          department: "Supply Chain",
-          joinDate: "2023-02-05",
-          permissions: ["Product Management", "Order Processing", "Analytics Access", "Communication"]
-        };
-      default:
-        return {
-          name: "User",
-          email: "user@medchain.com",
-          phone: "+1 (555) 000-0000",
-          location: "General",
-          avatar: "U",
-          role: "User",
-          color: "bg-gray-500",
-          department: "General",
-          joinDate: "2023-01-01",
-          permissions: ["Basic Access", "Profile Management"]
-        };
+  // Mock data for charts
+  const activityData = [
+    { name: 'Jan', value: 400 },
+    { name: 'Feb', value: 300 },
+    { name: 'Mar', value: 600 },
+    { name: 'Apr', value: 800 },
+    { name: 'May', value: 500 },
+    { name: 'Jun', value: 700 }
+  ];
+
+  const inventoryData = [
+    { name: 'Medicines', value: 45 },
+    { name: 'Equipment', value: 30 },
+    { name: 'Supplies', value: 25 }
+  ];
+
+  const performanceData = [
+    { month: 'Jan', efficiency: 85, accuracy: 92 },
+    { month: 'Feb', efficiency: 88, accuracy: 94 },
+    { month: 'Mar', efficiency: 82, accuracy: 89 },
+    { month: 'Apr', efficiency: 90, accuracy: 96 },
+    { month: 'May', efficiency: 87, accuracy: 93 },
+    { month: 'Jun', efficiency: 93, accuracy: 97 }
+  ];
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.');
+      setForm(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent as keyof typeof form],
+          [child]: value
+        }
+      }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        [field]: value
+      }));
     }
   };
 
-  const userInfo = getUserInfo();
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+      await updateProfile({
+        name: form.name,
+        phone: form.phone,
+        organization: form.organization,
+        department: form.department,
+        position: form.position,
+        dateOfBirth: form.dateOfBirth,
+        address: form.address,
+        preferences: form.preferences
+      });
+      setIsEditing(false);
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update profile');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success('Signed out successfully');
+    } catch (error) {
+      toast.error('Failed to sign out');
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Not Signed In</h2>
+            <p className="text-gray-600 mb-4">Please sign in to view your profile</p>
+            <Button onClick={() => window.location.href = '/signin'}>
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      
-      <main className="container mx-auto px-6 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Profile Header */}
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Profile</h1>
-              <p className="text-muted-foreground mt-2">Manage your account settings and preferences</p>
+          <h1 className="text-3xl font-bold">Profile</h1>
+          <p className="text-gray-600">Manage your account and preferences</p>
             </div>
-            <Button onClick={() => setIsEditing(!isEditing)}>
-              <Edit className="h-4 w-4 mr-2" />
-              {isEditing ? "Cancel" : "Edit Profile"}
+        <div className="flex gap-2">
+          {isEditing ? (
+            <>
+              <Button variant="outline" onClick={() => setIsEditing(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => setIsEditing(true)}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Profile
             </Button>
+          )}
+        </div>
           </div>
 
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+        <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
-              <TabsTrigger value="security">Security</TabsTrigger>
-              <TabsTrigger value="activity">Activity</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              <div className="grid md:grid-cols-3 gap-6">
                 {/* Profile Card */}
-                <Card className="md:col-span-1">
-                  <CardHeader className="text-center">
-                    <div className="flex justify-center mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Personal Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Avatar and Basic Info */}
+              <div className="flex items-center gap-6">
                       <div className="relative">
-                        <Avatar className="h-24 w-24">
-                          <AvatarImage src="" />
-                          <AvatarFallback className={`${userInfo.color} text-white text-2xl font-bold`}>
-                            {userInfo.avatar}
+                  <Avatar className="w-24 h-24">
+                    <AvatarImage src={user.picture} />
+                    <AvatarFallback className="text-2xl">
+                      {user.name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
                         {isEditing && (
-                          <Button size="sm" className="absolute -bottom-2 -right-2 rounded-full p-1">
-                            <Camera className="h-3 w-3" />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0"
+                    >
+                      <Camera className="w-4 h-4" />
                           </Button>
                         )}
                       </div>
+                <div className="flex-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Full Name</Label>
+                      <Input
+                        value={form.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Enter your full name"
+                      />
                     </div>
-                    <CardTitle className="text-xl">{userInfo.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{userInfo.role}</p>
-                    <Badge variant="outline" className="mt-2">
-                      {userInfo.department}
-                    </Badge>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{userInfo.email}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{userInfo.phone}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{userInfo.location}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">Joined {userInfo.joinDate}</span>
-                      </div>
+                    <div>
+                      <Label>Email</Label>
+                      <Input
+                        value={form.email}
+                        disabled
+                        className="bg-gray-50"
+                      />
                     </div>
-                  </CardContent>
-                </Card>
-
-                {/* Permissions & Role Info */}
-                <Card className="md:col-span-2">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      Role & Permissions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
                       <div>
-                        <h4 className="font-medium mb-2">Current Role</h4>
-                        <Badge className={`${userInfo.color} text-white`}>
-                          {userInfo.role}
-                        </Badge>
+                      <Label>Phone</Label>
+                      <Input
+                        value={form.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Enter your phone number"
+                      />
                       </div>
                       <div>
-                        <h4 className="font-medium mb-2">Permissions</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                          {userInfo.permissions.map((permission, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {permission}
-                            </Badge>
-                          ))}
+                      <Label>Date of Birth</Label>
+                      <Input
+                        type="date"
+                        value={form.dateOfBirth}
+                        onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                        disabled={!isEditing}
+                      />
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
               </div>
 
-              {/* Role-specific Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    {userRole === "admin" && <Shield className="h-5 w-5" />}
-                    {userRole === "manager" && <Package className="h-5 w-5" />}
-                    {userRole === "staff" && <User className="h-5 w-5" />}
-                    {userRole === "supplier" && <TrendingUp className="h-5 w-5" />}
-                    {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {userRole === "admin" && (
-                    <div className="grid md:grid-cols-2 gap-4">
+              {/* Organization Info */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Building className="w-5 h-5" />
+                  Organization Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <h4 className="font-medium mb-2">System Access</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Full administrative access to all system features including user management, 
-                          security settings, and system analytics.
-                        </p>
+                    <Label>Organization</Label>
+                    <Input
+                      value={form.organization}
+                      onChange={(e) => handleInputChange('organization', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Your organization"
+                    />
                       </div>
                       <div>
-                        <h4 className="font-medium mb-2">Recent Activities</h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span>User Management</span>
-                            <span className="text-muted-foreground">2 hours ago</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Security Audit</span>
-                            <span className="text-muted-foreground">1 day ago</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {userRole === "manager" && (
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium mb-2">Inventory Management</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Oversee inventory operations, manage staff, and generate reports 
-                          for the medical facility.
-                        </p>
+                    <Label>Department</Label>
+                    <Input
+                      value={form.department}
+                      onChange={(e) => handleInputChange('department', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Your department"
+                    />
                       </div>
                       <div>
-                        <h4 className="font-medium mb-2">Team Overview</h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span>Staff Members</span>
-                            <span className="text-muted-foreground">12</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Active Orders</span>
-                            <span className="text-muted-foreground">8</span>
+                    <Label>Position</Label>
+                    <Input
+                      value={form.position}
+                      onChange={(e) => handleInputChange('position', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Your position"
+                    />
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                  {userRole === "staff" && (
-                    <div className="grid md:grid-cols-2 gap-4">
+
+              {/* Address */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  Address
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h4 className="font-medium mb-2">Medical Access</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Access to patient care systems, inventory for medical supplies, 
-                          and work schedule management.
-                        </p>
+                    <Label>Street Address</Label>
+                    <Input
+                      value={form.address.street}
+                      onChange={(e) => handleInputChange('address.street', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Enter street address"
+                    />
                       </div>
                       <div>
-                        <h4 className="font-medium mb-2">Work Schedule</h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span>Current Shift</span>
-                            <span className="text-muted-foreground">Day Shift</span>
+                    <Label>City</Label>
+                    <Input
+                      value={form.address.city}
+                      onChange={(e) => handleInputChange('address.city', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Enter city"
+                    />
+                    </div>
+                      <div>
+                    <Label>State</Label>
+                    <Input
+                      value={form.address.state}
+                      onChange={(e) => handleInputChange('address.state', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Enter state"
+                    />
+                      </div>
+                      <div>
+                    <Label>ZIP Code</Label>
+                    <Input
+                      value={form.address.zipCode}
+                      onChange={(e) => handleInputChange('address.zipCode', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Enter ZIP code"
+                    />
                           </div>
-                          <div className="flex justify-between">
-                            <span>Next Break</span>
-                            <span className="text-muted-foreground">2:30 PM</span>
-                          </div>
+                  <div className="md:col-span-2">
+                    <Label>Country</Label>
+                    <Input
+                      value={form.address.country}
+                      onChange={(e) => handleInputChange('address.country', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Enter country"
+                    />
                         </div>
                       </div>
                     </div>
-                  )}
-                  {userRole === "supplier" && (
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium mb-2">Supply Chain</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Manage product catalog, process orders, and track delivery 
-                          status for medical supplies.
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium mb-2">Order Status</h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span>Pending Orders</span>
-                            <span className="text-muted-foreground">5</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>This Month Revenue</span>
-                            <span className="text-muted-foreground">$45,230</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="settings" className="space-y-6">
+        <TabsContent value="analytics" className="space-y-6">
+          {/* Activity Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Activities</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">2,847</div>
+                <p className="text-xs text-muted-foreground">
+                  +20.1% from last month
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Inventory Items</CardTitle>
+                <Package className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">1,234</div>
+                <p className="text-xs text-muted-foreground">
+                  +12.3% from last month
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">24</div>
+                <p className="text-xs text-muted-foreground">
+                  +2 new this month
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Account Settings</CardTitle>
+                <CardTitle>Activity Trends</CardTitle>
+                <CardDescription>Your activity over the last 6 months</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input id="name" defaultValue={userInfo.name} disabled={!isEditing} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" defaultValue={userInfo.email} disabled={!isEditing} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input id="phone" defaultValue={userInfo.phone} disabled={!isEditing} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="location">Location</Label>
-                      <Input id="location" defaultValue={userInfo.location} disabled={!isEditing} />
-                    </div>
-                  </div>
-                  {isEditing && (
-                    <div className="flex gap-2">
-                      <Button>
-                        <Save className="h-4 w-4 mr-2" />
-                        Save Changes
-                      </Button>
-                      <Button variant="outline">Cancel</Button>
-                    </div>
-                  )}
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={activityData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
                 </CardContent>
               </Card>
-            </TabsContent>
 
-            <TabsContent value="security" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Security Settings</CardTitle>
+                <CardTitle>Performance Metrics</CardTitle>
+                <CardDescription>Efficiency and accuracy trends</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={performanceData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="efficiency" fill="#8884d8" />
+                    <Bar dataKey="accuracy" fill="#82ca9d" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Inventory Distribution</CardTitle>
+                <CardDescription>Breakdown of inventory by category</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={inventoryData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {inventoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+                </CardContent>
+              </Card>
+          </div>
+            </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+              <Card>
+                <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Preferences
+              </CardTitle>
+                </CardHeader>
+            <CardContent className="space-y-6">
                   <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Password</h4>
-                      <Button variant="outline">Change Password</Button>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Two-Factor Authentication</h4>
-                      <Button variant="outline">Enable 2FA</Button>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Login Sessions</h4>
-                      <Button variant="outline">View Active Sessions</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Theme</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Choose your preferred theme
+                    </p>
+                        </div>
+                  <Select
+                    value={form.preferences.theme}
+                    onValueChange={(value) => handleInputChange('preferences.theme', value)}
+                    disabled={!isEditing}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="dark">Dark</SelectItem>
+                      <SelectItem value="system">System</SelectItem>
+                    </SelectContent>
+                  </Select>
+                        </div>
 
-            <TabsContent value="activity" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <Settings className="h-4 w-4 text-blue-600" />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Notifications</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Receive notifications about updates
+                    </p>
+                      </div>
+                  <Switch
+                    checked={form.preferences.notifications}
+                    onCheckedChange={(checked) => handleInputChange('preferences.notifications', checked)}
+                    disabled={!isEditing}
+                  />
+                    </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Language</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Choose your preferred language
+                    </p>
                         </div>
-                        <div>
-                          <p className="font-medium">Profile Updated</p>
-                          <p className="text-sm text-muted-foreground">2 hours ago</p>
+                  <Select
+                    value={form.preferences.language}
+                    onValueChange={(value) => handleInputChange('preferences.language', value)}
+                    disabled={!isEditing}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Spanish</SelectItem>
+                      <SelectItem value="fr">French</SelectItem>
+                    </SelectContent>
+                  </Select>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-100 rounded-lg">
-                          <Shield className="h-4 w-4 text-green-600" />
-                        </div>
+            </CardContent>
+          </Card>
+
+          {/* Account Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                Account Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">Password Changed</p>
-                          <p className="text-sm text-muted-foreground">1 day ago</p>
+                  <h4 className="font-medium">Sign Out</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Sign out of your account
+                  </p>
                         </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-100 rounded-lg">
-                          <Bell className="h-4 w-4 text-purple-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium">Notification Settings Updated</p>
-                          <p className="text-sm text-muted-foreground">3 days ago</p>
-                        </div>
-                      </div>
-                    </div>
+                <Button variant="outline" onClick={handleSignOut}>
+                  Sign Out
+                </Button>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
-        </div>
-      </main>
     </div>
   );
 };
-
-export default Profile;

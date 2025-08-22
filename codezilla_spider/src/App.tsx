@@ -1,78 +1,66 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import { MarketplaceDashboard } from "@/components/marketplace/MarketplaceDashboard";
-import { SupplierDashboard } from "@/components/marketplace/SupplierDashboard";
-import { InfiniteMemoryProvider } from "@/contexts/InfiniteMemoryContext";
-import { BlockchainProvider } from "@/contexts/BlockchainContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { InventoryProvider } from "@/contexts/InventoryContext";
+import { BlockchainProvider } from "@/contexts/BlockchainContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
-import { InfiniteMemoryDashboard } from "@/components/infinite-memory/InfiniteMemoryDashboard";
-import { InfiniteMemoryDemo } from "@/components/infinite-memory/InfiniteMemoryDemo";
-import { MLPredictionsDashboard } from "@/components/ml-predictions/MLPredictionsDashboard";
-import { EnhancedMLPredictionsDashboard } from "@/components/ml-predictions/EnhancedMLPredictionsDashboard";
-import { MedicineRecommendationDashboard } from "@/components/medicine-recommendation/MedicineRecommendationDashboard";
-import { EnhancedMedicineAIDashboard } from "@/components/medicine-recommendation/EnhancedMedicineAIDashboard";
-import { SkinAnalysisDashboard } from "@/components/flask-integration/SkinAnalysisDashboard";
-import VoiceMedicineAssistant from "@/components/voice-assistant/VoiceMedicineAssistant";
-import InventoryDashboard from "@/components/inventory/InventoryDashboard";
-import RFIDDashboard from "@/components/rfid/RFIDDashboard";
-import { Notifications } from "@/components/ui/notifications";
-import { useBlockchain } from "@/contexts/BlockchainContext";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
-import EchoMedAI from "./pages/EchoMedAI";
+import { InfiniteMemoryProvider } from "@/contexts/InfiniteMemoryContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { Header } from "@/components/layout/Header";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { SignIn } from "./pages/SignIn";
+import { SignUp } from "./pages/SignUp";
+import { ProfileSetup } from "./pages/ProfileSetup";
+import { Dashboard } from "./pages/Dashboard";
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import { AIOpenAIMedicineRecommendation } from "@/components/medicine-recommendation/AIOpenAIMedicineRecommendation";
+import { InfiniteMemoryDashboard } from "@/components/infinite-memory/InfiniteMemoryDashboard";
+import { EnhancedMLPredictionsDashboard } from "@/components/ml-predictions/EnhancedMLPredictionsDashboard";
+import InventoryDashboard from "@/components/inventory/InventoryDashboard";
+import RFIDDashboard from "@/components/rfid/RFIDDashboard";
+import EchoMedAI from "./pages/EchoMedAI";
+import { Profile } from "./pages/Profile";
+import ProfileSimple from "./pages/ProfileSimple";
+import Settings from "./pages/Settings";
+import VoiceMedicineAssistant from "@/components/voice-assistant/VoiceMedicineAssistant";
+import TestComponent from "@/components/TestComponent";
+import AuthDebugger from "@/components/auth/AuthDebugger";
+import { SkinAnalysisDashboard } from "@/components/flask-integration/SkinAnalysisDashboard";
+import { MarketplaceDashboard } from "@/components/marketplace/MarketplaceDashboard";
+import { EnhancedMedicineAIDashboard } from "@/components/medicine-recommendation/EnhancedMedicineAIDashboard";
 
 const queryClient = new QueryClient();
 
-// Simple test component to verify rendering
-const TestComponent = () => (
-  <div style={{ padding: '20px', textAlign: 'center' }}>
-    <h1>MedChain Test</h1>
-    <p>If you can see this, the app is rendering correctly!</p>
-  </div>
-);
+
 
 const AppContent = () => {
-  const { appNotifications, addAppNotification } = useBlockchain();
-
-  const handleRemoveNotification = (id: string) => {
-    // The notification will be automatically removed by the context
-    // This is just for manual removal if needed
-  };
-
   return (
     <>
       <Header />
-      <Notifications 
-        notifications={appNotifications} 
-        onRemove={handleRemoveNotification} 
-      />
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/marketplace" element={<MarketplaceDashboard />} />
-        <Route path="/supplier" element={<SupplierDashboard />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/profile-setup" element={<ProfileSetup />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/ai-medicine-recommendation" element={<AIOpenAIMedicineRecommendation />} />
         <Route path="/infinite-memory" element={<InfiniteMemoryDashboard />} />
-        <Route path="/infinite-memory-demo" element={<InfiniteMemoryDemo />} />
         <Route path="/ml-predictions" element={<EnhancedMLPredictionsDashboard />} />
-        <Route path="/enhanced-ml-predictions" element={<EnhancedMLPredictionsDashboard />} />
-        <Route path="/medicine-recommendation" element={<EnhancedMedicineAIDashboard />} />
-        <Route path="/enhanced-medicine-ai" element={<EnhancedMedicineAIDashboard />} />
-        <Route path="/skin-analysis" element={<SkinAnalysisDashboard />} />
-        <Route path="/voice-medicine" element={<VoiceMedicineAssistant />} />
         <Route path="/inventory" element={<InventoryDashboard />} />
         <Route path="/rfid" element={<RFIDDashboard />} />
         <Route path="/echomed-ai" element={<EchoMedAI />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<ProfileSimple />} />
         <Route path="/settings" element={<Settings />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="/voice-medicine" element={<TestComponent />} />
+        <Route path="/skin-analysis" element={<SkinAnalysisDashboard />} />
+        <Route path="/marketplace" element={<MarketplaceDashboard />} />
+        <Route path="/enhanced-medicine-ai" element={<EnhancedMedicineAIDashboard />} />
+        <Route path="/medicine-recommendation" element={<EnhancedMedicineAIDashboard />} />
+        <Route path="/test" element={<AuthDebugger />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
@@ -83,21 +71,23 @@ const App = () => (
   <ErrorBoundary>
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <BlockchainProvider>
-          <InventoryProvider>
-            <NotificationProvider>
-              <InfiniteMemoryProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <AppContent />
-                  </BrowserRouter>
-                </TooltipProvider>
-              </InfiniteMemoryProvider>
-            </NotificationProvider>
-          </InventoryProvider>
-        </BlockchainProvider>
+        <AuthProvider>
+          <BlockchainProvider>
+            <InventoryProvider>
+              <NotificationProvider>
+                <InfiniteMemoryProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <BrowserRouter>
+                      <AppContent />
+                    </BrowserRouter>
+                  </TooltipProvider>
+                </InfiniteMemoryProvider>
+              </NotificationProvider>
+            </InventoryProvider>
+          </BlockchainProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   </ErrorBoundary>

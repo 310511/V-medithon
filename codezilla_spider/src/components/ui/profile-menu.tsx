@@ -31,6 +31,7 @@ import {
   Target
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ProfileMenuProps {
   isOpen: boolean;
@@ -45,8 +46,25 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { user, signOut } = useAuth();
 
   const getUserInfo = () => {
+    if (user) {
+      return {
+        name: user.name,
+        email: user.email,
+        avatar: user.name.split(' ').map(n => n[0]).join(''),
+        role: user.role.charAt(0).toUpperCase() + user.role.slice(1),
+        color: "bg-gradient-to-br from-blue-500 to-indigo-500",
+        status: "online",
+        lastActive: "2 minutes ago",
+        department: user.department || "General",
+        location: user.address?.city || "Main Office",
+        joinDate: new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      };
+    }
+    
+    // Fallback for when user is not available
     switch (userRole) {
       case "admin":
         return {
@@ -313,6 +331,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
             <Button
               variant="ghost"
               size="sm"
+              onClick={signOut}
               className="w-full justify-start text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200"
             >
               <LogOut className="h-3 w-3 mr-2" />

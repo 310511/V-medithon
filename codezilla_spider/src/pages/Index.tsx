@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { StatsGrid } from "@/components/dashboard/StatsGrid";
 import { InventoryTable } from "@/components/dashboard/InventoryTable";
 import { BlockchainActivity } from "@/components/dashboard/BlockchainActivity";
@@ -9,6 +10,7 @@ import { InventoryAnalytics } from "@/components/dashboard/InventoryAnalytics";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 import { 
   ArrowRight, 
@@ -28,40 +30,108 @@ import {
   Award,
   Clock,
   DollarSign,
-  Heart
+  Heart,
+  ShoppingCart,
+  Eye
 } from "lucide-react";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     setIsVisible(true);
+    
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleGetStarted = () => {
+    toast.success("Welcome to MedChain! Redirecting to dashboard...");
+    setTimeout(() => {
+      navigate('/dashboard');
+    }, 1000);
+  };
+
+  const handleListInventory = () => {
+    console.log("List button clicked!");
+    toast.success("List button clicked! Opening inventory list...");
+    setTimeout(() => {
+      navigate('/inventory');
+    }, 500);
+  };
+
+  const handleViewAnalytics = () => {
+    console.log("View button clicked!");
+    toast.success("View button clicked! Loading analytics dashboard...");
+    setTimeout(() => {
+      navigate('/ml-predictions');
+    }, 500);
+  };
+
+  const handleStartTrial = () => {
+    toast.success("Starting your free trial! Redirecting to sign up...");
+    setTimeout(() => {
+      navigate('/signup');
+    }, 1000);
+  };
+
+  const handleRFIDScanner = () => {
+    toast.info("Opening RFID Scanner...");
+    setTimeout(() => {
+      navigate('/rfid');
+    }, 500);
+  };
+
+  const handleAIAssistant = () => {
+    toast.info("Launching AI Assistant...");
+    setTimeout(() => {
+      navigate('/echomed-ai');
+    }, 500);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 overflow-hidden">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Animated Background */}
+        {/* Enhanced Animated Background */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
           <div className="absolute top-0 right-0 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
           <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+          
+          {/* Floating Particles */}
+          <div className="particle absolute top-1/4 left-1/4"></div>
+          <div className="particle absolute top-1/3 right-1/3"></div>
+          <div className="particle absolute bottom-1/4 left-1/3"></div>
+          <div className="particle absolute bottom-1/3 right-1/4"></div>
+          <div className="particle absolute top-1/2 left-1/2"></div>
+          
+          {/* Animated Grid */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-0 w-full h-full" style={{
+              backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.3) 1px, transparent 0)',
+              backgroundSize: '50px 50px',
+              transform: `translateY(${scrollY * 0.5}px)`
+            }}></div>
+          </div>
         </div>
         
         <div className="container mx-auto px-6 py-12 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className={`space-y-8 transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
               <div className="space-y-4">
-                <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 px-4 py-2 text-sm font-medium animate-pulse">
-                  <Sparkles className="w-4 h-4 mr-2" />
+                <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 px-4 py-2 text-sm font-medium animate-pulse hover-scale">
+                  <Sparkles className="w-4 h-4 mr-2 animate-bounce-gentle" />
                   Next-Generation Healthcare
                 </Badge>
                 <h1 className="text-5xl lg:text-7xl font-bold">
-                  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  <span className="gradient-text-animate">
                     Blockchain-Powered
                   </span>
-                  <span className="block text-4xl lg:text-6xl font-bold text-gray-800 dark:text-gray-200 mt-2">
+                  <span className="block text-4xl lg:text-6xl font-bold text-gray-800 dark:text-gray-200 mt-2 animate-slide-in-up">
                     Medical Inventory
                   </span>
                 </h1>
@@ -74,28 +144,30 @@ const Index = () => {
               <div className="flex flex-wrap gap-4">
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 group"
+                  onClick={handleGetStarted}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 group hover-lift hover-glow"
                 >
-                  Get Started
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <span className="animate-wave">Get Started</span>
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform animate-bounce-gentle" />
                 </Button>
-
               </div>
 
               <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-3 px-4 py-2 bg-green-100 text-green-700 rounded-full border border-green-200">
+                <div className="flex items-center gap-3 px-4 py-2 bg-green-100 text-green-700 rounded-full border border-green-200 hover-lift interactive-card glass">
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="text-sm font-medium">Blockchain Connected</span>
                 </div>
-                <div className="flex items-center gap-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-full border border-blue-200">
-                  <Package className="w-4 h-4" />
+                <div className="flex items-center gap-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-full border border-blue-200 hover-lift interactive-card glass">
+                  <Package className="w-4 h-4 animate-bounce-gentle" />
                   <span className="text-sm font-medium">1,247 Items Tracked</span>
                 </div>
-                <div className="flex items-center gap-3 px-4 py-2 bg-purple-100 text-purple-700 rounded-full border border-purple-200">
-                  <Shield className="w-4 h-4" />
+                <div className="flex items-center gap-3 px-4 py-2 bg-purple-100 text-purple-700 rounded-full border border-purple-200 hover-lift interactive-card glass">
+                  <Shield className="w-4 h-4 animate-bounce-gentle" />
                   <span className="text-sm font-medium">100% Secure</span>
                 </div>
               </div>
+
+
             </div>
             
             <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95'}`}>
@@ -186,18 +258,87 @@ const Index = () => {
       </section>
 
              {/* Features Section */}
-       <section className="py-20 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
-        <div className="container mx-auto px-6">
+       <section className="py-20 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-blue-200 rounded-full opacity-20 animate-float"></div>
+          <div className="absolute top-20 right-20 w-24 h-24 bg-purple-200 rounded-full opacity-20 animate-float animation-delay-2000"></div>
+          <div className="absolute bottom-20 left-20 w-28 h-28 bg-pink-200 rounded-full opacity-20 animate-float animation-delay-4000"></div>
+        </div>
+        
+        <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
+            <h2 className="text-4xl lg:text-5xl font-bold gradient-text-animate mb-6 animate-fade-in-scale">
               Why Choose MedChain?
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto animate-slide-in-up">
               Experience the future of healthcare inventory management with cutting-edge blockchain technology
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Animated Stats Section */}
+            <div className="col-span-full mb-12">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center p-6 glass hover-lift interactive-card">
+                  <div className="text-3xl font-bold text-blue-600 mb-2 animate-bounce-gentle">1,247</div>
+                  <div className="text-sm text-gray-600">Items Tracked</div>
+                </div>
+                <div className="text-center p-6 glass hover-lift interactive-card">
+                  <div className="text-3xl font-bold text-purple-600 mb-2 animate-bounce-gentle">99.9%</div>
+                  <div className="text-sm text-gray-600">Uptime</div>
+                </div>
+                <div className="text-center p-6 glass hover-lift interactive-card">
+                  <div className="text-3xl font-bold text-green-600 mb-2 animate-bounce-gentle">24/7</div>
+                  <div className="text-sm text-gray-600">Monitoring</div>
+                </div>
+                <div className="text-center p-6 glass hover-lift interactive-card">
+                  <div className="text-3xl font-bold text-pink-600 mb-2 animate-bounce-gentle">100%</div>
+                  <div className="text-sm text-gray-600">Secure</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions Section */}
+            <div className="col-span-full mb-12">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6">Quick Actions</h3>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Button 
+                    variant="outline"
+                    onClick={handleListInventory}
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300 hover-lift hover-glow group"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2 group-hover:animate-bounce-gentle" />
+                    View Inventory
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={handleViewAnalytics}
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-300 hover-lift hover-glow group"
+                  >
+                    <Eye className="w-4 h-4 mr-2 group-hover:animate-bounce-gentle" />
+                    View Analytics
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={handleRFIDScanner}
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 hover-lift hover-glow group"
+                  >
+                    <Activity className="w-4 h-4 mr-2 group-hover:animate-bounce-gentle" />
+                    RFID Scanner
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={handleAIAssistant}
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-pink-200 dark:border-pink-800 text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all duration-300 hover-lift hover-glow group"
+                  >
+                    <Heart className="w-4 h-4 mr-2 group-hover:animate-bounce-gentle" />
+                    AI Assistant
+                  </Button>
+                </div>
+              </div>
+            </div>
             {[
               {
                 icon: Shield,
@@ -319,39 +460,59 @@ const Index = () => {
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+          
+          {/* Floating Elements */}
+          <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-white/20 rounded-full animate-float"></div>
+          <div className="absolute top-1/3 right-1/3 w-6 h-6 bg-white/30 rounded-full animate-float animation-delay-2000"></div>
+          <div className="absolute bottom-1/4 left-1/3 w-5 h-5 bg-white/25 rounded-full animate-float animation-delay-4000"></div>
+          
+          {/* Animated Grid */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-0 left-0 w-full h-full" style={{
+              backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.3) 1px, transparent 0)',
+              backgroundSize: '30px 30px',
+              transform: `translateY(${scrollY * 0.3}px)`
+            }}></div>
+          </div>
         </div>
         
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center text-white">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+            <h2 className="text-4xl lg:text-5xl font-bold mb-6 animate-fade-in-scale gradient-text-animate">
               Ready to Transform Your Healthcare Inventory?
             </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto animate-slide-in-up">
               Join leading healthcare facilities worldwide in adopting blockchain-powered inventory management. 
               Experience the future of secure, transparent, and automated healthcare supply chain management.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
-                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105"
+                onClick={handleStartTrial}
+                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 hover-lift hover-glow group"
               >
-                <Rocket className="w-5 h-5 mr-2" />
-                Start Free Trial
+                <Rocket className="w-5 h-5 mr-2 group-hover:animate-bounce-gentle" />
+                <span className="animate-wave">Start Free Trial</span>
               </Button>
-
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
-        <div className="container mx-auto px-6">
+      <section className="py-20 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 right-10 w-32 h-32 bg-blue-200 rounded-full opacity-20 animate-float"></div>
+          <div className="absolute bottom-10 left-10 w-24 h-24 bg-purple-200 rounded-full opacity-20 animate-float animation-delay-2000"></div>
+        </div>
+        
+        <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
+            <h2 className="text-4xl lg:text-5xl font-bold gradient-text-animate mb-6 animate-fade-in-scale">
               Trusted by Healthcare Leaders
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto animate-slide-in-up">
               See what healthcare professionals are saying about MedChain
             </p>
           </div>
@@ -382,7 +543,7 @@ const Index = () => {
             ].map((testimonial, index) => (
               <Card 
                 key={index}
-                className={`group hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm ${
+                className={`group hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover-lift interactive-card glass ${
                   isVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-10'
                 }`}
                 style={{ animationDelay: `${index * 300}ms` }}
