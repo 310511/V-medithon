@@ -35,3 +35,4 @@ echo "✅ All servers stopped successfully"
 echo
 echo "Log files are still available in /tmp/ if you need to check them"
 
+
