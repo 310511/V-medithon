@@ -49,7 +49,6 @@ export const Header = () => {
     { to: "/infinite-memory", icon: Brain, label: "Infinite Memory", variant: "outline" as const },
     { to: "/ml-predictions", icon: TrendingUp, label: "ML Predictions", variant: "outline" as const },
     { to: "/medicine-recommendation", icon: Pill, label: "Enhanced Medicine AI", variant: "outline" as const },
-    { to: "/ai-medicine-recommendation", icon: Sparkles, label: "AI Medicine Recommendations", variant: "outline" as const },
     { to: "/echomed-ai", icon: Heart, label: "EchoMed AI", variant: "outline" as const },
     { to: "/inventory", icon: Package, label: "Inventory", variant: "outline" as const },
     { to: "/rfid", icon: Radio, label: "RFID", variant: "outline" as const },
