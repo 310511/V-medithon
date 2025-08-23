@@ -1,4 +1,4 @@
-import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital, Stethoscope, Activity, Zap, Settings } from "lucide-react";
+import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital, Stethoscope, Activity, Zap, Settings, Dna } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -57,6 +57,14 @@ export const Header = () => {
       ]
     },
     {
+      title: "Medical Records",
+      items: [
+        { to: "/medical-records", icon: User, label: "Medical Records" },
+        { to: "/patient-profile", icon: User, label: "Patient Profile" },
+        { to: "/prescriptions", icon: Pill, label: "Prescriptions" },
+      ]
+    },
+    {
       title: "Predictive Analytics",
       items: [
         { to: "/readmission-risk", icon: Hospital, label: "Readmission Risk" },
@@ -70,6 +78,7 @@ export const Header = () => {
         { to: "/infinite-memory", icon: Zap, label: "Infinite Memory" },
         { to: "/medicine-recommendation", icon: Pill, label: "Medicine AI" },
         { to: "/echomed-ai", icon: Heart, label: "EchoMed AI" },
+        { to: "/genechain-assist", icon: Dna, label: "GeneChain Assist" },
         { to: "/marketplace", icon: Package, label: "Marketplace", highlight: true },
       ]
     },
