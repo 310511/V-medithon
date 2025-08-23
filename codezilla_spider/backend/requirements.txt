@@ -16,4 +16,7 @@ redis==5.0.1
 
 # Additional utilities
 sqlalchemy==2.0.23
-alembic==1.13.1 
+alembic==1.13.1
+
+# Payment processing
+razorpay==1.4.1 

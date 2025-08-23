@@ -33,6 +33,7 @@ import { useBlockchain } from "@/contexts/BlockchainContext";
 import { ProductListing, Order } from "@/contexts/BlockchainContext";
 import { MetaMaskGuide } from "@/components/ui/metamask-guide";
 import { WalletDebug } from "@/components/ui/wallet-debug";
+import { PaymentDialog } from "./PaymentDialog";
 
 interface MarketplaceStats {
   totalProducts: number;
@@ -69,7 +70,7 @@ export const MarketplaceDashboard: React.FC = () => {
     totalRevenue: 0,
     averageRating: 0
   });
-  const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductListing | null>(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   const [isPurchaseLoading, setIsPurchaseLoading] = useState(false);
@@ -125,24 +126,25 @@ export const MarketplaceDashboard: React.FC = () => {
   const handlePurchase = async (product: ProductListing) => {
     setSelectedProduct(product);
     setPurchaseQuantity(1);
-    setIsPurchaseDialogOpen(true);
+    setIsPaymentDialogOpen(true);
   };
 
-  const handleConfirmPurchase = async () => {
-    if (!selectedProduct || !address) return;
+  const handleBlockchainPayment = async (): Promise<boolean> => {
+    if (!selectedProduct || !address) return false;
 
     setIsPurchaseLoading(true);
     try {
       const success = await purchaseProduct(selectedProduct.id, purchaseQuantity);
       if (success) {
-        setIsPurchaseDialogOpen(false);
-        setSelectedProduct(null);
         loadMarketplaceData(); // Refresh data
-        addAppNotification("Purchase completed successfully!", "success");
+        addAppNotification("Blockchain purchase completed successfully!", "success");
+        return true;
       }
+      return false;
     } catch (error) {
       console.error("Purchase error:", error);
-      addAppNotification("Failed to complete purchase", "error");
+      addAppNotification("Failed to complete blockchain purchase", "error");
+      return false;
     } finally {
       setIsPurchaseLoading(false);
     }
@@ -494,68 +496,20 @@ export const MarketplaceDashboard: React.FC = () => {
         </Tabs>
       </div>
 
-      {/* Purchase Dialog */}
-      <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Purchase Product</DialogTitle>
-          </DialogHeader>
-          
-          {selectedProduct && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg flex items-center justify-center">
-                  <Package className="h-8 w-8 text-blue-500" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">{selectedProduct.name}</h3>
-                  <p className="text-sm text-muted-foreground">{selectedProduct.supplier}</p>
-                  <p className="text-lg font-bold">${selectedProduct.price}</p>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  min="1"
-                  max={selectedProduct.inventoryLevel}
-                  value={purchaseQuantity}
-                  onChange={(e) => setPurchaseQuantity(parseInt(e.target.value) || 1)}
-                />
-                <p className="text-sm text-muted-foreground">
-                  Available: {selectedProduct.inventoryLevel} units
-                </p>
-              </div>
-              
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <span className="font-semibold">Total:</span>
-                <span className="font-bold text-lg">
-                  ${(selectedProduct.price * purchaseQuantity).toFixed(2)}
-                </span>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsPurchaseDialogOpen(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleConfirmPurchase}
-                  disabled={isPurchaseLoading || !address}
-                  className="flex-1"
-                >
-                  {isPurchaseLoading ? "Processing..." : "Confirm Purchase"}
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Payment Dialog */}
+      <PaymentDialog
+        isOpen={isPaymentDialogOpen}
+        onClose={() => {
+          setIsPaymentDialogOpen(false);
+          setSelectedProduct(null);
+        }}
+        product={selectedProduct}
+        quantity={purchaseQuantity}
+        onBlockchainPayment={handleBlockchainPayment}
+        userEmail="user@example.com" // This should come from user context
+        userPhone="+91-9876543210" // This should come from user context
+        userName="User Name" // This should come from user context
+      />
 
       {/* Blockchain Status Alert */}
       {!address && (

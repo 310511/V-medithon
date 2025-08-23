@@ -30,6 +30,7 @@ import VoiceMedicineAssistant from "@/components/voice-assistant/VoiceMedicineAs
 import AuthDebugger from "@/components/auth/AuthDebugger";
 import { SkinAnalysisDashboard } from "@/components/flask-integration/SkinAnalysisDashboard";
 import { MarketplaceDashboard } from "@/components/marketplace/MarketplaceDashboard";
+import { SupplierDashboard } from "@/components/marketplace/SupplierDashboard";
 import { EnhancedMedicineAIDashboard } from "@/components/medicine-recommendation/EnhancedMedicineAIDashboard";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ const AppContent = () => {
         <Route path="/voice-medicine" element={<VoiceMedicineAssistant />} />
         <Route path="/skin-analysis" element={<SkinAnalysisDashboard />} />
         <Route path="/marketplace" element={<MarketplaceDashboard />} />
+        <Route path="/supplier" element={<SupplierDashboard />} />
         <Route path="/enhanced-medicine-ai" element={<EnhancedMedicineAIDashboard />} />
         <Route path="/medicine-recommendation" element={<EnhancedMedicineAIDashboard />} />
         <Route path="/test" element={<AuthDebugger />} />
