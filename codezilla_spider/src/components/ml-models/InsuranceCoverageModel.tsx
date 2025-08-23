@@ -248,17 +248,17 @@ export const InsuranceCoverageModel: React.FC = () => {
 
   const getCoverageColor = (prediction: string) => {
     switch (prediction) {
-      case "Likely Insured": return "bg-green-100 text-green-800";
-      case "May Need Assistance": return "bg-yellow-100 text-yellow-800";
-      case "Likely Uninsured": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "Likely Insured": return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200";
+      case "May Need Assistance": return "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200";
+      case "Likely Uninsured": return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200";
+      default: return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200";
     }
   };
 
   const getImpactColor = (impact: string) => {
-    if (impact.includes("Better") || impact.includes("increasing")) return "text-green-600";
-    if (impact.includes("gap") || impact.includes("decreasing")) return "text-red-600";
-    return "text-blue-600";
+    if (impact.includes("Better") || impact.includes("increasing")) return "text-green-600 dark:text-green-400";
+    if (impact.includes("gap") || impact.includes("decreasing")) return "text-red-600 dark:text-red-400";
+    return "text-blue-600 dark:text-blue-400";
   };
 
   return (
@@ -456,8 +456,8 @@ export const InsuranceCoverageModel: React.FC = () => {
               {insuranceResult ? (
                 <div className="space-y-4">
                   {/* Coverage Prediction */}
-                  <div className="text-center p-4 border rounded-lg">
-                    <h3 className="text-lg font-semibold mb-2">Coverage Prediction</h3>
+                  <div className="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900">
+                    <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Coverage Prediction</h3>
                     <div className="text-2xl font-bold text-primary mb-2">
                       {insuranceResult.coveragePrediction}
                     </div>
@@ -478,7 +478,7 @@ export const InsuranceCoverageModel: React.FC = () => {
                       </h4>
                       <div className="space-y-1">
                         {insuranceResult.factors.map((factor, index) => (
-                          <div key={index} className="p-2 bg-blue-50 rounded text-sm">
+                          <div key={index} className="p-2 bg-blue-50 dark:bg-blue-950 rounded text-sm text-blue-900 dark:text-blue-100">
                             • {factor}
                           </div>
                         ))}
@@ -494,7 +494,7 @@ export const InsuranceCoverageModel: React.FC = () => {
                     </h4>
                     <div className="space-y-2">
                       {insuranceResult.recommendations.map((rec, index) => (
-                        <div key={index} className="p-2 bg-green-50 rounded text-sm">
+                        <div key={index} className="p-2 bg-green-50 dark:bg-green-950 rounded text-sm text-green-900 dark:text-green-100">
                           • {rec}
                         </div>
                       ))}
@@ -526,12 +526,12 @@ export const InsuranceCoverageModel: React.FC = () => {
 
                   {/* High Priority Alert */}
                   {insuranceResult.coveragePrediction === "Likely Uninsured" && (
-                    <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-                      <h4 className="font-semibold mb-2 flex items-center gap-2 text-red-800">
+                    <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-950">
+                      <h4 className="font-semibold mb-2 flex items-center gap-2 text-red-800 dark:text-red-200">
                         <AlertTriangle className="h-4 w-4" />
                         High Priority
                       </h4>
-                      <p className="text-sm text-red-700">
+                      <p className="text-sm text-red-700 dark:text-red-300">
                         Immediate action recommended to secure health insurance coverage.
                       </p>
                     </div>
