@@ -15,11 +15,34 @@ import {
   UserCheck,
   ClipboardList,
   TrendingUp,
-  Zap
+  Zap,
+  Plus,
+  Eye,
+  List
 } from 'lucide-react';
+import ProposalForm from './ProposalForm';
+import ProposalDetails from './ProposalDetails';
+import ProposalsList from './ProposalsList';
+
+interface Proposal {
+  id: number;
+  geneTarget: string;
+  modificationType: string;
+  patientId: string;
+  description: string;
+  riskLevel: string;
+  status: string;
+  timestamp: string;
+  blockchainHash: string;
+  validationScore: number;
+}
 
 const GeneChainAssist: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
+  const [showProposalForm, setShowProposalForm] = useState(false);
+  const [showProposalsList, setShowProposalsList] = useState(false);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [currentProposal, setCurrentProposal] = useState<Proposal | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -40,6 +63,31 @@ const GeneChainAssist: React.FC = () => {
         staggerChildren: 0.1
       }
     }
+  };
+
+  const handleProposalSubmit = (formData: {
+    geneTarget: string;
+    modificationType: string;
+    patientId: string;
+    description: string;
+    riskLevel: string;
+  }) => {
+    const newProposal: Proposal = {
+      id: Date.now(),
+      ...formData,
+      status: 'pending',
+      timestamp: new Date().toISOString(),
+      blockchainHash: `0x${Math.random().toString(36).substr(2, 9)}`,
+      validationScore: Math.floor(Math.random() * 100) + 1
+    };
+    setProposals([newProposal, ...proposals]);
+    setShowProposalForm(false);
+    setCurrentProposal(newProposal);
+  };
+
+  const handleViewProposal = (proposal: Proposal) => {
+    setCurrentProposal(proposal);
+    setShowProposalsList(false);
   };
 
   const coreCapabilities = [
@@ -154,6 +202,36 @@ const GeneChainAssist: React.FC = () => {
               </motion.p>
             </motion.div>
 
+            {/* Interactive Action Buttons */}
+            <motion.div 
+              className="flex justify-center gap-4 mb-16 flex-wrap"
+              variants={fadeInUp}
+            >
+              <button
+                onClick={() => setShowProposalForm(true)}
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Propose Genetic Edit
+              </button>
+              <button
+                onClick={() => setShowProposalsList(true)}
+                className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                <List className="w-5 h-5 mr-2" />
+                View Proposals ({proposals.length})
+              </button>
+              {currentProposal && (
+                <button
+                  onClick={() => setCurrentProposal(currentProposal)}
+                  className="inline-flex items-center px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  <Eye className="w-5 h-5 mr-2" />
+                  Latest Proposal
+                </button>
+              )}
+            </motion.div>
+
             {/* Side Illustration */}
             <motion.div 
               className="flex justify-center mb-16"
@@ -177,6 +255,36 @@ const GeneChainAssist: React.FC = () => {
             </motion.div>
           </div>
         </motion.section>
+
+        {/* Working Features Section */}
+        {showProposalForm && (
+          <ProposalForm 
+            onSubmit={handleProposalSubmit}
+            onClose={() => setShowProposalForm(false)}
+          />
+        )}
+
+        {showProposalsList && (
+          <motion.section 
+            className="py-16 px-4 sm:px-6 lg:px-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="max-w-7xl mx-auto">
+              <ProposalsList 
+                proposals={proposals}
+                onViewProposal={handleViewProposal}
+              />
+            </div>
+          </motion.section>
+        )}
+
+        {currentProposal && (
+          <ProposalDetails 
+            proposal={currentProposal}
+            onClose={() => setCurrentProposal(null)}
+          />
+        )}
 
         {/* Why This Matters Section */}
         <motion.section 
@@ -456,11 +564,12 @@ const GeneChainAssist: React.FC = () => {
                 Join us in revolutionizing genetic therapy with blockchain-powered safety and transparency
               </p>
               <motion.button
+                onClick={() => setShowProposalForm(true)}
                 className="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Explore More Features
+                Start Your First Proposal
                 <ArrowRight className="w-5 h-5 ml-2" />
               </motion.button>
             </motion.div>
