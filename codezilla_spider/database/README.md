@@ -394,3 +394,4 @@ For database-related issues:
 2. Review the logs
 3. Verify environment variables
 4. Test database connections manually
+

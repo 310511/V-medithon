@@ -102,25 +102,25 @@ def show_status():
     print("\n🔗 Connection Information:")
     print("PostgreSQL: localhost:5432")
     print("  - Database: medchain")
-    print("  - Username: medchain_user")
-    print("  - Password: medchain_password")
+    print("  - Username: indian22162")
+    print("  - Password: password")
     
     print("\nMongoDB: localhost:27017")
     print("  - Database: medchain")
-    print("  - Username: medchain_admin")
-    print("  - Password: medchain_password")
+    print("  - Username: indian22162")
+    print("  - Password: password")
     
     print("\nRedis: localhost:6379")
-    print("  - Password: medchain_redis_password")
+    print("  - Password: password")
     
     print("\n📱 Management Interfaces:")
     print("pgAdmin: http://localhost:5050")
-    print("  - Email: admin@medchain.com")
-    print("  - Password: admin_password")
+    print("  - Email: indian22162@medchain.com")
+    print("  - Password: password")
     
     print("Mongo Express: http://localhost:8081")
-    print("  - Username: admin")
-    print("  - Password: admin_password")
+    print("  - Username: indian22162")
+    print("  - Password: password")
 
 def create_env_file():
     """Create environment file with database configuration"""
@@ -128,14 +128,14 @@ def create_env_file():
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=medchain
-POSTGRES_USER=medchain_user
-POSTGRES_PASSWORD=medchain_password
+POSTGRES_USER=indian22162
+POSTGRES_PASSWORD=password
 
-MONGO_URI=mongodb://medchain_admin:medchain_password@localhost:27017/
+MONGO_URI=mongodb://indian22162:password@localhost:27017/
 
 REDIS_HOST=localhost
 REDIS_PORT=6379
-REDIS_PASSWORD=medchain_redis_password
+REDIS_PASSWORD=password
 
 # Existing configuration
 OPENAI_API_KEY=your_openai_api_key_here
@@ -217,3 +217,4 @@ Commands:
 
 if __name__ == "__main__":
     main()
+
