@@ -238,10 +238,10 @@ export const ReadmissionRiskModel: React.FC = () => {
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case "High": return "bg-red-100 text-red-800";
-      case "Medium": return "bg-yellow-100 text-yellow-800";
-      case "Low": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "High": return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200";
+      case "Medium": return "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200";
+      case "Low": return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200";
+      default: return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200";
     }
   };
 
@@ -509,8 +509,8 @@ export const ReadmissionRiskModel: React.FC = () => {
               {readmissionResult ? (
                 <div className="space-y-4">
                   {/* Risk Level */}
-                  <div className="text-center p-4 border rounded-lg">
-                    <h3 className="text-lg font-semibold mb-2">Readmission Risk Level</h3>
+                  <div className="text-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900">
+                    <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Readmission Risk Level</h3>
                     <div className="text-2xl font-bold text-primary mb-2">
                       {readmissionResult.riskLevel} Risk
                     </div>
@@ -523,12 +523,12 @@ export const ReadmissionRiskModel: React.FC = () => {
                   </div>
 
                   {/* Predicted Timeline */}
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
                       <Calendar className="h-4 w-4" />
                       Predicted Readmission Timeline
                     </h4>
-                    <p className="text-sm">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
                       Likely readmission within <span className="font-semibold text-primary">
                         {readmissionResult.predictedReadmissionDays} days
                       </span> if no intervention
@@ -544,7 +544,7 @@ export const ReadmissionRiskModel: React.FC = () => {
                       </h4>
                       <div className="space-y-1">
                         {readmissionResult.riskFactors.map((factor, index) => (
-                          <div key={index} className="p-2 bg-red-50 rounded text-sm">
+                          <div key={index} className="p-2 bg-red-50 dark:bg-red-950 rounded text-sm text-red-900 dark:text-red-100">
                             • {factor}
                           </div>
                         ))}
@@ -560,7 +560,7 @@ export const ReadmissionRiskModel: React.FC = () => {
                     </h4>
                     <div className="space-y-2">
                       {readmissionResult.recommendations.map((rec, index) => (
-                        <div key={index} className="p-2 bg-blue-50 rounded text-sm">
+                        <div key={index} className="p-2 bg-blue-50 dark:bg-blue-950 rounded text-sm text-blue-900 dark:text-blue-100">
                           • {rec}
                         </div>
                       ))}
@@ -569,12 +569,12 @@ export const ReadmissionRiskModel: React.FC = () => {
 
                   {/* High Risk Alert */}
                   {readmissionResult.riskLevel === "High" && (
-                    <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-                      <h4 className="font-semibold mb-2 flex items-center gap-2 text-red-800">
+                    <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-950">
+                      <h4 className="font-semibold mb-2 flex items-center gap-2 text-red-800 dark:text-red-200">
                         <AlertTriangle className="h-4 w-4" />
                         High Risk Alert
                       </h4>
-                      <p className="text-sm text-red-700">
+                      <p className="text-sm text-red-700 dark:text-red-300">
                         Immediate intervention required. Implement comprehensive discharge planning and follow-up care.
                       </p>
                     </div>
