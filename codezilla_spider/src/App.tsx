@@ -32,6 +32,10 @@ import { SkinAnalysisDashboard } from "@/components/flask-integration/SkinAnalys
 import { MarketplaceDashboard } from "@/components/marketplace/MarketplaceDashboard";
 import { SupplierDashboard } from "@/components/marketplace/SupplierDashboard";
 import { EnhancedMedicineAIDashboard } from "@/components/medicine-recommendation/EnhancedMedicineAIDashboard";
+import { DiseaseDiagnosisModel } from "@/components/ml-models/DiseaseDiagnosisModel";
+import { MentalHealthModel } from "@/components/ml-models/MentalHealthModel";
+import { ReadmissionRiskModel } from "@/components/ml-models/ReadmissionRiskModel";
+import { InsuranceCoverageModel } from "@/components/ml-models/InsuranceCoverageModel";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +64,10 @@ const AppContent = () => {
         <Route path="/marketplace" element={<MarketplaceDashboard />} />
         <Route path="/supplier" element={<SupplierDashboard />} />
         <Route path="/enhanced-medicine-ai" element={<EnhancedMedicineAIDashboard />} />
+        <Route path="/disease-diagnosis" element={<DiseaseDiagnosisModel />} />
+        <Route path="/mental-health" element={<MentalHealthModel />} />
+        <Route path="/readmission-risk" element={<ReadmissionRiskModel />} />
+        <Route path="/insurance-coverage" element={<InsuranceCoverageModel />} />
         <Route path="/medicine-recommendation" element={<EnhancedMedicineAIDashboard />} />
         <Route path="/test" element={<AuthDebugger />} />
         <Route path="*" element={<NotFound />} />
