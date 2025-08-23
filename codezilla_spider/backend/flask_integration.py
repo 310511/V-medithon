@@ -28,14 +28,30 @@ from PIL import Image
 import cv2
 
 # Import Flask components
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../Flask')))
+
+# Import basic_model first (this should always work)
 try:
     from basic_model import predict_lesion
-    from enhanced_skin_analysis import EnhancedSkinAnalyzer
-    from medical_chatbot import MedicalChatbot
+    print("✅ Basic model imported successfully")
 except ImportError as e:
-    print(f"Warning: Could not import Flask components: {e}")
+    print(f"❌ Error importing basic_model: {e}")
     predict_lesion = None
+
+# Import enhanced components (these might fail)
+try:
+    from enhanced_skin_analysis import EnhancedSkinAnalyzer
+    print("✅ Enhanced skin analyzer imported successfully")
+except ImportError as e:
+    print(f"⚠️ Warning: Could not import EnhancedSkinAnalyzer: {e}")
     EnhancedSkinAnalyzer = None
+
+try:
+    from medical_chatbot import MedicalChatbot
+    print("✅ Medical chatbot imported successfully")
+except ImportError as e:
+    print(f"⚠️ Warning: Could not import MedicalChatbot: {e}")
     MedicalChatbot = None
 
 # Import existing backend services
