@@ -1,4 +1,4 @@
-import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus } from "lucide-react";
+import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -49,6 +49,10 @@ export const Header = () => {
     { to: "/infinite-memory", icon: Brain, label: "Infinite Memory", variant: "outline" as const },
     { to: "/ml-predictions", icon: TrendingUp, label: "ML Predictions", variant: "outline" as const },
     { to: "/medicine-recommendation", icon: Pill, label: "Enhanced Medicine AI", variant: "outline" as const },
+    { to: "/disease-diagnosis", icon: Brain, label: "Disease Diagnosis", variant: "outline" as const },
+    { to: "/mental-health", icon: Brain, label: "Mental Health AI", variant: "outline" as const },
+    { to: "/readmission-risk", icon: Hospital, label: "Readmission Risk", variant: "outline" as const },
+    { to: "/insurance-coverage", icon: Shield, label: "Insurance Coverage", variant: "outline" as const },
     { to: "/echomed-ai", icon: Heart, label: "EchoMed AI", variant: "outline" as const },
     { to: "/inventory", icon: Package, label: "Inventory", variant: "outline" as const },
     { to: "/rfid", icon: Radio, label: "RFID", variant: "outline" as const },
