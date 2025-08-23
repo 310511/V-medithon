@@ -423,3 +423,4 @@ class CacheService(BaseService):
         except Exception as e:
             logger.error(f"Error clearing cache pattern {pattern}: {e}")
             return 0
+

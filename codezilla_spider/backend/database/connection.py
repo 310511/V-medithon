@@ -37,14 +37,14 @@ class DatabaseConnection:
                 host=os.getenv('POSTGRES_HOST', 'localhost'),
                 port=os.getenv('POSTGRES_PORT', '5432'),
                 database=os.getenv('POSTGRES_DB', 'medchain'),
-                user=os.getenv('POSTGRES_USER', 'medchain_user'),
-                password=os.getenv('POSTGRES_PASSWORD', 'medchain_password')
+                user=os.getenv('POSTGRES_USER', 'indian22162'),
+                password=os.getenv('POSTGRES_PASSWORD', 'password')
             )
             self.postgres_conn.autocommit = True
             logger.info("PostgreSQL connection established")
             
             # MongoDB connection
-            mongo_uri = os.getenv('MONGO_URI', 'mongodb://medchain_admin:medchain_password@localhost:27017/')
+            mongo_uri = os.getenv('MONGO_URI', 'mongodb://indian22162:password@localhost:27017/')
             self.mongo_client = MongoClient(mongo_uri)
             self.mongo_db = self.mongo_client.medchain
             logger.info("MongoDB connection established")
@@ -53,7 +53,7 @@ class DatabaseConnection:
             self.redis_client = Redis(
                 host=os.getenv('REDIS_HOST', 'localhost'),
                 port=int(os.getenv('REDIS_PORT', '6379')),
-                password=os.getenv('REDIS_PASSWORD', 'medchain_redis_password'),
+                password=os.getenv('REDIS_PASSWORD', 'password'),
                 decode_responses=True
             )
             # Test Redis connection
@@ -164,3 +164,4 @@ def check_all_databases_health() -> dict:
         'mongodb': check_mongo_health(),
         'redis': check_redis_health()
     }
+

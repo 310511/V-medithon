@@ -175,7 +175,7 @@ CREATE TRIGGER update_users_updated_at
 
 -- Insert sample data
 INSERT INTO users (firebase_uid, email, display_name, role) VALUES
-('sample_firebase_uid_1', 'admin@medchain.com', 'System Admin', 'admin'),
+('sample_firebase_uid_1', 'indian22162@medchain.com', 'System Admin', 'admin'),
 ('sample_firebase_uid_2', 'pharmacist@medchain.com', 'John Pharmacist', 'pharmacist')
 ON CONFLICT (firebase_uid) DO NOTHING;
 
@@ -187,3 +187,4 @@ INSERT INTO inventory_items (name, category, stock_quantity, threshold_quantity,
 ('Blood Pressure Monitors', 'Equipment', 8, 5, NULL, 'TechMed Solutions', 129.99, 'good', true),
 ('Paracetamol 500mg', 'Pain Management', 25, 30, '2025-03-15', 'PharmaCorp', 12.99, 'low', true)
 ON CONFLICT DO NOTHING;
+
