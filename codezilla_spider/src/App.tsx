@@ -27,7 +27,6 @@ import { Profile } from "./pages/Profile";
 import ProfileSimple from "./pages/ProfileSimple";
 import Settings from "./pages/Settings";
 import VoiceMedicineAssistant from "@/components/voice-assistant/VoiceMedicineAssistant";
-import TestComponent from "@/components/TestComponent";
 import AuthDebugger from "@/components/auth/AuthDebugger";
 import { SkinAnalysisDashboard } from "@/components/flask-integration/SkinAnalysisDashboard";
 import { MarketplaceDashboard } from "@/components/marketplace/MarketplaceDashboard";
@@ -55,7 +54,7 @@ const AppContent = () => {
         <Route path="/echomed-ai" element={<EchoMedAI />} />
         <Route path="/profile" element={<ProfileSimple />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/voice-medicine" element={<TestComponent />} />
+        <Route path="/voice-medicine" element={<VoiceMedicineAssistant />} />
         <Route path="/skin-analysis" element={<SkinAnalysisDashboard />} />
         <Route path="/marketplace" element={<MarketplaceDashboard />} />
         <Route path="/enhanced-medicine-ai" element={<EnhancedMedicineAIDashboard />} />
