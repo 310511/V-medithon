@@ -39,7 +39,7 @@ import { InsuranceCoverageModel } from "@/components/ml-models/InsuranceCoverage
 import { MedicalRecordsDashboard } from "@/components/medical-records/MedicalRecordsDashboard";
 import { PatientProfile } from "@/components/medical-records/PatientProfile";
 import { PrescriptionManager } from "@/components/medical-records/PrescriptionManager";
-import GeneChainAssist from "@/components/genechain-assist/GeneChainAssist";
+import UnifiedGeneChain from "@/components/genechain-assist/UnifiedGeneChain";
 
 const queryClient = new QueryClient();
 
@@ -73,10 +73,10 @@ const AppContent = () => {
         <Route path="/readmission-risk" element={<ReadmissionRiskModel />} />
         <Route path="/insurance-coverage" element={<InsuranceCoverageModel />} />
         <Route path="/medical-records" element={<MedicalRecordsDashboard />} />
-        <Route path="/patient-profile" element={<PatientProfile />} />
-        <Route path="/prescriptions" element={<PrescriptionManager />} />
-        <Route path="/genechain-assist" element={<GeneChainAssist />} />
-        <Route path="/medicine-recommendation" element={<EnhancedMedicineAIDashboard />} />
+                      <Route path="/patient-profile" element={<PatientProfile />} />
+              <Route path="/prescriptions" element={<PrescriptionManager />} />
+              <Route path="/genechain" element={<UnifiedGeneChain />} />
+              <Route path="/medicine-recommendation" element={<EnhancedMedicineAIDashboard />} />
         <Route path="/test" element={<AuthDebugger />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -17,9 +17,10 @@ interface Proposal {
 interface ProposalDetailsProps {
   proposal: Proposal;
   onClose: () => void;
+  isDarkMode?: boolean;
 }
 
-const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onClose }) => {
+const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onClose, isDarkMode = true }) => {
   const [validationStatus, setValidationStatus] = useState<'pending' | 'validating' | 'approved' | 'rejected'>('pending');
   const [consentStatus, setConsentStatus] = useState<{[key: string]: boolean}>({
     patient: false,
@@ -27,28 +28,18 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onClose }) 
     regulator: false,
     ethicist: false
   });
-  const [currentStep, setCurrentStep] = useState(1);
-  const [validationProgress, setValidationProgress] = useState(0);
 
   useEffect(() => {
-    if (validationStatus === 'validating') {
-      const interval = setInterval(() => {
-        setValidationProgress(prev => {
-          if (prev >= 100) {
-            setValidationStatus('approved');
-            return 100;
-          }
-          return prev + 10;
-        });
-      }, 300);
-      return () => clearInterval(interval);
-    }
-  }, [validationStatus]);
+    // Simulate validation process
+    const timer = setTimeout(() => {
+      setValidationStatus('validating');
+      setTimeout(() => {
+        setValidationStatus(proposal.status === 'approved' ? 'approved' : 'rejected');
+      }, 3000);
+    }, 1000);
 
-  const simulateValidation = () => {
-    setValidationStatus('validating');
-    setValidationProgress(0);
-  };
+    return () => clearTimeout(timer);
+  }, [proposal.status]);
 
   const toggleConsent = (stakeholder: string) => {
     setConsentStatus(prev => ({
@@ -59,244 +50,226 @@ const ProposalDetails: React.FC<ProposalDetailsProps> = ({ proposal, onClose }) 
 
   const getRiskColor = (riskLevel: string) => {
     switch (riskLevel) {
-      case 'low': return 'text-green-600 bg-green-100 dark:bg-green-900 dark:text-green-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'high': return 'text-orange-600 bg-orange-100 dark:bg-orange-900 dark:text-orange-200';
-      case 'critical': return 'text-red-600 bg-red-100 dark:bg-red-900 dark:text-red-200';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900 dark:text-gray-200';
+      case 'low':
+        return isDarkMode ? 'text-green-400 bg-green-900/20 border-green-500/30' : 'text-green-600 bg-green-50 border-green-200';
+      case 'medium':
+        return isDarkMode ? 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30' : 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'high':
+        return isDarkMode ? 'text-red-400 bg-red-900/20 border-red-500/30' : 'text-red-600 bg-red-50 border-red-200';
+      default:
+        return isDarkMode ? 'text-gray-400 bg-gray-900/20 border-gray-500/30' : 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'text-green-600 bg-green-100 dark:bg-green-900 dark:text-green-200';
-      case 'pending': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'rejected': return 'text-red-600 bg-red-100 dark:bg-red-900 dark:text-red-200';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900 dark:text-gray-200';
+      case 'pending':
+        return isDarkMode ? 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30' : 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'approved':
+        return isDarkMode ? 'text-green-400 bg-green-900/20 border-green-500/30' : 'text-green-600 bg-green-50 border-green-200';
+      case 'rejected':
+        return isDarkMode ? 'text-red-400 bg-red-900/20 border-red-500/30' : 'text-red-600 bg-red-50 border-red-200';
+      case 'under_review':
+        return isDarkMode ? 'text-blue-400 bg-blue-900/20 border-blue-500/30' : 'text-blue-600 bg-blue-50 border-blue-200';
+      default:
+        return isDarkMode ? 'text-gray-400 bg-gray-900/20 border-gray-500/30' : 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
-  const allConsentsGranted = Object.values(consentStatus).every(Boolean);
+  const formatDate = (timestamp: string) => {
+    return new Date(timestamp).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-xl border border-gray-200 dark:border-slate-700 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Genetic Edit Proposal #{proposal.id}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h3 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Proposal Details</h3>
+        <button
+          onClick={onClose}
+          className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+        >
+          <X className={`w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+        </button>
+      </div>
+
+      {/* Basic Information */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className={`${isDarkMode ? 'bg-gray-800/50' : 'bg-white/80'} rounded-xl p-6 border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} shadow-lg`}>
+          <h4 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Proposal Information</h4>
+          <div className="space-y-3">
+            <div>
+              <div className={`text-sm mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Gene Target</div>
+              <div className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{proposal.geneTarget}</div>
+            </div>
+            <div>
+              <div className={`text-sm mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Modification Type</div>
+              <div className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{proposal.modificationType}</div>
+            </div>
+            <div>
+              <div className={`text-sm mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Patient ID</div>
+              <div className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{proposal.patientId}</div>
+            </div>
+            <div>
+              <div className={`text-sm mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Submitted</div>
+              <div className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{formatDate(proposal.timestamp)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className={`${isDarkMode ? 'bg-gray-800/50' : 'bg-white/80'} rounded-xl p-6 border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} shadow-lg`}>
+          <h4 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Status & Risk</h4>
+          <div className="space-y-4">
+            <div>
+              <div className={`text-sm mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Status</div>
+              <div className={`inline-flex items-center px-3 py-2 rounded-lg border ${getStatusColor(proposal.status)}`}>
+                <span className="text-sm font-medium capitalize">
+                  {proposal.status.replace('_', ' ')}
+                </span>
+              </div>
+            </div>
+            <div>
+              <div className={`text-sm mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Risk Level</div>
+              <div className={`inline-flex items-center px-3 py-2 rounded-lg border ${getRiskColor(proposal.riskLevel)}`}>
+                <span className="text-sm font-medium capitalize">
+                  {proposal.riskLevel} Risk
+                </span>
+              </div>
+            </div>
+            <div>
+              <div className={`text-sm mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Validation Score</div>
+              <div className="flex items-center gap-2">
+                <div className={`flex-1 rounded-full h-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-1000"
+                    style={{ width: `${proposal.validationScore}%` }}
+                  />
+                </div>
+                <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{proposal.validationScore}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Description */}
+      <div className={`${isDarkMode ? 'bg-gray-800/50' : 'bg-white/80'} rounded-xl p-6 border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} shadow-lg`}>
+        <h4 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Description</h4>
+        <p className={`leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{proposal.description}</p>
+      </div>
+
+      {/* Blockchain Information */}
+      <div className={`${isDarkMode ? 'bg-gray-800/50' : 'bg-white/80'} rounded-xl p-6 border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} shadow-lg`}>
+        <h4 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Blockchain Information</h4>
+        <div className="space-y-3">
+          <div>
+            <div className={`text-sm mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Blockchain Hash</div>
+            <div className="font-mono text-blue-400 text-sm break-all">
+              {proposal.blockchainHash}
+            </div>
+          </div>
+          <div>
+            <div className={`text-sm mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Proposal ID</div>
+            <div className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>#{proposal.id}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Validation Process */}
+      <div className={`${isDarkMode ? 'bg-gray-800/50' : 'bg-white/80'} rounded-xl p-6 border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} shadow-lg`}>
+        <h4 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Validation Process</h4>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              validationStatus === 'pending' ? 'bg-gray-600' :
+              validationStatus === 'validating' ? 'bg-blue-600 animate-pulse' :
+              validationStatus === 'approved' ? 'bg-green-600' : 'bg-red-600'
+            }`}>
+              {validationStatus === 'pending' && <Clock className="w-4 h-4 text-white" />}
+              {validationStatus === 'validating' && <Zap className="w-4 h-4 text-white" />}
+              {validationStatus === 'approved' && <CheckCircle className="w-4 h-4 text-white" />}
+              {validationStatus === 'rejected' && <AlertTriangle className="w-4 h-4 text-white" />}
+            </div>
+            <div className="flex-1">
+              <div className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Smart Contract Validation</div>
+              <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                {validationStatus === 'pending' && 'Waiting to start...'}
+                {validationStatus === 'validating' && 'Validating proposal on blockchain...'}
+                {validationStatus === 'approved' && 'Proposal validated successfully'}
+                {validationStatus === 'rejected' && 'Proposal validation failed'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Multi-Party Consent */}
+      <div className={`${isDarkMode ? 'bg-gray-800/50' : 'bg-white/80'} rounded-xl p-6 border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} shadow-lg`}>
+        <h4 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Multi-Party Consent</h4>
+        <div className="grid md:grid-cols-2 gap-4">
+          {[
+            { key: 'patient', label: 'Patient Consent', icon: Users },
+            { key: 'doctor', label: 'Doctor Approval', icon: Shield },
+            { key: 'regulator', label: 'Regulatory Review', icon: Activity },
+            { key: 'ethicist', label: 'Ethics Committee', icon: Lock }
+          ].map(({ key, label, icon: Icon }) => (
+            <div
+              key={key}
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                consentStatus[key as keyof typeof consentStatus]
+                  ? 'border-green-500 bg-green-900/20'
+                  : isDarkMode
+                  ? 'border-gray-600 bg-gray-800/30 hover:border-gray-500'
+                  : 'border-gray-300 bg-gray-50 hover:border-gray-400'
+              }`}
+              onClick={() => toggleConsent(key)}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  consentStatus[key as keyof typeof consentStatus]
+                    ? 'bg-green-600'
+                    : isDarkMode ? 'bg-gray-600' : 'bg-gray-400'
+                }`}>
+                  {consentStatus[key as keyof typeof consentStatus] ? (
+                    <Unlock className="w-5 h-5 text-white" />
+                  ) : (
+                    <Icon className="w-5 h-5 text-gray-400" />
+                  )}
+                </div>
+                <div>
+                  <div className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{label}</div>
+                  <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {consentStatus[key as keyof typeof consentStatus] ? 'Consent Given' : 'Pending Consent'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-4 pt-6">
+        <button
+          onClick={onClose}
+          className={`px-6 py-3 border rounded-lg transition-colors ${
+            isDarkMode 
+              ? 'border-gray-600 text-gray-300 hover:bg-gray-800' 
+              : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          Close
+        </button>
+        {proposal.status === 'pending' && (
+          <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg hover:shadow-lg transition-all duration-300">
+            Approve Proposal
           </button>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Proposal Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Basic Information */}
-            <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <Shield className="w-5 h-5 mr-2" />
-                Proposal Details
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Gene Target:</span>
-                  <p className="text-gray-900 dark:text-white font-medium">{proposal.geneTarget}</p>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Modification Type:</span>
-                  <p className="text-gray-900 dark:text-white font-medium capitalize">{proposal.modificationType}</p>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Patient ID:</span>
-                  <p className="text-gray-900 dark:text-white font-medium">{proposal.patientId}</p>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Risk Level:</span>
-                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(proposal.riskLevel)}`}>
-                    {proposal.riskLevel.toUpperCase()}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Description:</span>
-                <p className="text-gray-900 dark:text-white mt-1">{proposal.description}</p>
-              </div>
-            </div>
-
-            {/* Blockchain Validation */}
-            <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <Activity className="w-5 h-5 mr-2" />
-                Blockchain Validation
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-600 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Blockchain Hash:</span>
-                  <code className="text-xs text-blue-600 dark:text-blue-400 font-mono">{proposal.blockchainHash}</code>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-600 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Validation Score:</span>
-                  <span className="text-sm font-bold text-green-600">{proposal.validationScore}%</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-600 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
-                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(validationStatus)}`}>
-                    {validationStatus === 'validating' ? 'Validating...' : validationStatus.toUpperCase()}
-                  </span>
-                </div>
-                
-                {validationStatus === 'validating' && (
-                  <div className="mt-4">
-                    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      <span>Validation Progress</span>
-                      <span>{validationProgress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-slate-600 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${validationProgress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-                
-                {validationStatus === 'pending' && (
-                  <button
-                    onClick={simulateValidation}
-                    className="w-full mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-                  >
-                    <Zap className="w-4 h-4 mr-2" />
-                    Run Blockchain Validation
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Workflow Progress */}
-            <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Workflow Progress</h3>
-              <div className="space-y-4">
-                {[
-                  { step: 1, title: 'Proposal Submitted', icon: CheckCircle, completed: true },
-                  { step: 2, title: 'Blockchain Validation', icon: validationStatus === 'approved' ? CheckCircle : Clock, completed: validationStatus === 'approved' },
-                  { step: 3, title: 'Consent Collection', icon: allConsentsGranted ? CheckCircle : Clock, completed: allConsentsGranted },
-                  { step: 4, title: 'Treatment Execution', icon: Clock, completed: false },
-                  { step: 5, title: 'Monitoring', icon: Clock, completed: false },
-                  { step: 6, title: 'Audit Log', icon: Clock, completed: false }
-                ].map((item, index) => (
-                  <div key={index} className={`flex items-center space-x-3 p-3 rounded-lg ${
-                    item.completed ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-100 dark:bg-slate-600'
-                  }`}>
-                    <item.icon className={`w-5 h-5 ${
-                      item.completed ? 'text-green-600' : 'text-gray-400'
-                    }`} />
-                    <span className={`text-sm font-medium ${
-                      item.completed ? 'text-green-800 dark:text-green-200' : 'text-gray-600 dark:text-gray-400'
-                    }`}>
-                      {item.title}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Consent Management */}
-          <div className="space-y-6">
-            {/* Consent Management */}
-            <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <Users className="w-5 h-5 mr-2" />
-                Multi-Party Consent
-              </h3>
-              <div className="space-y-4">
-                {Object.entries(consentStatus).map(([stakeholder, hasConsent]) => (
-                  <div key={stakeholder} className="flex items-center justify-between p-3 bg-white dark:bg-slate-600 rounded-lg">
-                    <div>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
-                        {stakeholder} Consent
-                      </span>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {stakeholder === 'patient' && 'Patient approval required'}
-                        {stakeholder === 'doctor' && 'Medical professional approval'}
-                        {stakeholder === 'regulator' && 'Regulatory body approval'}
-                        {stakeholder === 'ethicist' && 'Ethics committee approval'}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => toggleConsent(stakeholder)}
-                      className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                        hasConsent 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800' 
-                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-800'
-                      }`}
-                    >
-                      {hasConsent ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                      <span>{hasConsent ? 'Granted' : 'Pending'}</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-              
-              {allConsentsGranted && (
-                <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                  <div className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                    <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                      All consents granted! Ready for execution.
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Risk Assessment */}
-            <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <AlertTriangle className="w-5 h-5 mr-2" />
-                Risk Assessment
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Safety Score:</span>
-                  <span className="text-sm font-bold text-green-600">{100 - proposal.validationScore}%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Compliance Score:</span>
-                  <span className="text-sm font-bold text-blue-600">95%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Ethics Score:</span>
-                  <span className="text-sm font-bold text-purple-600">88%</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Timestamp */}
-            <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Timeline</h3>
-              <div className="space-y-2">
-                <div>
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Created:</span>
-                  <p className="text-sm text-gray-900 dark:text-white">
-                    {new Date(proposal.timestamp).toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Updated:</span>
-                  <p className="text-sm text-gray-900 dark:text-white">
-                    {new Date().toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital, Stethoscope, Activity, Zap, Settings, Dna } from "lucide-react";
+import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital, Stethoscope, Activity, Zap, Settings, Dna, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -75,11 +75,11 @@ export const Header = () => {
     {
       title: "Core Features",
       items: [
-        { to: "/infinite-memory", icon: Zap, label: "Infinite Memory" },
-        { to: "/medicine-recommendation", icon: Pill, label: "Medicine AI" },
-        { to: "/echomed-ai", icon: Heart, label: "EchoMed AI" },
-        { to: "/genechain-assist", icon: Dna, label: "GeneChain Assist" },
-        { to: "/marketplace", icon: Package, label: "Marketplace", highlight: true },
+                      { to: "/infinite-memory", icon: Zap, label: "Infinite Memory" },
+              { to: "/medicine-recommendation", icon: Pill, label: "Medicine AI" },
+              { to: "/echomed-ai", icon: Heart, label: "EchoMed AI" },
+              { to: "/genechain", icon: Dna, label: "GeneChain Unified", highlight: true },
+              { to: "/marketplace", icon: Package, label: "Marketplace" },
       ]
     },
     {
