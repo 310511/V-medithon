@@ -4,8 +4,10 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: chmod +x build.sh && ./build.sh
-    startCommand: cd codezilla_spider/backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      chmod +x build.sh
+      ./build.sh
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
