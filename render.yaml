@@ -4,11 +4,7 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: |
-      # Install Python dependencies from backend requirements only
-      pip install -r codezilla_spider/backend/requirements.txt
-      # Install Node.js dependencies and build frontend
-      cd codezilla_spider && yarn install && yarn build
+    buildCommand: chmod +x build.sh && ./build.sh
     startCommand: cd codezilla_spider/backend && uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
