@@ -7,7 +7,6 @@ echo "📦 Installing Python dependencies..."
 pip install -r requirements.txt
 
 echo "📦 Installing Node.js dependencies..."
-cd codezilla_spider
 yarn install
 
 echo "🔨 Building frontend..."
