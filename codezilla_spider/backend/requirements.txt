@@ -16,7 +16,14 @@ httpx==0.25.2
 pydantic==2.5.0
 pydantic-settings==2.1.0
 python-dotenv==1.0.0
-# Audio dependencies removed for Render compatibility
+
+# Audio alternatives (cloud-deployment friendly)
+sounddevice>=0.4.6
+scipy>=1.13.1
+webrtcvad>=2.0.10
+SpeechRecognition>=3.10.0
+
+# Removed problematic dependencies:
 # pyaudio - requires system audio libraries
 # pyannote-audio - depends on pyaudio
 # speechbrain - may have audio dependencies 
