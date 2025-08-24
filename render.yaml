@@ -5,8 +5,12 @@ services:
     region: oregon
     plan: free
     buildCommand: |
-      chmod +x build.sh
-      ./build.sh
+      echo "Starting custom build process..."
+      pip install -r requirements.txt
+      cd codezilla_spider
+      yarn install
+      yarn build
+      echo "Build completed!"
     startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
@@ -15,4 +19,4 @@ services:
         value: 8000
       - key: NODE_VERSION
         value: 18
-    rootDir: codezilla_spider
+    # rootDir: codezilla_spider
