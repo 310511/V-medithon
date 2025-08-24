@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: free
     buildCommand: |
-      # Install Python dependencies from backend requirements only (no pyproject.toml)
+      # Install Python dependencies from backend requirements only
       pip install -r codezilla_spider/backend/requirements.txt
       # Install Node.js dependencies and build frontend
       cd codezilla_spider && yarn install && yarn build
