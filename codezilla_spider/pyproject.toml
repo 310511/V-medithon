@@ -33,6 +33,10 @@ dependencies = [
     "uvicorn[standard]>=0.34.3",
     "watchdog>=6.0.0",
     "websockets>=15.0.1",
+    # Cloud-friendly audio alternatives
+    "sounddevice>=0.4.6",
+    "webrtcvad>=2.0.10",
+    "SpeechRecognition>=3.10.0",
 ]
 
 [project.optional-dependencies]
