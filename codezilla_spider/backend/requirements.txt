@@ -15,4 +15,8 @@ redis==5.0.1
 httpx==0.25.2
 pydantic==2.5.0
 pydantic-settings==2.1.0
-python-dotenv==1.0.0 
+python-dotenv==1.0.0
+# Audio dependencies removed for Render compatibility
+# pyaudio - requires system audio libraries
+# pyannote-audio - depends on pyaudio
+# speechbrain - may have audio dependencies 

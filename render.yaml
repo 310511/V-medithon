@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: shine2-medical-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: |
+      # Install Python dependencies from backend requirements only
+      pip install -r codezilla_spider/backend/requirements.txt
+      # Install Node.js dependencies and build frontend
+      cd codezilla_spider && yarn install && yarn build
+    startCommand: cd codezilla_spider/backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 8000
+      - key: NODE_VERSION
+        value: 18
+    rootDir: codezilla_spider
