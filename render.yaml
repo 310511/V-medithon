@@ -4,14 +4,8 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: |
-      echo "Starting custom build process..."
-      pip install -r requirements.txt
-      cd codezilla_spider
-      yarn install
-      yarn build
-      echo "Build completed!"
-    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
