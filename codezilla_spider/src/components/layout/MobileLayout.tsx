@@ -36,32 +36,32 @@ const MobileBottomNav: React.FC = () => {
       description: 'Dashboard'
     },
     { 
+      name: 'Fitness', 
+      path: '/fitness-dashboard', 
+      icon: '💪',
+      activeIcon: '💪',
+      description: 'Fitness'
+    },
+    { 
+      name: 'Health', 
+      path: '/bmi-calculator', 
+      icon: '🏥',
+      activeIcon: '🏥',
+      description: 'Health'
+    },
+    { 
+      name: 'Zenith', 
+      path: '/mental-health', 
+      icon: '🧘',
+      activeIcon: '🧘',
+      description: 'Wellness'
+    },
+    { 
       name: 'AI', 
       path: '/ai-medicine-recommendation', 
       icon: '🤖',
       activeIcon: '🤖',
       description: 'AI Medicine'
-    },
-    { 
-      name: 'Memory', 
-      path: '/infinite-memory', 
-      icon: '🧠',
-      activeIcon: '🧠',
-      description: 'Memory'
-    },
-    { 
-      name: 'RFID', 
-      path: '/rfid', 
-      icon: '📡',
-      activeIcon: '📡',
-      description: 'RFID'
-    },
-    { 
-      name: 'Test', 
-      path: '/mobile-test', 
-      icon: '📱',
-      activeIcon: '📱',
-      description: 'Test'
     },
   ];
 
