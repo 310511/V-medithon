@@ -44,6 +44,13 @@ import { PatientProfile } from "@/components/medical-records/PatientProfile";
 import { PrescriptionManager } from "@/components/medical-records/PrescriptionManager";
 import UnifiedGeneChain from "@/components/genechain-assist/UnifiedGeneChain";
 import { MobileTest } from "@/components/MobileTest";
+import { FitnessDashboard } from "@/components/fitness/FitnessDashboard";
+import { BmiCalculator } from "@/components/health/BmiCalculator";
+import { PeriodTracker } from "@/components/health/PeriodTracker";
+import { HealthAnalytics } from "@/components/health/HealthAnalytics";
+import { MentalHealthDashboard } from "@/components/zenith/MentalHealthDashboard";
+import { SpotifyIntegration } from "@/components/zenith/SpotifyIntegration";
+import { AIWellnessPlanner } from "@/components/zenith/AIWellnessPlanner";
 
 const queryClient = new QueryClient();
 
@@ -94,11 +101,18 @@ const AppContent = () => {
       <Route path="/medical-records" element={<MedicalRecordsDashboard />} />
                       <Route path="/patient-profile" element={<PatientProfile />} />
               <Route path="/prescriptions" element={<PrescriptionManager />} />
-              <Route path="/genechain" element={<UnifiedGeneChain />} />
-              <Route path="/medicine-recommendation" element={<EnhancedMedicineAIDashboard />} />
-              <Route path="/mobile-test" element={<MobileTest />} />
-        <Route path="/test" element={<AuthDebugger />} />
-        <Route path="*" element={<NotFound />} />
+                    <Route path="/genechain" element={<UnifiedGeneChain />} />
+      <Route path="/medicine-recommendation" element={<EnhancedMedicineAIDashboard />} />
+      <Route path="/fitness-dashboard" element={<FitnessDashboard />} />
+      <Route path="/bmi-calculator" element={<BmiCalculator />} />
+      <Route path="/period-tracker" element={<PeriodTracker />} />
+      <Route path="/health-analytics" element={<HealthAnalytics />} />
+      <Route path="/mental-health" element={<MentalHealthDashboard />} />
+      <Route path="/spotify-integration" element={<SpotifyIntegration />} />
+      <Route path="/ai-wellness-planner" element={<AIWellnessPlanner />} />
+      <Route path="/mobile-test" element={<MobileTest />} />
+      <Route path="/test" element={<AuthDebugger />} />
+      <Route path="*" element={<NotFound />} />
       </Routes>
   );
 

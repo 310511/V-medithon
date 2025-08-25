@@ -11,7 +11,7 @@ import {
   RotateCcw, 
   Maximize2, 
   Minimize2,
-  Touch,
+  Hand,
   Wifi,
   Battery,
   Volume2,
@@ -168,8 +168,8 @@ export const MobileTest: React.FC = () => {
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-2">
-                  <Touch className="h-4 w-4" />
-                  <span className="text-sm font-medium">Touch Navigation</span>
+                                  <Hand className="h-4 w-4" />
+                <span className="text-sm font-medium">Touch Navigation</span>
                 </div>
                 <Badge variant={touchSupported ? "default" : "secondary"}>
                   {touchSupported ? "Supported" : "Not Supported"}
@@ -256,8 +256,8 @@ export const MobileTest: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Touch className="h-5 w-5 text-green-500" />
-            Touch Interaction Test
+                            <Hand className="h-5 w-5 text-green-500" />
+                Touch Interaction Test
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
