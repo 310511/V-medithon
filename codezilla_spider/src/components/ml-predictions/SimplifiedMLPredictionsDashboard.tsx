@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { 
   TrendingUp, 
@@ -21,7 +20,6 @@ import {
   Target,
   Zap,
   Eye,
-  Settings,
   Bell,
   Minus
 } from "lucide-react";
@@ -50,7 +48,7 @@ interface PredictionStats {
   last_updated: string;
 }
 
-export const EnhancedMLPredictionsDashboard = () => {
+export const SimplifiedMLPredictionsDashboard = () => {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,7 +56,7 @@ export const EnhancedMLPredictionsDashboard = () => {
   const [sortBy, setSortBy] = useState("risk");
   const [stats, setStats] = useState<PredictionStats | null>(null);
 
-  // Enhanced mock data with more realistic predictions
+  // Mock data with realistic predictions
   useEffect(() => {
     const mockPredictions: Prediction[] = [
       {
@@ -172,28 +170,28 @@ export const EnhancedMLPredictionsDashboard = () => {
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'critical': return 'from-red-500/10 to-pink-500/10 border-red-300/50 hover:from-red-500/20 hover:to-pink-500/20';
-      case 'warning': return 'from-yellow-500/10 to-orange-500/10 border-yellow-300/50 hover:from-yellow-500/20 hover:to-orange-500/20';
-      case 'safe': return 'from-green-500/10 to-emerald-500/10 border-green-300/50 hover:from-green-500/20 hover:to-emerald-500/20';
-      default: return 'from-gray-500/10 to-slate-500/10 border-gray-300/50 hover:from-gray-500/20 hover:to-slate-500/20';
+      case 'critical': return 'border-red-200 bg-red-50';
+      case 'warning': return 'border-yellow-200 bg-yellow-50';
+      case 'safe': return 'border-green-200 bg-green-50';
+      default: return 'border-gray-200 bg-gray-50';
     }
   };
 
   const getRiskBadge = (risk: string) => {
     switch (risk) {
-      case 'critical': return 'bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg shadow-red-500/25';
-      case 'warning': return 'bg-gradient-to-r from-yellow-500 to-orange-600 text-white shadow-lg shadow-yellow-500/25';
-      case 'safe': return 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/25';
-      default: return 'bg-gradient-to-r from-gray-500 to-slate-600 text-white shadow-lg shadow-gray-500/25';
+      case 'critical': return 'bg-red-600 text-white';
+      case 'warning': return 'bg-yellow-600 text-white';
+      case 'safe': return 'bg-green-600 text-white';
+      default: return 'bg-gray-600 text-white';
     }
   };
 
   const getProgressColor = (risk: string) => {
     switch (risk) {
-      case 'critical': return 'bg-gradient-to-r from-red-500 to-pink-500';
-      case 'warning': return 'bg-gradient-to-r from-yellow-500 to-orange-500';
-      case 'safe': return 'bg-gradient-to-r from-green-500 to-emerald-500';
-      default: return 'bg-gradient-to-r from-blue-500 to-purple-500';
+      case 'critical': return 'bg-red-500';
+      case 'warning': return 'bg-yellow-500';
+      case 'safe': return 'bg-green-500';
+      default: return 'bg-blue-500';
     }
   };
 
@@ -238,7 +236,6 @@ export const EnhancedMLPredictionsDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-6 py-4">
@@ -247,9 +244,7 @@ export const EnhancedMLPredictionsDashboard = () => {
               <div className="flex items-center gap-3">
                 <Brain className="h-8 w-8 text-blue-600" />
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    ML Predictions
-                  </h1>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">ML Predictions</h1>
                   <p className="text-sm text-gray-600 dark:text-gray-300">AI-powered inventory forecasting</p>
                 </div>
               </div>
@@ -385,7 +380,7 @@ export const EnhancedMLPredictionsDashboard = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-all duration-500 ease-out">
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
                       {item.item_name}
                     </CardTitle>
                     <CardDescription className="text-sm text-gray-600 dark:text-gray-400">
@@ -505,8 +500,6 @@ export const EnhancedMLPredictionsDashboard = () => {
           </CardContent>
         </Card>
       </div>
-
-
     </div>
   );
-}; 
+};
