@@ -49,3 +49,4 @@ this.baseUrl = (import.meta.env?.VITE_API_URL as string) || 'http://localhost:80
 **The white screen issue has been completely resolved! The site should now load properly with all functionality working.**
 
 **Try accessing http://localhost:3001/ now!** 🚀
+

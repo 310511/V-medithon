@@ -34,7 +34,8 @@ import {
   ShoppingCart,
   Eye,
   Brain,
-  Disc3
+  Disc3,
+  Plane
 } from "lucide-react";
 
 const Index = () => {
@@ -328,6 +329,14 @@ const Index = () => {
                   </Button>
                   <Button 
                     variant="outline"
+                    onClick={() => navigate('/drone-delivery')}
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300 hover-lift hover-glow group"
+                  >
+                    <Plane className="w-4 h-4 mr-2 group-hover:animate-bounce-gentle" />
+                    Drone Delivery
+                  </Button>
+                  <Button 
+                    variant="outline"
                     onClick={() => navigate('/spotify-integration')}
                     className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-300 hover-lift hover-glow group"
                   >
@@ -351,6 +360,12 @@ const Index = () => {
                 title: "Blockchain Security",
                 description: "Every transaction is immutably recorded on the blockchain, ensuring complete transparency and audit trails.",
                 color: "from-blue-500 to-blue-600"
+              },
+              {
+                icon: Plane,
+                title: "Drone Delivery",
+                description: "AI-powered medical supply delivery with real-time tracking, 3D visualization, and automated fleet management.",
+                color: "from-cyan-500 to-cyan-600"
               },
               {
                 icon: Heart,

@@ -57,11 +57,11 @@ const MobileBottomNav: React.FC = () => {
       description: 'Wellness'
     },
     { 
-      name: 'AI', 
-      path: '/ai-medicine-recommendation', 
-      icon: '🤖',
-      activeIcon: '🤖',
-      description: 'AI Medicine'
+      name: 'Drone', 
+      path: '/drone-delivery', 
+      icon: '🚁',
+      activeIcon: '🚁',
+      description: 'Delivery'
     },
   ];
 
