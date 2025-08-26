@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Shield, 
   Zap, 
@@ -25,7 +25,6 @@ import {
   Pause,
   X,
   Save,
-  List,
   Network,
   Microscope,
   UserCheck,
@@ -51,7 +50,8 @@ import {
   ExternalLink,
   Copy,
   Loader2,
-  AlertCircle as AlertCircleIcon
+  AlertCircle as AlertCircleIcon,
+  Plus
 } from 'lucide-react';
 import ProposalForm from './ProposalForm';
 import ProposalsList from './ProposalsList';
@@ -157,11 +157,14 @@ const UnifiedGeneChain: React.FC = () => {
   const [showProposalsList, setShowProposalsList] = useState(false);
   const [currentProposal, setCurrentProposal] = useState<Proposal | null>(null);
   const [proposals, setProposals] = useState<Proposal[]>([]);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   const [userRole, setUserRole] = useState<'Doctor' | 'Regulator' | 'Patient'>('Doctor');
   const [geneExpressionData, setGeneExpressionData] = useState<GeneExpressionData | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [auditTab, setAuditTab] = useState<'upload' | 'analysis' | 'blockchain' | 'report'>('upload');
+  
+  // Genetic Variants State
+  const [variantTab, setVariantTab] = useState<'conflicts' | 'analysis' | 'blockchain' | 'resolution'>('conflicts');
   
   // Promoter Validation State
   const [promoterData, setPromoterData] = useState<PromoterData | null>(null);
@@ -175,15 +178,15 @@ const UnifiedGeneChain: React.FC = () => {
   
   // Consent Management State
   const [consentRequests, setConsentRequests] = useState<ConsentRequest[]>([]);
-  const [consentTab, setConsentTab] = useState<'pending' | 'active' | 'blockchain'>('pending');
+  const [consentTab, setConsentTab] = useState<'create' | 'pending' | 'active' | 'blockchain' | 'analytics'>('create');
   
   // Reports State
   const [reports, setReports] = useState<ReportData[]>([]);
   const [reportsTab, setReportsTab] = useState<'gene_expression' | 'promoter' | 'consent' | 'export'>('gene_expression');
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
+
+
 
   // Emergency scenarios data
   const emergencies = [
@@ -1534,9 +1537,11 @@ const UnifiedGeneChain: React.FC = () => {
       {/* Tab Navigation */}
       <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
         {[
+          { id: 'create', label: 'Create Consent', icon: Plus },
           { id: 'pending', label: 'Pending Requests', icon: Clock },
           { id: 'active', label: 'Active Consents', icon: UserCheck },
-          { id: 'blockchain', label: 'Blockchain Ledger', icon: Hash }
+          { id: 'blockchain', label: 'Blockchain Ledger', icon: Hash },
+          { id: 'analytics', label: 'Analytics', icon: BarChart3 }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -1555,6 +1560,88 @@ const UnifiedGeneChain: React.FC = () => {
 
       {/* Tab Content */}
       <div className="min-h-[500px]">
+        {consentTab === 'create' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg`}
+          >
+            <h3 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              Create New Consent Record
+            </h3>
+            <p className={`text-sm mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              Create patient consent records on blockchain
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Patient ID
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., patient_001"
+                  className={`w-full px-3 py-2 border rounded-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Researcher ID
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., researcher_001"
+                  className={`w-full px-3 py-2 border rounded-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Dataset Type
+                </label>
+                <select className={`w-full px-3 py-2 border rounded-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}>
+                  <option>Select dataset type</option>
+                  <option>AML_expression</option>
+                  <option>ALL_expression</option>
+                  <option>Genetic_variants</option>
+                  <option>Clinical_data</option>
+                  <option>Drug_response</option>
+                </select>
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Consent Granted
+                </label>
+                <select className={`w-full px-3 py-2 border rounded-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}>
+                  <option>Select consent status</option>
+                  <option>Yes</option>
+                  <option>No</option>
+                  <option>Partial</option>
+                  <option>Withdrawn</option>
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Consent Details
+                </label>
+                <textarea
+                  placeholder="Additional consent details, restrictions, or special conditions..."
+                  rows={3}
+                  className={`w-full px-3 py-2 border rounded-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                />
+              </div>
+            </div>
+            
+            <div className="flex space-x-4">
+              <button className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                Create Consent Record
+              </button>
+              <button className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Preview
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         {consentTab === 'pending' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1653,7 +1740,282 @@ const UnifiedGeneChain: React.FC = () => {
             </div>
           </motion.div>
         )}
+
+        {consentTab === 'analytics' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            {/* Consent Statistics */}
+            <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg`}>
+              <h3 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                Consent Analytics Dashboard
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+                  <div className="text-2xl font-bold text-blue-500">156</div>
+                  <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Total Consents</div>
+                </div>
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-green-50'}`}>
+                  <div className="text-2xl font-bold text-green-500">142</div>
+                  <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Active Consents</div>
+                </div>
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-yellow-50'}`}>
+                  <div className="text-2xl font-bold text-yellow-500">8</div>
+                  <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Pending Requests</div>
+                </div>
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-red-50'}`}>
+                  <div className="text-2xl font-bold text-red-500">6</div>
+                  <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Expired Consents</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Consent Trends */}
+            <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg`}>
+              <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                Consent Trends (Last 30 Days)
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>New Consents</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div className="bg-blue-500 h-2 rounded-full" style={{ width: '75%' }}></div>
+                    </div>
+                    <span className="text-sm font-medium">75%</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Consent Renewals</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div className="bg-green-500 h-2 rounded-full" style={{ width: '60%' }}></div>
+                    </div>
+                    <span className="text-sm font-medium">60%</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Consent Withdrawals</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div className="bg-red-500 h-2 rounded-full" style={{ width: '15%' }}></div>
+                    </div>
+                    <span className="text-sm font-medium">15%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dataset Type Distribution */}
+            <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg`}>
+              <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                Consent by Dataset Type
+              </h3>
+              <div className="space-y-3">
+                {[
+                  { type: 'AML_expression', count: 45, percentage: 29 },
+                  { type: 'ALL_expression', count: 38, percentage: 24 },
+                  { type: 'Genetic_variants', count: 32, percentage: 21 },
+                  { type: 'Clinical_data', count: 28, percentage: 18 },
+                  { type: 'Drug_response', count: 13, percentage: 8 }
+                ].map((item) => (
+                  <div key={item.type} className="flex items-center justify-between">
+                    <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{item.type}</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${item.percentage}%` }}></div>
+                      </div>
+                      <span className="text-sm font-medium">{item.count}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
+    </div>
+  );
+
+  const renderGeneticVariants = () => (
+    <div className="space-y-6">
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+        {[
+          { id: 'conflicts', label: 'Variant Conflicts', icon: AlertTriangle },
+          { id: 'analysis', label: 'Variant Analysis', icon: BrainCircuit },
+          { id: 'blockchain', label: 'Blockchain Ledger', icon: Hash },
+          { id: 'resolution', label: 'Conflict Resolution', icon: CheckCircle }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setVariantTab(tab.id as any)}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              variantTab === tab.id
+                ? 'bg-blue-500 text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}
+          >
+            <tab.icon className="w-4 h-4" />
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {variantTab === 'conflicts' && (
+        <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg`}>
+          <h3 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Genetic Variant Conflict Resolution
+          </h3>
+          <p className={`text-sm mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            Log variant classification conflicts on blockchain
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Variant ID
+              </label>
+              <input
+                type="text"
+                placeholder="e.g., rs123456"
+                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+            </div>
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Lab ID
+              </label>
+              <input
+                type="text"
+                placeholder="e.g., lab_001"
+                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+            </div>
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Original Classification
+              </label>
+              <select className={`w-full px-3 py-2 border rounded-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}>
+                <option>Select classification</option>
+                <option>Pathogenic</option>
+                <option>Likely Pathogenic</option>
+                <option>VUS</option>
+                <option>Likely Benign</option>
+                <option>Benign</option>
+              </select>
+            </div>
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Conflicting Classification
+              </label>
+              <select className={`w-full px-3 py-2 border rounded-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}>
+                <option>Select classification</option>
+                <option>Pathogenic</option>
+                <option>Likely Pathogenic</option>
+                <option>VUS</option>
+                <option>Likely Benign</option>
+                <option>Benign</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Evidence Level
+              </label>
+              <select className={`w-full px-3 py-2 border rounded-lg ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}>
+                <option>Select evidence level</option>
+                <option>Strong</option>
+                <option>Moderate</option>
+                <option>Supporting</option>
+                <option>Stand-alone</option>
+              </select>
+            </div>
+          </div>
+          
+          <button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+            Log Conflict on Blockchain
+          </button>
+        </div>
+      )}
+
+      {variantTab === 'analysis' && (
+        <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg`}>
+          <h3 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Variant Analysis Dashboard
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+              <div className="text-2xl font-bold text-blue-500">1,247</div>
+              <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Total Variants</div>
+            </div>
+            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-green-50'}`}>
+              <div className="text-2xl font-bold text-green-500">892</div>
+              <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Analyzed</div>
+            </div>
+            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-red-50'}`}>
+              <div className="text-2xl font-bold text-red-500">23</div>
+              <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Conflicts</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {variantTab === 'blockchain' && (
+        <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg`}>
+          <h3 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Blockchain Ledger
+          </h3>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={`p-4 rounded-lg border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      Variant Conflict #{i}
+                    </div>
+                    <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      rs12345{i} • Lab {i}
+                    </div>
+                  </div>
+                  <div className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800'}`}>
+                    Resolved
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {variantTab === 'resolution' && (
+        <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg`}>
+          <h3 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Conflict Resolution History
+          </h3>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={`p-4 rounded-lg border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      rs12345{i} Resolution
+                    </div>
+                    <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      Pathogenic → Benign • Evidence: Strong
+                    </div>
+                  </div>
+                  <div className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-800'}`}>
+                    {new Date().toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -1747,6 +2109,8 @@ const UnifiedGeneChain: React.FC = () => {
     switch (activeSection) {
       case 'dashboard':
         return renderDashboard();
+      case 'variants':
+        return renderGeneticVariants();
       case 'audit':
         return renderGeneExpressionAudit();
       case 'promoter':
@@ -1770,79 +2134,34 @@ const UnifiedGeneChain: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-black text-white' : 'bg-gradient-to-br from-blue-50 via-white to-green-50 text-gray-900'}`}>
-      {/* Background Animation */}
-      <motion.div
-        style={{ y }}
-        className="fixed inset-0 pointer-events-none"
-      >
-        <div className={`absolute top-20 left-10 w-32 h-32 rounded-full ${isDarkMode ? 'bg-blue-500' : 'bg-blue-200'} opacity-20 blur-xl animate-pulse`}></div>
-        <div className={`absolute top-40 right-20 w-24 h-24 rounded-full ${isDarkMode ? 'bg-green-500' : 'bg-green-200'} opacity-20 blur-xl animate-pulse delay-1000`}></div>
-        <div className={`absolute bottom-20 left-1/3 w-40 h-40 rounded-full ${isDarkMode ? 'bg-purple-500' : 'bg-purple-200'} opacity-20 blur-xl animate-pulse delay-2000`}></div>
-      </motion.div>
-
-      <div className="relative z-10">
-        {/* Top Navbar */}
-        <div className={`border-b ${isDarkMode ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-white'} shadow-sm`}>
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
-              >
-                <List className="w-5 h-5" />
-              </button>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 via-green-400 to-cyan-400 bg-clip-text text-transparent">
-                GeneChain Unified Platform
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className={`px-3 py-1 rounded-full text-sm ${isDarkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
-                {userRole}
-              </div>
-              <button className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
-                <Bell className="w-5 h-5" />
-              </button>
-              <button className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
-                <User className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} p-6`}>
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">🧬 GeneChain Unified Platform</h1>
+          <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Immutable genomic data integrity and audit trail</p>
         </div>
 
-        <div className="flex">
-          {/* Sidebar */}
-          <motion.div
-            initial={{ width: sidebarCollapsed ? 64 : 280 }}
-            animate={{ width: sidebarCollapsed ? 64 : 280 }}
-            className={`${isDarkMode ? 'bg-gray-900 border-r border-gray-800' : 'bg-white border-r border-gray-200'} min-h-screen transition-all duration-300`}
-          >
-            <div className="p-4">
-              <nav className="space-y-2">
-                {navigationItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveSection(item.id as any)}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                      item.active
-                        ? `${isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'}`
-                        : `${isDarkMode ? 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`
-                    }`}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    {!sidebarCollapsed && <span>{item.label}</span>}
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </motion.div>
+        {/* Top Navigation Tabs */}
+        <div className={`flex space-x-1 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'} p-1 rounded-lg mb-6`}>
+          {navigationItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id as any)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                activeSection === item.id
+                  ? `${isDarkMode ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'} shadow-sm`
+                  : `${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`
+              }`}
+            >
+              <item.icon className="w-4 h-4" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
 
-          {/* Main Content */}
-          <div className="flex-1 p-6">
-            <div className="max-w-7xl mx-auto">
-              {renderContent()}
-            </div>
-          </div>
+        {/* Main Content */}
+        <div className="space-y-6">
+          {renderContent()}
         </div>
       </div>
 
