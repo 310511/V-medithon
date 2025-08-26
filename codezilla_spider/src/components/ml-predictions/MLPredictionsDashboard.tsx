@@ -196,7 +196,7 @@ export const MLPredictionsDashboard: React.FC = () => {
                 disabled={isLoading}
                 className="flex items-center gap-2"
               >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className="h-4 w-4" />
                 {isLoading ? "Running..." : "Run Predictions"}
               </Button>
               
@@ -521,7 +521,7 @@ export const MLPredictionsDashboard: React.FC = () => {
           <div className="text-center py-12">
             {isLoading ? (
               <div className="space-y-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <div className="rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                 <h3 className="text-lg font-semibold">Running ML Predictions...</h3>
                 <p className="text-muted-foreground">Analyzing inventory data and generating restocking predictions</p>
               </div>
