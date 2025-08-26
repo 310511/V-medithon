@@ -1,4 +1,4 @@
-import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital, Stethoscope, Activity, Zap, Settings, Dna, AlertTriangle, Dumbbell, Calculator, Calendar, Target, BarChart3, Activity as ActivityIcon, Disc3 } from "lucide-react";
+import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital, Stethoscope, Activity, Zap, Settings, Dna, AlertTriangle, Dumbbell, Calculator, Calendar, Target, BarChart3, Activity as ActivityIcon, Disc3, Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -97,6 +97,7 @@ export const Header = () => {
         { to: "/echomed-ai", icon: Heart, label: "EchoMed AI" },
         { to: "/genechain", icon: Dna, label: "GeneChain Unified" },
         { to: "/marketplace", icon: Package, label: "Marketplace" },
+        { to: "/drone-delivery", icon: Plane, label: "Drone Delivery", highlight: true },
       ]
     },
     {

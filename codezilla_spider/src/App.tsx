@@ -51,6 +51,7 @@ import { HealthAnalytics } from "@/components/health/HealthAnalytics";
 import { MentalHealthDashboard } from "@/components/zenith/MentalHealthDashboard";
 import { SpotifyIntegration } from "@/components/zenith/SpotifyIntegration";
 import { AIWellnessPlanner } from "@/components/zenith/AIWellnessPlanner";
+import { DroneDelivery } from "@/components/delivery/DroneDelivery";
 
 const queryClient = new QueryClient();
 
@@ -110,6 +111,7 @@ const AppContent = () => {
       <Route path="/mental-health" element={<MentalHealthDashboard />} />
       <Route path="/spotify-integration" element={<SpotifyIntegration />} />
       <Route path="/ai-wellness-planner" element={<AIWellnessPlanner />} />
+      <Route path="/drone-delivery" element={<DroneDelivery />} />
       <Route path="/mobile-test" element={<MobileTest />} />
       <Route path="/test" element={<AuthDebugger />} />
       <Route path="*" element={<NotFound />} />

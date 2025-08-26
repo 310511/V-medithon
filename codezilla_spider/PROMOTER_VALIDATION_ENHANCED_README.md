@@ -419,3 +419,4 @@ For issues and questions:
 **GeneChain Team** - Building the future of genetic medicine with blockchain technology.
 
 *Last updated: January 2024*
+
