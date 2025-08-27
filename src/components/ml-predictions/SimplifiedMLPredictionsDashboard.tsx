@@ -503,3 +503,4 @@ export const SimplifiedMLPredictionsDashboard = () => {
     </div>
   );
 };
+
