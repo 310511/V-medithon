@@ -238,7 +238,8 @@
             
             <div class="button-group">
                 <button id="reset-btn">Reset</button>
-                <button id="auto-fly-btn">Auto Fly</button>
+                <button id="auto-fly-btn">Realistic Auto Fly</button>
+                <button id="maze-mode-btn">Maze Navigation</button>
                 <button id="emergency-btn" class="danger">Emergency Stop</button>
             </div>
         </div>
@@ -276,6 +277,7 @@
             <button id="top-view">Top View</button>
             <button id="side-view">Side View</button>
             <button id="follow-view">Follow Drone</button>
+                <button id="maze-view">Maze View</button>
             <button id="orbit-view">Orbit View</button>
         </div>
         
@@ -305,8 +307,14 @@
                 this.controls = null;
                 this.drone = null;
                 this.obstacles = [];
+                this.mazeWalls = [];
+                this.mazePath = [];
                 this.autoFlyMode = false;
+                this.mazeMode = false;
                 this.emergencyStop = false;
+                this.currentCameraView = 'orbit';
+                this.pathfindingPath = [];
+                this.currentPathIndex = 0;
                 
                 this.dronePosition = { x: 0, y: 0, z: 10 };
                 this.droneRotation = { x: 0, y: 0, z: 0 };
@@ -346,6 +354,8 @@
                 this.createDrone();
                 this.createObstacles();
                 this.createEnvironment();
+                this.createMaze();
+                this.generatePathfindingPath();
                 
                 // Hide loading
                 document.getElementById('loading').style.display = 'none';
@@ -517,6 +527,211 @@
                 }
             }
             
+            generateMazeLayout() {
+                // Generate a complex maze layout with realistic patterns
+                const mazeSize = 25;
+                const maze = [];
+                
+                // Initialize maze with walls
+                for (let i = 0; i < mazeSize; i++) {
+                    maze[i] = [];
+                    for (let j = 0; j < mazeSize; j++) {
+                        maze[i][j] = 1; // Start with all walls
+                    }
+                }
+                
+                // Create maze using recursive backtracking algorithm
+                this.generateMazeRecursive(maze, 1, 1, mazeSize - 2, mazeSize - 2);
+                
+                // Ensure start and end are clear
+                maze[0][0] = 0;
+                maze[1][0] = 0;
+                maze[0][1] = 0;
+                maze[mazeSize-1][mazeSize-1] = 0;
+                maze[mazeSize-2][mazeSize-1] = 0;
+                maze[mazeSize-1][mazeSize-2] = 0;
+                
+                // Add some random obstacles for complexity
+                for (let i = 0; i < 15; i++) {
+                    const x = Math.floor(Math.random() * (mazeSize - 2)) + 1;
+                    const y = Math.floor(Math.random() * (mazeSize - 2)) + 1;
+                    if (maze[x][y] === 0) {
+                        maze[x][y] = 1;
+                    }
+                }
+                
+                return maze;
+            }
+            
+            generateMazeRecursive(maze, startX, startY, endX, endY) {
+                if (startX >= endX || startY >= endY) return;
+                
+                // Create horizontal and vertical walls
+                const wallX = Math.floor((startX + endX) / 2);
+                const wallY = Math.floor((startY + endY) / 2);
+                
+                // Create passages
+                for (let i = startX; i <= endX; i++) {
+                    maze[i][wallY] = 0;
+                }
+                for (let j = startY; j <= endY; j++) {
+                    maze[wallX][j] = 0;
+                }
+                
+                // Create random passages
+                const passages = [
+                    { x: wallX, y: startY + Math.floor(Math.random() * (wallY - startY)) },
+                    { x: wallX, y: wallY + Math.floor(Math.random() * (endY - wallY)) },
+                    { x: startX + Math.floor(Math.random() * (wallX - startX)), y: wallY },
+                    { x: wallX + Math.floor(Math.random() * (endX - wallX)), y: wallY }
+                ];
+                
+                passages.forEach(passage => {
+                    if (passage.x >= 0 && passage.x < maze.length && 
+                        passage.y >= 0 && passage.y < maze[0].length) {
+                        maze[passage.x][passage.y] = 0;
+                    }
+                });
+                
+                // Recursively generate sub-mazes
+                this.generateMazeRecursive(maze, startX, startY, wallX - 1, wallY - 1);
+                this.generateMazeRecursive(maze, wallX + 1, startY, endX, wallY - 1);
+                this.generateMazeRecursive(maze, startX, wallY + 1, wallX - 1, endY);
+                this.generateMazeRecursive(maze, wallX + 1, wallY + 1, endX, endY);
+            }
+            
+            createMaze() {
+                this.mazeLayout = this.generateMazeLayout();
+                const wallGeometry = new THREE.BoxGeometry(1, 10, 1);
+                const wallMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0xFF6B35,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                
+                for (let i = 0; i < this.mazeLayout.length; i++) {
+                    for (let j = 0; j < this.mazeLayout[i].length; j++) {
+                        if (this.mazeLayout[i][j] === 1) {
+                            const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+                            wall.position.set(
+                                (i - this.mazeLayout.length / 2) * 2,
+                                5,
+                                (j - this.mazeLayout[i].length / 2) * 2
+                            );
+                            wall.castShadow = true;
+                            wall.receiveShadow = true;
+                            this.mazeWalls.push(wall);
+                            this.scene.add(wall);
+                        }
+                    }
+                }
+            }
+            
+            generatePathfindingPath() {
+                // Simple A* pathfinding from start to end
+                const start = { x: 0, y: 0 };
+                const end = { x: this.mazeLayout.length - 1, y: this.mazeLayout[0].length - 1 };
+                
+                this.pathfindingPath = this.aStarPathfinding(start, end);
+                
+                // Visualize path
+                this.visualizePath();
+            }
+            
+            aStarPathfinding(start, end) {
+                // Simplified A* algorithm for maze navigation
+                const openSet = [start];
+                const closedSet = new Set();
+                const cameFrom = new Map();
+                const gScore = new Map();
+                const fScore = new Map();
+                
+                gScore.set(`${start.x},${start.y}`, 0);
+                fScore.set(`${start.x},${start.y}`, this.heuristic(start, end));
+                
+                while (openSet.length > 0) {
+                    let current = openSet.reduce((min, node) => 
+                        fScore.get(`${node.x},${node.y}`) < fScore.get(`${min.x},${min.y}`) ? node : min
+                    );
+                    
+                    if (current.x === end.x && current.y === end.y) {
+                        // Reconstruct path
+                        const path = [];
+                        while (cameFrom.has(`${current.x},${current.y}`)) {
+                            path.unshift(current);
+                            current = cameFrom.get(`${current.x},${current.y}`);
+                        }
+                        path.unshift(start);
+                        return path;
+                    }
+                    
+                    openSet.splice(openSet.indexOf(current), 1);
+                    closedSet.add(`${current.x},${current.y}`);
+                    
+                    // Check neighbors
+                    const neighbors = [
+                        { x: current.x + 1, y: current.y },
+                        { x: current.x - 1, y: current.y },
+                        { x: current.x, y: current.y + 1 },
+                        { x: current.x, y: current.y - 1 }
+                    ];
+                    
+                    for (const neighbor of neighbors) {
+                        if (neighbor.x < 0 || neighbor.x >= this.mazeLayout.length ||
+                            neighbor.y < 0 || neighbor.y >= this.mazeLayout[0].length ||
+                            this.mazeLayout[neighbor.x][neighbor.y] === 1 ||
+                            closedSet.has(`${neighbor.x},${neighbor.y}`)) {
+                            continue;
+                        }
+                        
+                        const tentativeGScore = gScore.get(`${current.x},${current.y}`) + 1;
+                        
+                        if (!openSet.some(node => node.x === neighbor.x && node.y === neighbor.y)) {
+                            openSet.push(neighbor);
+                        } else if (tentativeGScore >= gScore.get(`${neighbor.x},${neighbor.y}`)) {
+                            continue;
+                        }
+                        
+                        cameFrom.set(`${neighbor.x},${neighbor.y}`, current);
+                        gScore.set(`${neighbor.x},${neighbor.y}`, tentativeGScore);
+                        fScore.set(`${neighbor.x},${neighbor.y}`, tentativeGScore + this.heuristic(neighbor, end));
+                    }
+                }
+                
+                return [start]; // No path found
+            }
+            
+            heuristic(a, b) {
+                return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+            }
+            
+            visualizePath() {
+                // Clear existing path visualization
+                this.mazePath.forEach(pathSegment => {
+                    this.scene.remove(pathSegment);
+                });
+                this.mazePath = [];
+                
+                // Create path visualization
+                const pathGeometry = new THREE.SphereGeometry(0.3);
+                const pathMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0x00FF88,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                for (let i = 0; i < this.pathfindingPath.length; i++) {
+                    const pathPoint = new THREE.Mesh(pathGeometry, pathMaterial);
+                    pathPoint.position.set(
+                        (this.pathfindingPath[i].x - this.mazeLayout.length / 2) * 2,
+                        1.0,
+                        (this.pathfindingPath[i].y - this.mazeLayout[0].length / 2) * 2
+                    );
+                    this.mazePath.push(pathPoint);
+                    this.scene.add(pathPoint);
+                }
+            }
+            
             setupEventListeners() {
                 // Control sliders
                 const controls = ['altitude', 'forward', 'lateral', 'rotation', 'pitch', 'roll'];
@@ -538,12 +753,14 @@
                 // Buttons
                 document.getElementById('reset-btn').addEventListener('click', () => this.resetDrone());
                 document.getElementById('auto-fly-btn').addEventListener('click', () => this.toggleAutoFly());
+                document.getElementById('maze-mode-btn').addEventListener('click', () => this.toggleMazeMode());
                 document.getElementById('emergency-btn').addEventListener('click', () => this.emergencyStop());
                 
                 // Camera controls
                 document.getElementById('top-view').addEventListener('click', () => this.setCameraView('top'));
                 document.getElementById('side-view').addEventListener('click', () => this.setCameraView('side'));
                 document.getElementById('follow-view').addEventListener('click', () => this.setCameraView('follow'));
+                document.getElementById('maze-view').addEventListener('click', () => this.setCameraView('maze'));
                 document.getElementById('orbit-view').addEventListener('click', () => this.setCameraView('orbit'));
                 
                 // Keyboard controls
@@ -588,12 +805,14 @@
                 document.getElementById('signal-status').textContent = 
                     this.signalStrength;
                 document.getElementById('mode-status').textContent = 
-                    this.autoFlyMode ? 'Auto Fly' : 'Manual';
+                    this.mazeMode ? 'Maze Navigation' : (this.autoFlyMode ? 'Realistic Auto Fly' : 'Manual');
             }
             
             resetDrone() {
                 this.emergencyStop = false;
                 this.autoFlyMode = false;
+                this.mazeMode = false;
+                this.currentPathIndex = 0;
                 
                 const controls = ['altitude', 'forward', 'lateral', 'rotation', 'pitch', 'roll'];
                 const resetValues = [10, 0, 0, 0, 0, 0];
@@ -610,28 +829,163 @@
             
             toggleAutoFly() {
                 this.autoFlyMode = !this.autoFlyMode;
+                this.mazeMode = false;
                 if (this.autoFlyMode) {
                     this.startAutoFly();
+                }
+            }
+            
+            toggleMazeMode() {
+                this.mazeMode = !this.mazeMode;
+                this.autoFlyMode = false;
+                if (this.mazeMode) {
+                    this.startMazeAutoNavigation();
                 }
             }
             
             startAutoFly() {
                 if (!this.autoFlyMode) return;
                 
+                // Create a more complex flight path with waypoints
                 const time = Date.now() * 0.001;
-                const altitude = 15 + Math.sin(time * 0.5) * 5;
-                const forward = Math.sin(time * 0.3) * 10;
-                const lateral = Math.cos(time * 0.3) * 10;
-                const rotation = Math.sin(time * 0.2) * 30;
+                const waypoints = [
+                    { x: 0, y: 0, z: 8 },
+                    { x: 15, y: 10, z: 6 },
+                    { x: -10, y: 20, z: 10 },
+                    { x: 5, y: -15, z: 7 },
+                    { x: -20, y: -5, z: 9 },
+                    { x: 0, y: 0, z: 8 }
+                ];
                 
-                document.getElementById('altitude').value = altitude;
-                document.getElementById('altitude-value').value = altitude;
-                document.getElementById('forward').value = forward;
-                document.getElementById('forward-value').value = forward;
-                document.getElementById('lateral').value = lateral;
-                document.getElementById('lateral-value').value = lateral;
-                document.getElementById('rotation').value = rotation;
-                document.getElementById('rotation-value').value = rotation;
+                const currentWaypointIndex = Math.floor(time * 0.2) % waypoints.length;
+                const nextWaypointIndex = (currentWaypointIndex + 1) % waypoints.length;
+                const progress = (time * 0.2) % 1;
+                
+                const currentWaypoint = waypoints[currentWaypointIndex];
+                const nextWaypoint = waypoints[nextWaypointIndex];
+                
+                // Interpolate between waypoints with realistic movement
+                const targetPosition = {
+                    x: currentWaypoint.x + (nextWaypoint.x - currentWaypoint.x) * progress,
+                    y: currentWaypoint.y + (nextWaypoint.y - currentWaypoint.y) * progress,
+                    z: currentWaypoint.z + (nextWaypoint.z - currentWaypoint.z) * progress
+                };
+                
+                // Calculate direction to target
+                const direction = {
+                    x: targetPosition.x - this.dronePosition.x,
+                    y: targetPosition.y - this.dronePosition.y,
+                    z: targetPosition.z - this.dronePosition.z
+                };
+                
+                const distance = Math.sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+                
+                // Realistic drone movement with acceleration and deceleration
+                const maxSpeed = 0.4;
+                const acceleration = 0.02;
+                const decelerationDistance = 3.0;
+                
+                // Calculate current speed based on distance to target
+                let currentSpeed = maxSpeed;
+                if (distance < decelerationDistance) {
+                    currentSpeed = maxSpeed * (distance / decelerationDistance);
+                }
+                
+                // Add slight hover oscillation for realism
+                const hoverOffset = Math.sin(time * 3) * 0.3;
+                
+                // Calculate new position with realistic movement
+                const newPosition = {
+                    x: this.dronePosition.x + (direction.x / distance) * currentSpeed,
+                    y: this.dronePosition.y + (direction.y / distance) * currentSpeed,
+                    z: targetPosition.z + hoverOffset
+                };
+                
+                // Add slight lateral drift for realism
+                const driftAmount = 0.05;
+                const driftDirection = Math.sin(time * 2);
+                newPosition.x += driftDirection * driftAmount;
+                
+                // Add wind effects for more realism
+                const windStrength = 0.03;
+                const windDirection = Math.sin(time * 0.5) * windStrength;
+                newPosition.x += windDirection;
+                newPosition.y += Math.cos(time * 0.7) * windStrength * 0.5;
+                
+                // Simple obstacle avoidance
+                const avoidanceRadius = 3.0;
+                let avoidanceVector = { x: 0, y: 0, z: 0 };
+                
+                // Check obstacles for avoidance
+                for (const obstacle of this.obstacles) {
+                    const obstacleDistance = Math.sqrt(
+                        Math.pow(newPosition.x - obstacle.position.x, 2) +
+                        Math.pow(newPosition.y - obstacle.position.y, 2) +
+                        Math.pow(newPosition.z - obstacle.position.z, 2)
+                    );
+                    
+                    if (obstacleDistance < avoidanceRadius) {
+                        const avoidDirection = {
+                            x: newPosition.x - obstacle.position.x,
+                            y: newPosition.y - obstacle.position.y,
+                            z: newPosition.z - obstacle.position.z
+                        };
+                        const avoidLength = Math.sqrt(avoidDirection.x * avoidDirection.x + avoidDirection.y * avoidDirection.y + avoidDirection.z * avoidDirection.z);
+                        const avoidStrength = (avoidanceRadius - obstacleDistance) / avoidanceRadius;
+                        
+                        avoidanceVector.x += (avoidDirection.x / avoidLength) * avoidStrength * 0.5;
+                        avoidanceVector.y += (avoidDirection.y / avoidLength) * avoidStrength * 0.5;
+                        avoidanceVector.z += (avoidDirection.z / avoidLength) * avoidStrength * 0.5;
+                    }
+                }
+                
+                // Apply avoidance vector
+                newPosition.x += avoidanceVector.x;
+                newPosition.y += avoidanceVector.y;
+                newPosition.z += avoidanceVector.z;
+                
+                // Update controls with smooth interpolation
+                const smoothingFactor = 0.08;
+                const currentLateral = parseFloat(document.getElementById('lateral').value);
+                const currentForward = parseFloat(document.getElementById('forward').value);
+                const currentAltitude = parseFloat(document.getElementById('altitude').value);
+                
+                const newLateral = currentLateral + (newPosition.x - currentLateral) * smoothingFactor;
+                const newForward = currentForward + (newPosition.y - currentForward) * smoothingFactor;
+                const newAltitude = currentAltitude + (newPosition.z - currentAltitude) * smoothingFactor;
+                
+                document.getElementById('lateral').value = newLateral;
+                document.getElementById('lateral-value').value = newLateral;
+                document.getElementById('forward').value = newForward;
+                document.getElementById('forward-value').value = newForward;
+                document.getElementById('altitude').value = newAltitude;
+                document.getElementById('altitude-value').value = newAltitude;
+                
+                // Calculate realistic rotation with smooth turning
+                const targetAngle = Math.atan2(direction.x, direction.y) * 180 / Math.PI;
+                const currentRotation = parseFloat(document.getElementById('rotation').value);
+                
+                // Smooth rotation interpolation
+                let angleDiff = targetAngle - currentRotation;
+                if (angleDiff > 180) angleDiff -= 360;
+                if (angleDiff < -180) angleDiff += 360;
+                
+                const rotationSpeed = 0.03;
+                const newRotation = currentRotation + angleDiff * rotationSpeed;
+                
+                document.getElementById('rotation').value = newRotation;
+                document.getElementById('rotation-value').value = newRotation;
+                
+                // Add slight pitch and roll for realistic flight
+                const pitchAmount = Math.sin(time * 1.5) * 2;
+                const rollAmount = Math.cos(time * 2) * 1.5;
+                
+                // Update drone rotation for realistic flight dynamics
+                this.droneRotation = { 
+                    x: pitchAmount, 
+                    y: newRotation, 
+                    z: rollAmount 
+                };
                 
                 this.updateDronePosition();
                 
@@ -640,14 +994,164 @@
                 }
             }
             
+            startMazeAutoNavigation() {
+                if (!this.mazeMode) return;
+                
+                // Follow the pathfinding path with realistic drone behavior
+                if (this.currentPathIndex < this.pathfindingPath.length) {
+                    const targetPoint = this.pathfindingPath[this.currentPathIndex];
+                    const targetPosition = {
+                        x: (targetPoint.x - this.mazeLayout.length / 2) * 2,
+                        y: (targetPoint.y - this.mazeLayout[0].length / 2) * 2,
+                        z: 3.5 // Lower altitude for maze navigation
+                    };
+                    
+                    // Calculate distance and direction to target
+                    const direction = {
+                        x: targetPosition.x - this.dronePosition.x,
+                        y: targetPosition.y - this.dronePosition.y,
+                        z: targetPosition.z - this.dronePosition.z
+                    };
+                    
+                    const distance = Math.sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+                    
+                    // Realistic drone movement with acceleration and deceleration
+                    const maxSpeed = 0.3; // Much slower for very realistic movement
+                    const acceleration = 0.02;
+                    const decelerationDistance = 3.0; // Start decelerating even earlier
+                    
+                    // Calculate current speed based on distance to target
+                    let currentSpeed = maxSpeed;
+                    if (distance < decelerationDistance) {
+                        currentSpeed = maxSpeed * (distance / decelerationDistance);
+                    }
+                    
+                    // Add slight hover oscillation for realism
+                    const hoverOffset = Math.sin(Date.now() * 0.003) * 0.2; // More pronounced hover
+                    
+                    // Calculate new position with realistic movement
+                    const newPosition = {
+                        x: this.dronePosition.x + (direction.x / distance) * currentSpeed,
+                        y: this.dronePosition.y + (direction.y / distance) * currentSpeed,
+                        z: targetPosition.z + hoverOffset
+                    };
+                    
+                    // Add slight lateral drift for realism
+                    const driftAmount = 0.04; // More pronounced drift for realistic flight
+                    const driftDirection = Math.sin(Date.now() * 0.002);
+                    newPosition.x += driftDirection * driftAmount;
+                    
+                    // Simple obstacle avoidance for maze walls
+                    const avoidanceRadius = 2.5;
+                    let avoidanceVector = { x: 0, y: 0, z: 0 };
+                    
+                    // Check maze walls for avoidance
+                    for (const wall of this.mazeWalls) {
+                        const wallDistance = Math.sqrt(
+                            Math.pow(newPosition.x - wall.position.x, 2) +
+                            Math.pow(newPosition.y - wall.position.z, 2)
+                        );
+                        
+                        if (wallDistance < avoidanceRadius) {
+                            const avoidDirection = {
+                                x: newPosition.x - wall.position.x,
+                                y: newPosition.y - wall.position.z,
+                                z: 0
+                            };
+                            const avoidLength = Math.sqrt(avoidDirection.x * avoidDirection.x + avoidDirection.y * avoidDirection.y);
+                            const avoidStrength = (avoidanceRadius - wallDistance) / avoidanceRadius;
+                            
+                            avoidanceVector.x += (avoidDirection.x / avoidLength) * avoidStrength * 0.3;
+                            avoidanceVector.y += (avoidDirection.y / avoidLength) * avoidStrength * 0.3;
+                        }
+                    }
+                    
+                    // Apply avoidance vector
+                    newPosition.x += avoidanceVector.x;
+                    newPosition.y += avoidanceVector.y;
+                    
+                    // Update controls with smooth interpolation
+                    const smoothingFactor = 0.05; // Even slower interpolation for very realistic movement
+                    const currentLateral = parseFloat(document.getElementById('lateral').value);
+                    const currentForward = parseFloat(document.getElementById('forward').value);
+                    const currentAltitude = parseFloat(document.getElementById('altitude').value);
+                    
+                    const newLateral = currentLateral + (newPosition.x - currentLateral) * smoothingFactor;
+                    const newForward = currentForward + (newPosition.y - currentForward) * smoothingFactor;
+                    const newAltitude = currentAltitude + (newPosition.z - currentAltitude) * smoothingFactor;
+                    
+                    document.getElementById('lateral').value = newLateral;
+                    document.getElementById('lateral-value').value = newLateral;
+                    document.getElementById('forward').value = newForward;
+                    document.getElementById('forward-value').value = newForward;
+                    document.getElementById('altitude').value = newAltitude;
+                    document.getElementById('altitude-value').value = newAltitude;
+                    
+                    // Calculate realistic rotation with smooth turning
+                    const targetAngle = Math.atan2(direction.x, direction.y) * 180 / Math.PI;
+                    const currentRotation = parseFloat(document.getElementById('rotation').value);
+                    
+                    // Smooth rotation interpolation
+                    let angleDiff = targetAngle - currentRotation;
+                    if (angleDiff > 180) angleDiff -= 360;
+                    if (angleDiff < -180) angleDiff += 360;
+                    
+                    const rotationSpeed = 0.02; // Even slower rotation for very realistic turning
+                    const newRotation = currentRotation + angleDiff * rotationSpeed;
+                    
+                    document.getElementById('rotation').value = newRotation;
+                    document.getElementById('rotation-value').value = newRotation;
+                    
+                    // Add slight pitch and roll for realistic flight
+                    const pitchAmount = Math.sin(Date.now() * 0.001) * 1.0; // Reduced pitch
+                    const rollAmount = Math.cos(Date.now() * 0.0015) * 0.8; // Reduced roll
+                    
+                    // Update drone rotation for realistic flight dynamics
+                    this.droneRotation = { 
+                        x: pitchAmount, 
+                        y: newRotation, 
+                        z: rollAmount 
+                    };
+                    
+                    // Check if reached target with tolerance
+                    if (distance < 0.8) {
+                        this.currentPathIndex++;
+                        // Add a longer pause at waypoints for more realistic behavior
+                        setTimeout(() => {
+                            if (this.mazeMode) {
+                                requestAnimationFrame(() => this.startMazeAutoNavigation());
+                            }
+                        }, 300);
+                        return;
+                    }
+                } else {
+                    // Reached the end - hover in place
+                    const hoverOffset = Math.sin(Date.now() * 0.002) * 0.2;
+                    const currentAltitude = parseFloat(document.getElementById('altitude').value);
+                    const targetAltitude = 3.5 + hoverOffset;
+                    
+                    document.getElementById('altitude').value = targetAltitude;
+                    document.getElementById('altitude-value').value = targetAltitude;
+                }
+                
+                this.updateDronePosition();
+                
+                if (this.mazeMode) {
+                    requestAnimationFrame(() => this.startMazeAutoNavigation());
+                }
+            }
+            
             emergencyStop() {
                 this.emergencyStop = true;
                 this.autoFlyMode = false;
+                this.mazeMode = false;
                 this.droneSpeed = 0;
+                this.currentCameraView = 'orbit';
                 this.updateStatus();
             }
             
             setCameraView(view) {
+                this.currentCameraView = view;
                 switch(view) {
                     case 'top':
                         this.camera.position.set(0, 50, 0);
@@ -658,12 +1162,28 @@
                         this.camera.lookAt(0, 0, 0);
                         break;
                     case 'follow':
-                        this.camera.position.set(
-                            this.dronePosition.x + 10,
-                            this.dronePosition.y + 5,
-                            this.dronePosition.z + 10
-                        );
+                        // Dynamic follow camera with smooth movement
+                        const followDistance = 12;
+                        const followHeight = 6;
+                        const followOffset = 8;
+                        
+                        const targetCameraPos = {
+                            x: this.dronePosition.x + followOffset,
+                            y: this.dronePosition.y + followHeight,
+                            z: this.dronePosition.z + followOffset
+                        };
+                        
+                        // Smooth camera movement
+                        const cameraSmoothing = 0.05;
+                        this.camera.position.x += (targetCameraPos.x - this.camera.position.x) * cameraSmoothing;
+                        this.camera.position.y += (targetCameraPos.y - this.camera.position.y) * cameraSmoothing;
+                        this.camera.position.z += (targetCameraPos.z - this.camera.position.z) * cameraSmoothing;
+                        
                         this.camera.lookAt(this.dronePosition.x, this.dronePosition.y, this.dronePosition.z);
+                        break;
+                    case 'maze':
+                        this.camera.position.set(0, 20, 0);
+                        this.camera.lookAt(0, 0, 0);
                         break;
                     case 'orbit':
                         this.camera.position.set(20, 20, 20);
@@ -730,13 +1250,25 @@
                 // Update controls
                 this.controls.update();
                 
-                // Animate propellers
+                // Animate propellers with realistic speed variation
                 if (this.drone && !this.emergencyStop) {
+                    const time = Date.now() * 0.001;
+                    const baseSpeed = 0.4;
+                    const speedVariation = Math.sin(time * 2) * 0.1;
+                    
                     this.drone.children.forEach((child, index) => {
                         if (index >= 4 && index < 8) { // Propellers
-                            child.rotation.y += 0.3;
+                            // Vary propeller speed based on movement
+                            const speedMultiplier = this.autoFlyMode ? 1.8 : 1.0;
+                            child.rotation.y += (baseSpeed + speedVariation) * speedMultiplier;
                         }
                     });
+                    
+                    // Add slight drone body oscillation for realism
+                    if (this.autoFlyMode) {
+                        const bodyOscillation = Math.sin(time * 3) * 0.02;
+                        this.drone.rotation.z += bodyOscillation;
+                    }
                 }
                 
                 // Update battery and signal
@@ -754,6 +1286,26 @@
                     Math.pow(currentPos.y - this.dronePosition.y, 2) +
                     Math.pow(currentPos.z - this.dronePosition.z, 2)
                 ) * 10;
+                
+                // Update follow camera continuously
+                if (this.currentCameraView === 'follow') {
+                    const followDistance = 12;
+                    const followHeight = 6;
+                    const followOffset = 8;
+                    
+                    const targetCameraPos = {
+                        x: this.dronePosition.x + followOffset,
+                        y: this.dronePosition.y + followHeight,
+                        z: this.dronePosition.z + followOffset
+                    };
+                    
+                    const cameraSmoothing = 0.05;
+                    this.camera.position.x += (targetCameraPos.x - this.camera.position.x) * cameraSmoothing;
+                    this.camera.position.y += (targetCameraPos.y - this.camera.position.y) * cameraSmoothing;
+                    this.camera.position.z += (targetCameraPos.z - this.camera.position.z) * cameraSmoothing;
+                    
+                    this.camera.lookAt(this.dronePosition.x, this.dronePosition.y, this.dronePosition.z);
+                }
                 
                 this.updateStatus();
                 this.renderer.render(this.scene, this.camera);
