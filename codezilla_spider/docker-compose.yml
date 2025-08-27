@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # Frontend React Application
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3001:3001"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8001
+      - REACT_APP_BLOCKCHAIN_NETWORK=sepolia
+    depends_on:
+      - backend
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    networks:
+      - genechain-network
+
+  # Backend FastAPI Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/genechain
+      - MONGODB_URL=mongodb://mongo:27017/genechain
+      - REDIS_URL=redis://redis:6379
+      - BLOCKCHAIN_NETWORK=sepolia
+      - INFURA_API_KEY=${INFURA_API_KEY}
+    depends_on:
+      - postgres
+      - mongo
+      - redis
+    volumes:
+      - ./backend:/app
+      - model-storage:/app/models
+    networks:
+      - genechain-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=genechain
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - genechain-network
+
+  # MongoDB Database
+  mongo:
+    image: mongo:7
+    environment:
+      - MONGO_INITDB_DATABASE=genechain
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - genechain-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - genechain-network
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - genechain-network
+
+volumes:
+  postgres-data:
+  mongo-data:
+  redis-data:
+  model-storage:
+
+networks:
+  genechain-network:
+    driver: bridge
+
+

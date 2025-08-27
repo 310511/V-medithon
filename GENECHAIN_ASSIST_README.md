@@ -235,3 +235,4 @@ This feature is part of the MedChain healthcare platform and follows the same li
 **GeneChain Assist** — Building trust in the future of medicine through blockchain-powered genetic therapy validation and safety protocols.
 
 
+

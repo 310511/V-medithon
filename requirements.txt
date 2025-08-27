@@ -2,6 +2,7 @@
 # This file ensures Render uses pip instead of uv
 
 # Core FastAPI dependencies
+flask==2.3.3
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 pandas==2.1.3
