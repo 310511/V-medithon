@@ -42,8 +42,8 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 15px;
             padding: 20px;
-            width: 300px;
-            z-index: 1000;
+            width: 320px;
+            z-index: 9999;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
@@ -131,8 +131,9 @@
 
         .action-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-top: 15px;
+            flex-wrap: wrap;
         }
 
         .action-btn {
@@ -166,6 +167,34 @@
         .action-btn#regenerateObstaclesBtn:hover {
             background: rgba(255, 165, 0, 0.3);
             box-shadow: 0 0 15px rgba(255, 165, 0, 0.4);
+        }
+
+        .action-btn#obstacleAvoidanceBtn {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #ffd700;
+            color: #ffd700;
+            font-weight: bold;
+            flex: 2;
+        }
+
+        .action-btn#obstacleAvoidanceBtn:hover {
+            background: rgba(255, 215, 0, 0.4);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .action-btn#obstacleAvoidanceBtn.active {
+            background: #ffd700;
+            color: #000;
+        }
+
+        .action-btn#obstacleAvoidanceBtn {
+            animation: pulse-gold 2s infinite;
+        }
+
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
         }
 
         .status-panel {
@@ -408,6 +437,7 @@
 
             <div class="action-buttons">
                 <button class="action-btn" id="autoFlyBtn">Auto Fly</button>
+                <button class="action-btn" id="obstacleAvoidanceBtn">🎯 Intelligent Navigation</button>
                 <button class="action-btn" id="resetBtn">Reset</button>
                 <button class="action-btn" id="emergencyBtn">Emergency</button>
                 <button class="action-btn" id="regenerateObstaclesBtn">🔄 New Obstacles</button>
@@ -507,6 +537,14 @@
         let autoFlyPhase = 'idle'; // idle, takeoff, flight, landing, complete
         let autoFlyProgress = 0;
         let flightPathPoints = [];
+        
+        // Intelligent Obstacle Avoidance system
+        let obstacleAvoidanceMode = false;
+        let currentWaypoint = 0;
+        let waypoints = [];
+        let detectedObstacles = [];
+        let avoidancePath = [];
+        let pathfindingMode = false;
 
         function initScene() {
             scene = new THREE.Scene();
@@ -539,6 +577,7 @@
             createEnvironment();
             createDrone();
             createFlightPath();
+            generateWaypoints();
             setupEventListeners();
             animate();
             
@@ -617,6 +656,173 @@
 
             addObstacles();
         }
+        
+        function generateWaypoints() {
+            // Generate waypoints for intelligent navigation
+            waypoints = [
+                { x: -50, y: 15, z: -50 }, // Start point
+                { x: -30, y: 20, z: -30 }, // Waypoint 1
+                { x: 0, y: 25, z: 0 },     // Waypoint 2
+                { x: 30, y: 20, z: 30 },   // Waypoint 3
+                { x: 50, y: 15, z: 50 }    // End point
+            ];
+            
+            // Visualize waypoints
+            visualizeWaypoints();
+        }
+        
+        function visualizeWaypoints() {
+            // Clear existing waypoint visualization
+            avoidancePath.forEach(pathSegment => {
+                scene.remove(pathSegment);
+            });
+            avoidancePath = [];
+            
+            // Create waypoint visualization
+            const waypointGeometry = new THREE.SphereGeometry(0.5);
+            const waypointMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x00AAFF,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            for (let i = 0; i < waypoints.length; i++) {
+                const waypoint = new THREE.Mesh(waypointGeometry, waypointMaterial);
+                waypoint.position.set(waypoints[i].x, waypoints[i].y, waypoints[i].z);
+                avoidancePath.push(waypoint);
+                scene.add(waypoint);
+            }
+        }
+        
+        function detectObstacles() {
+            detectedObstacles = [];
+            const detectionRadius = 35; // Larger detection radius for earlier warning
+            
+            obstacles.forEach(obstacle => {
+                const distance = Math.sqrt(
+                    Math.pow(dronePosition.x - obstacle.position.x, 2) +
+                    Math.pow(dronePosition.y - obstacle.position.y, 2) +
+                    Math.pow(dronePosition.z - obstacle.position.z, 2)
+                );
+                
+                if (distance < detectionRadius) {
+                    detectedObstacles.push({
+                        position: obstacle.position,
+                        distance: distance,
+                        radius: detectionRadius,
+                        size: obstacle.size || 2 // Add obstacle size for better avoidance
+                    });
+                }
+            });
+            
+            return detectedObstacles;
+        }
+        
+        function calculateAvoidanceVector(targetPosition) {
+            let avoidanceVector = { x: 0, y: 0, z: 0 };
+            const baseAvoidanceStrength = 2.0; // Increased base strength
+            
+            detectedObstacles.forEach(obstacle => {
+                const direction = {
+                    x: dronePosition.x - obstacle.position.x,
+                    y: dronePosition.y - obstacle.position.y,
+                    z: dronePosition.z - obstacle.position.z
+                };
+                
+                const distance = Math.sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+                const safeDistance = obstacle.size + 5; // Safe distance from obstacle
+                
+                if (distance < safeDistance) {
+                    // Stronger avoidance when closer to obstacle
+                    const strength = Math.max(0, (safeDistance - distance) / safeDistance);
+                    const avoidanceStrength = baseAvoidanceStrength * strength * strength; // Quadratic falloff
+                    
+                    const normalizedDirection = {
+                        x: direction.x / distance,
+                        y: direction.y / distance,
+                        z: direction.z / distance
+                    };
+                    
+                    avoidanceVector.x += normalizedDirection.x * avoidanceStrength;
+                    avoidanceVector.y += normalizedDirection.y * avoidanceStrength;
+                    avoidanceVector.z += normalizedDirection.z * avoidanceStrength;
+                }
+            });
+            
+            return avoidanceVector;
+        }
+        
+        function calculateOptimalPath(currentPosition, targetPosition) {
+            // Calculate direct path to target
+            const directPath = {
+                x: targetPosition.x - currentPosition.x,
+                y: targetPosition.y - currentPosition.y,
+                z: targetPosition.z - currentPosition.z
+            };
+            
+            // Calculate direct path length
+            const directPathLength = Math.sqrt(directPath.x * directPath.x + directPath.y * directPath.y + directPath.z * directPath.z);
+            
+            // Apply obstacle avoidance
+            const avoidanceVector = calculateAvoidanceVector(targetPosition);
+            
+            // Calculate avoidance vector length
+            const avoidanceLength = Math.sqrt(avoidanceVector.x * avoidanceVector.x + avoidanceVector.y * avoidanceVector.y + avoidanceVector.z * avoidanceVector.z);
+            
+            // Weight the avoidance based on how strong it is
+            const avoidanceWeight = Math.min(1.0, avoidanceLength / directPathLength * 3.0); // Scale avoidance appropriately
+            
+            // Combine direct path with weighted avoidance
+            const optimalPath = {
+                x: directPath.x + avoidanceVector.x * avoidanceWeight,
+                y: directPath.y + avoidanceVector.y * avoidanceWeight,
+                z: directPath.z + avoidanceVector.z * avoidanceWeight
+            };
+            
+            // Normalize the path
+            const pathLength = Math.sqrt(optimalPath.x * optimalPath.x + optimalPath.y * optimalPath.y + optimalPath.z * optimalPath.z);
+            
+            if (pathLength > 0) {
+                return {
+                    x: optimalPath.x / pathLength,
+                    y: optimalPath.y / pathLength,
+                    z: optimalPath.z / pathLength
+                };
+            } else {
+                // Fallback to direct path if optimal path is zero
+                return {
+                    x: directPath.x / directPathLength,
+                    y: directPath.y / directPathLength,
+                    z: directPath.z / directPathLength
+                };
+            }
+        }
+        
+        function highlightDetectedObstacles() {
+            // Reset all obstacle colors
+            obstacles.forEach(obstacle => {
+                if (obstacle.mesh) {
+                    obstacle.mesh.material.color.setHex(obstacle.originalColor);
+                    obstacle.mesh.material.emissive = new THREE.Color(0x000000);
+                    obstacle.mesh.material.emissiveIntensity = 0;
+                }
+            });
+            
+            // Highlight detected obstacles
+            detectedObstacles.forEach(detectedObstacle => {
+                const obstacle = obstacles.find(obs => 
+                    obs.position.x === detectedObstacle.position.x &&
+                    obs.position.y === detectedObstacle.position.y &&
+                    obs.position.z === detectedObstacle.position.z
+                );
+                
+                if (obstacle && obstacle.mesh) {
+                    obstacle.mesh.material.color.setHex(0xFF4444);
+                    obstacle.mesh.material.emissive = new THREE.Color(0xFF0000);
+                    obstacle.mesh.material.emissiveIntensity = 0.3;
+                }
+            });
+        }
 
         function addObstacles() {
             // Clear existing obstacles
@@ -692,11 +898,15 @@
                 obstacle.receiveShadow = true;
                 scene.add(obstacle);
                 
+                // Calculate obstacle size for avoidance
+                const obstacleSize = Math.max(scale * 6, scale * 8, scale * 4); // Use largest dimension
+                
                 // Store obstacle data for collision detection
                 obstacles.push({
                     mesh: obstacle,
                     position: { x: x, y: height, z: z },
                     scale: scale,
+                    size: obstacleSize, // Add size for avoidance calculation
                     originalColor: color,
                     rotationY: rotationY,
                     type: obstacleType < 0.4 ? 'building' : obstacleType < 0.7 ? 'tower' : 'block'
@@ -977,10 +1187,11 @@
             setupJoystick('forwardJoystick', 'forwardStick', 'forward');
             setupJoystick('lateralJoystick', 'lateralStick', 'lateral');
 
-            document.getElementById('autoFlyBtn').addEventListener('click', toggleAutoFly);
-            document.getElementById('resetBtn').addEventListener('click', resetDrone);
-            document.getElementById('emergencyBtn').addEventListener('click', emergencyStop);
-            document.getElementById('regenerateObstaclesBtn').addEventListener('click', regenerateObstacles);
+                    document.getElementById('autoFlyBtn').addEventListener('click', toggleAutoFly);
+        document.getElementById('obstacleAvoidanceBtn').addEventListener('click', toggleObstacleAvoidance);
+        document.getElementById('resetBtn').addEventListener('click', resetDrone);
+        document.getElementById('emergencyBtn').addEventListener('click', emergencyStop);
+        document.getElementById('regenerateObstaclesBtn').addEventListener('click', regenerateObstacles);
 
             window.addEventListener('resize', onWindowResize);
         }
@@ -1126,6 +1337,8 @@
                 // Reset auto fly state
                 autoFlyPhase = 'idle';
                 isAutoFlying = false;
+                obstacleAvoidanceMode = false;
+                currentWaypoint = 0;
                 document.getElementById('autoFlyBtn').textContent = 'Auto Fly';
                 document.getElementById('autoFlyBtn').classList.remove('active');
             });
@@ -1133,6 +1346,8 @@
 
         function emergencyStop() {
             isAutoFlying = false;
+            obstacleAvoidanceMode = false;
+            currentWaypoint = 0;
             document.getElementById('autoFlyBtn').textContent = 'Auto Fly';
             document.getElementById('autoFlyBtn').classList.remove('active');
             
@@ -1226,6 +1441,12 @@
             
             const time = Date.now() * 0.001;
             
+            // Check if obstacle avoidance mode is active
+            if (obstacleAvoidanceMode) {
+                updateIntelligentNavigation();
+                return;
+            }
+            
             switch (autoFlyPhase) {
                 case 'takeoff':
                     autoFlyProgress += 0.02;
@@ -1288,6 +1509,202 @@
                         drone.position.y = dronePosition.y;
                     }
                     break;
+            }
+        }
+        
+        function updateIntelligentNavigation() {
+            if (!obstacleAvoidanceMode || currentWaypoint >= waypoints.length) return;
+            
+            // Get current target waypoint
+            const targetWaypoint = waypoints[currentWaypoint];
+            
+            // Detect obstacles in the environment
+            detectObstacles();
+            highlightDetectedObstacles();
+            
+            // Calculate distance to target
+            const distance = Math.sqrt(
+                Math.pow(targetWaypoint.x - dronePosition.x, 2) +
+                Math.pow(targetWaypoint.y - dronePosition.y, 2) +
+                Math.pow(targetWaypoint.z - dronePosition.z, 2)
+            );
+            
+            // Enhanced collision detection and avoidance with dramatic turning
+            let movementDirection = { x: 0, z: 0 };
+            let currentSpeed = 0.3;
+            
+            if (detectedObstacles.length > 0) {
+                const closestObstacle = detectedObstacles.reduce((closest, obstacle) => 
+                    obstacle.distance < closest.distance ? obstacle : closest
+                );
+                
+                // Dramatic avoidance when very close
+                if (closestObstacle.distance < 10) {
+                    // Calculate perpendicular avoidance direction for dramatic turning
+                    const toObstacle = {
+                        x: closestObstacle.position.x - dronePosition.x,
+                        z: closestObstacle.position.z - dronePosition.z
+                    };
+                    
+                    // Create perpendicular vector (90-degree turn)
+                    const perpendicular = {
+                        x: -toObstacle.z,
+                        z: toObstacle.x
+                    };
+                    
+                    // Normalize perpendicular direction
+                    const perpLength = Math.sqrt(perpendicular.x * perpendicular.x + perpendicular.z * perpendicular.z);
+                    if (perpLength > 0) {
+                        movementDirection.x = perpendicular.x / perpLength;
+                        movementDirection.z = perpendicular.z / perpLength;
+                    }
+                    
+                    currentSpeed = 0.15; // Slower for dramatic turns
+                } else if (closestObstacle.distance < 25) {
+                    // Calculate dramatic avoidance path
+                    const optimalDirection = calculateOptimalPath(dronePosition, targetWaypoint);
+                    const avoidanceVector = calculateAvoidanceVector(targetWaypoint);
+                    
+                    // Much stronger avoidance for visible turning
+                    const avoidanceStrength = Math.max(0, (25 - closestObstacle.distance) / 25);
+                    const avoidanceWeight = avoidanceStrength * 5.0; // 5x stronger for dramatic effect
+                    
+                    // Blend with heavy avoidance bias
+                    movementDirection.x = optimalDirection.x + avoidanceVector.x * avoidanceWeight;
+                    movementDirection.z = optimalDirection.z + avoidanceVector.z * avoidanceWeight;
+                    
+                    // Normalize
+                    const directionLength = Math.sqrt(movementDirection.x * movementDirection.x + movementDirection.z * movementDirection.z);
+                    if (directionLength > 0) {
+                        movementDirection.x /= directionLength;
+                        movementDirection.z /= directionLength;
+                    }
+                    
+                    currentSpeed = 0.2; // Moderate speed for visible avoidance
+                } else {
+                    // Normal movement when obstacles are far
+                    const optimalDirection = calculateOptimalPath(dronePosition, targetWaypoint);
+                    movementDirection = optimalDirection;
+                    currentSpeed = 0.3;
+                }
+            } else {
+                // No obstacles - direct path
+                const optimalDirection = calculateOptimalPath(dronePosition, targetWaypoint);
+                movementDirection = optimalDirection;
+                currentSpeed = 0.3;
+            }
+            
+            // Add slight hover oscillation for realism
+            const hoverOffset = Math.sin(Date.now() * 0.003) * 0.2;
+            
+            const newPosition = {
+                x: dronePosition.x + movementDirection.x * currentSpeed,
+                y: targetWaypoint.y + hoverOffset,
+                z: dronePosition.z + movementDirection.z * currentSpeed
+            };
+            
+            // Update drone position
+            dronePosition.x = newPosition.x;
+            dronePosition.y = newPosition.y;
+            dronePosition.z = newPosition.z;
+            drone.position.set(dronePosition.x, dronePosition.y, dronePosition.z);
+            
+            // Dramatic rotation for visible turning behavior
+            const targetAngle = Math.atan2(movementDirection.x, movementDirection.z);
+            const currentRotation = drone.rotation.y;
+            
+            // Calculate angle difference
+            let angleDiff = targetAngle - currentRotation;
+            if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+            if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+            
+            // Much faster rotation for dramatic turning
+            let rotationSpeed = 0.08; // Faster base rotation
+            
+            if (detectedObstacles.length > 0) {
+                const closestObstacle = detectedObstacles.reduce((closest, obstacle) => 
+                    obstacle.distance < closest.distance ? obstacle : closest
+                );
+                
+                if (closestObstacle.distance < 10) {
+                    // Very fast rotation for dramatic avoidance
+                    rotationSpeed = 0.25;
+                } else if (closestObstacle.distance < 25) {
+                    // Fast rotation for visible avoidance
+                    rotationSpeed = 0.18;
+                }
+            }
+            
+            // Apply rotation with dramatic interpolation
+            drone.rotation.y = currentRotation + angleDiff * rotationSpeed;
+            
+            // Dramatic banking effect for visible turning
+            const pitchAmount = Math.sin(Date.now() * 0.001) * 0.15;
+            let rollAmount = Math.cos(Date.now() * 0.0015) * 0.1;
+            
+            // Add dramatic banking effect based on turn direction
+            const turnAngle = Math.abs(angleDiff);
+            if (turnAngle > 0.05) { // Lower threshold for more banking
+                // Much stronger banking roll for dramatic effect
+                const bankingRoll = Math.sin(angleDiff) * Math.min(turnAngle * 4, 0.8); // 2x stronger banking
+                rollAmount += bankingRoll;
+                
+                // Add extra pitch when turning sharply
+                if (turnAngle > 0.3) {
+                    const turnPitch = Math.sin(angleDiff) * 0.2;
+                    drone.rotation.x = pitchAmount + turnPitch;
+                } else {
+                    drone.rotation.x = pitchAmount;
+                }
+            } else {
+                drone.rotation.x = pitchAmount;
+            }
+            
+            drone.rotation.z = rollAmount;
+            
+            // Check if reached waypoint with tolerance
+            if (distance < 3.0) {
+                currentWaypoint++;
+                // No pause - continue immediately for smooth navigation
+                return;
+            }
+            
+            // Update status with dramatic turning indicators
+            const obstacleCount = detectedObstacles.length;
+            const isAvoiding = detectedObstacles.some(obs => obs.distance < 25);
+            const isDramaticTurning = detectedObstacles.some(obs => obs.distance < 10);
+            
+            let statusText = `Intelligent Navigation (${obstacleCount} obstacles detected)`;
+            if (isDramaticTurning && turnAngle > 0.5) {
+                statusText = `Intelligent Navigation (${obstacleCount} obstacles detected - DRAMATIC TURN!)`;
+            } else if (isAvoiding && turnAngle > 0.2) {
+                statusText = `Intelligent Navigation (${obstacleCount} obstacles detected - VISIBLE TURNING!)`;
+            } else if (isAvoiding) {
+                statusText = `Intelligent Navigation (${obstacleCount} obstacles detected - AVOIDING!)`;
+            }
+            
+            updateStatus('droneStatus', statusText);
+            updateStatus('altitude', `${dronePosition.y.toFixed(1)}m`);
+            updateStatus('speed', `${(currentSpeed * 10).toFixed(1)} m/s`);
+        }
+        
+        function toggleObstacleAvoidance() {
+            obstacleAvoidanceMode = !obstacleAvoidanceMode;
+            if (obstacleAvoidanceMode) {
+                // Reset waypoint index and start intelligent navigation
+                currentWaypoint = 0;
+                isAutoFlying = true;
+                autoFlyPhase = 'flight';
+                updateStatus('droneStatus', 'Intelligent Navigation');
+                document.getElementById('autoFlyBtn').textContent = 'Stop Navigation';
+                document.getElementById('autoFlyBtn').classList.add('active');
+            } else {
+                // Stop intelligent navigation
+                isAutoFlying = false;
+                autoFlyPhase = 'idle';
+                updateStatus('droneStatus', 'Ready');
+                document.getElementById('autoFlyBtn').textContent = 'Auto Fly';
+                document.getElementById('autoFlyBtn').classList.remove('active');
             }
         }
 
