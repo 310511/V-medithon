@@ -1,16 +1,25 @@
 services:
   - type: web
-    name: shine2-medical-backend
-    env: python
+    name: shine2-medical-frontend
+    env: static
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
-      - key: PORT
-        value: 8000
       - key: NODE_VERSION
         value: 18
-    # rootDir: codezilla_spider
+      - key: VITE_API_URL
+        value: https://shine2-medical-backend.onrender.com
+      - key: VITE_APP_NAME
+        value: "SHINE2 Medical Platform"
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: "public, max-age=31536000, immutable"
+      - path: /assets/*
+        name: Cache-Control
+        value: "public, max-age=31536000, immutable"
+      - path: /index.html
+        name: Cache-Control
+        value: "no-cache"
