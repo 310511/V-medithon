@@ -2141,6 +2141,119 @@ const UnifiedGeneChain: React.FC = () => {
           <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Immutable genomic data integrity and audit trail</p>
         </div>
 
+        {/* GeneTrust+FL USP Banner */}
+        <div className={`mb-8 p-6 rounded-xl border ${isDarkMode ? 'bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-700/50' : 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200'} shadow-lg`}>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              🏆 GeneTrust+FL from Shine Healthcare Hackathon 2025
+            </h2>
+            <p className={`text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
+              GeneTrust+FL is the first unified platform combining AI-optimized CRISPR, Federated Learning, and Blockchain for precision gene editing and privacy-preserving medical AI.
+            </p>
+          </div>
+        </div>
+
+        {/* GeneTrust+FL Features Grid */}
+        <div className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* AI-Driven CRISPR Optimization */}
+            <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg hover:shadow-xl transition-all duration-300`}>
+              <div className="flex items-start space-x-4">
+                <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'} flex-shrink-0`}>
+                  <Dna className="w-8 h-8 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-3 text-blue-600">AI-Driven CRISPR Optimization</h3>
+                  <div className={`mb-3 p-3 rounded-lg ${isDarkMode ? 'bg-red-900/20 border border-red-700/30' : 'bg-red-50 border border-red-200'}`}>
+                    <p className="text-sm font-medium text-red-600 mb-1">Problem:</p>
+                    <p className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>
+                      Over 50% of CRISPR experiments face off-target effects and irreproducibility (Nature Biotechnology, 2020).
+                    </p>
+                  </div>
+                  <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-green-900/20 border border-green-700/30' : 'bg-green-50 border border-green-200'}`}>
+                    <p className="text-sm font-medium text-green-600 mb-1">Solution:</p>
+                    <p className={`text-sm ${isDarkMode ? 'text-green-300' : 'text-green-700'}`}>
+                      DNABERT-powered AI and IoT lab sensors for precise gRNA design and reproducible lab conditions.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Federated Learning for Medical AI */}
+            <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg hover:shadow-xl transition-all duration-300`}>
+              <div className="flex items-start space-x-4">
+                <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-purple-900/30' : 'bg-purple-100'} flex-shrink-0`}>
+                  <Network className="w-8 h-8 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-3 text-purple-600">Federated Learning for Medical AI</h3>
+                  <div className={`mb-3 p-3 rounded-lg ${isDarkMode ? 'bg-red-900/20 border border-red-700/30' : 'bg-red-50 border border-red-200'}`}>
+                    <p className="text-sm font-medium text-red-600 mb-1">Problem:</p>
+                    <p className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>
+                      80% of medical AI models are trained on narrow datasets due to privacy laws (The Lancet Digital Health, 2021).
+                    </p>
+                  </div>
+                  <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-green-900/20 border border-green-700/30' : 'bg-green-50 border border-green-200'}`}>
+                    <p className="text-sm font-medium text-green-600 mb-1">Solution:</p>
+                    <p className={`text-sm ${isDarkMode ? 'text-green-300' : 'text-green-700'}`}>
+                      Enables cross-hospital model training without sharing raw patient data.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Blockchain-Powered Data Security */}
+            <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg hover:shadow-xl transition-all duration-300`}>
+              <div className="flex items-start space-x-4">
+                <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-green-900/30' : 'bg-green-100'} flex-shrink-0`}>
+                  <Shield className="w-8 h-8 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-3 text-green-600">Blockchain-Powered Data Security</h3>
+                  <div className={`mb-3 p-3 rounded-lg ${isDarkMode ? 'bg-red-900/20 border border-red-700/30' : 'bg-red-50 border border-red-200'}`}>
+                    <p className="text-sm font-medium text-red-600 mb-1">Problem:</p>
+                    <p className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>
+                      Sensitive genomic data poses ethical, legal, and security risks.
+                    </p>
+                  </div>
+                  <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-green-900/20 border border-green-700/30' : 'bg-green-50 border border-green-200'}`}>
+                    <p className="text-sm font-medium text-green-600 mb-1">Solution:</p>
+                    <p className={`text-sm ${isDarkMode ? 'text-green-300' : 'text-green-700'}`}>
+                      Immutable blockchain logs + smart contracts for secure and automated data sharing.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Global Collaboration Dashboard */}
+            <div className={`p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg hover:shadow-xl transition-all duration-300`}>
+              <div className="flex items-start space-x-4">
+                <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-orange-900/30' : 'bg-orange-100'} flex-shrink-0`}>
+                  <Globe className="w-8 h-8 text-orange-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-3 text-orange-600">Global Collaboration Dashboard</h3>
+                  <div className={`mb-3 p-3 rounded-lg ${isDarkMode ? 'bg-red-900/20 border border-red-700/30' : 'bg-red-50 border border-red-200'}`}>
+                    <p className="text-sm font-medium text-red-600 mb-1">Problem:</p>
+                    <p className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>
+                      Fragmented data systems and lack of incentives slow collaboration.
+                    </p>
+                  </div>
+                  <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-green-900/20 border border-green-700/30' : 'bg-green-50 border border-green-200'}`}>
+                    <p className="text-sm font-medium text-green-600 mb-1">Solution:</p>
+                    <p className={`text-sm ${isDarkMode ? 'text-green-300' : 'text-green-700'}`}>
+                      Unified dashboard with tokenized rewards for contributors and global research insights.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Top Navigation Tabs */}
         <div className={`flex space-x-1 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'} p-1 rounded-lg mb-6`}>
           {navigationItems.map((item) => (
