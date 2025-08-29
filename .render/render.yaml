@@ -1,18 +1,11 @@
-# =============================================================================
-# SHINE2 Medical Platform - FRONTEND DEPLOYMENT (STATIC SITE)
-# =============================================================================
-# IMPORTANT: This is a Vite React frontend, NOT a Python backend
-# Use render-backend.yaml for the backend deployment
-# =============================================================================
-
 services:
   - type: web
     name: shine2-medical-frontend
-    env: static                    # CRITICAL: This must be 'static' for Vite React apps
+    env: static
     region: oregon
     plan: free
     buildCommand: npm ci && npm run build
-    staticPublishPath: ./dist      # Vite builds to 'dist' directory
+    staticPublishPath: ./dist
     envVars:
       - key: NODE_VERSION
         value: 18

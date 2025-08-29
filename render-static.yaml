@@ -1,0 +1,19 @@
+# SHINE2 Medical Platform - STATIC FRONTEND ONLY
+# Use this file for the frontend deployment
+services:
+  - type: web
+    name: shine2-medical-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: VITE_API_URL
+        value: https://shine2-medical-backend.onrender.com
+      - key: VITE_APP_NAME
+        value: "SHINE2 Medical Platform"
+    autoDeploy: true
+    branch: main
