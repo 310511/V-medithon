@@ -1,14 +1,14 @@
 # =============================================================================
 # SHINE2 Medical Platform - FRONTEND DEPLOYMENT (STATIC SITE)
 # =============================================================================
-# IMPORTANT: This is a Vite React frontend, NOT a Python backend
-# Use render-backend.yaml for the backend deployment
+# CRITICAL: This service MUST be created as a "Static Site" on Render
+# NOT as a "Web Service" - the service type cannot be changed after creation
 # =============================================================================
 
 services:
   - type: web
     name: shine2-medical-frontend
-    env: static                    # CRITICAL: This must be 'static' for Vite React apps
+    env: static                    # MUST be 'static' for Vite React apps
     region: oregon
     plan: free
     buildCommand: npm ci && npm run build
@@ -32,3 +32,6 @@ services:
         value: "no-cache"
     autoDeploy: true
     branch: main
+    # Additional static site specific settings
+    skipCache: false
+    pullRequestPreviewsEnabled: true
