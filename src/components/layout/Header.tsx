@@ -95,7 +95,7 @@ export const Header = () => {
         { to: "/infinite-memory", icon: Zap, label: "Infinite Memory" },
         { to: "/medicine-recommendation", icon: Pill, label: "Medicine AI" },
         { to: "/echomed-ai", icon: Heart, label: "EchoMed AI" },
-        { to: "/genechain", icon: Dna, label: "GeneChain Unified" },
+        { to: "/genechain", icon: Dna, label: "MedGENE Unified" },
         { to: "/marketplace", icon: Package, label: "Marketplace" },
         { to: "/drone-delivery", icon: Plane, label: "Drone Delivery", highlight: true },
       ]
@@ -139,7 +139,7 @@ export const Header = () => {
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200 cursor-pointer dark:text-foreground">
             <Shield className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-xl font-bold text-foreground">MedChain</h1>
+              <h1 className="text-xl font-bold text-foreground">MedGENE</h1>
               <p className="text-xs text-muted-foreground hidden sm:block">Healthcare AI Platform</p>
             </div>
           </Link>
