@@ -1,11 +1,18 @@
+# =============================================================================
+# SHINE2 Medical Platform - FRONTEND DEPLOYMENT (STATIC SITE)
+# =============================================================================
+# CRITICAL: This service MUST be created as a "Static Site" on Render
+# NOT as a "Web Service" - the service type cannot be changed after creation
+# =============================================================================
+
 services:
   - type: web
     name: shine2-medical-frontend
-    env: static
+    env: static                    # MUST be 'static' for Vite React apps
     region: oregon
     plan: free
     buildCommand: npm ci && npm run build
-    staticPublishPath: ./dist
+    staticPublishPath: ./dist      # Vite builds to 'dist' directory
     envVars:
       - key: NODE_VERSION
         value: 18
@@ -23,3 +30,8 @@ services:
       - path: /index.html
         name: Cache-Control
         value: "no-cache"
+    autoDeploy: true
+    branch: main
+    # Additional static site specific settings
+    skipCache: false
+    pullRequestPreviewsEnabled: true

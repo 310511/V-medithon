@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: shine2-medical-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: VITE_API_URL
+        value: https://shine2-medical-backend.onrender.com
+      - key: VITE_APP_NAME
+        value: "SHINE2 Medical Platform"
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: "public, max-age=31536000, immutable"
+      - path: /assets/*
+        name: Cache-Control
+        value: "public, max-age=31536000, immutable"
+      - path: /index.html
+        name: Cache-Control
+        value: "no-cache"
+    autoDeploy: true
+    branch: main
