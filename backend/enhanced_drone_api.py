@@ -606,3 +606,5 @@ def calculate_fuel_consumption(distance: float, wind_speed: float) -> float:
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
