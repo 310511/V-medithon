@@ -46,6 +46,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for deployment platforms"""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "version": "2.0.0",
+        "service": "SHINE2 Medical Backend API"
+    }
+
 # Global data storage
 memory_data = {}
 tasks_data = {}

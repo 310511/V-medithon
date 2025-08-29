@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: shine2-medical-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: PORT
+        value: 8000
+      - key: CORS_ORIGINS
+        value: "https://shine2-medical-frontend.onrender.com,https://shine2-medical-frontend.vercel.app"
+      - key: DATABASE_URL
+        value: "sqlite:///./backend/database/medical.db"
+      - key: OPENAI_API_KEY
+        value: "your-openai-api-key-here"
+      - key: RAZORPAY_KEY_ID
+        value: "your-razorpay-key-id-here"
+      - key: RAZORPAY_KEY_SECRET
+        value: "your-razorpay-secret-here"
+    healthCheckPath: /health
+    autoDeploy: true
