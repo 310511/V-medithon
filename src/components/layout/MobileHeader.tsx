@@ -78,7 +78,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ className }) => {
     { name: 'Voice Assistant', path: '/voice-medicine', icon: Mic, color: 'text-indigo-600' },
     { name: 'Marketplace', path: '/marketplace', icon: ShoppingCart, color: 'text-pink-600' },
     { name: 'Medical Records', path: '/medical-records', icon: FileText, color: 'text-cyan-600' },
-    { name: 'GeneChain', path: '/genechain', icon: Shield, color: 'text-emerald-600' },
+    { name: 'MedGENE', path: '/genechain', icon: Shield, color: 'text-emerald-600' },
     { name: 'Mobile Test', path: '/mobile-test', icon: Shield, color: 'text-violet-600' },
   ];
 
@@ -129,7 +129,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ className }) => {
           </div>
           <div className="hidden sm:block">
             <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              MedChain
+              MedGENE
             </h1>
             <p className="text-xs text-muted-foreground">Healthcare AI</p>
           </div>

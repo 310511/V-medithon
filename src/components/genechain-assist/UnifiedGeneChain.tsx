@@ -2137,7 +2137,7 @@ const UnifiedGeneChain: React.FC = () => {
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} p-6`}>
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">🧬 GeneChain Unified Platform</h1>
+          <h1 className="text-3xl font-bold mb-2">🧬 MedGENE Unified Platform</h1>
           <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Immutable genomic data integrity and audit trail</p>
         </div>
 

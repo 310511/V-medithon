@@ -52,7 +52,7 @@ const Index = () => {
   }, []);
 
   const handleGetStarted = () => {
-    toast.success("Welcome to VitalSync HealthHub! Redirecting to dashboard...");
+    toast.success("Welcome to MedGENE HealthHub! Redirecting to dashboard...");
     setTimeout(() => {
       navigate('/dashboard');
     }, 1000);
@@ -132,7 +132,7 @@ const Index = () => {
                 </Badge>
                 <h1 className="text-5xl lg:text-7xl font-bold">
                   <span className="gradient-text-animate">
-                    VitalSync
+                    MedGENE
                   </span>
                   <span className="block text-4xl lg:text-6xl font-bold text-gray-800 dark:text-gray-200 mt-2 animate-slide-in-up">
                     HealthHub
@@ -195,7 +195,7 @@ const Index = () => {
                       <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 mx-auto backdrop-blur-sm animate-pulse-glow">
                         <Heart className="w-8 h-8 text-white fill-current" />
                       </div>
-                                             <h3 className="text-lg font-bold mb-2">VitalSync</h3>
+                      <h3 className="text-lg font-bold mb-2">MedGENE</h3>
                       <p className="text-sm opacity-90">Wellness Connected</p>
                     </div>
                   </div>
