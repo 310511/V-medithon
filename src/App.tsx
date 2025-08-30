@@ -55,6 +55,13 @@ import { AIWellnessPlanner } from "@/components/zenith/AIWellnessPlanner";
 import { DroneDelivery } from "@/components/delivery/DroneDelivery";
 import { EnhancedDroneDelivery } from "@/components/delivery/EnhancedDroneDelivery";
 
+// GeneTrust Integration Components
+import { GenePredictor } from "@/components/genetrust/GenePredictor";
+import { LabMonitor } from "@/components/genetrust/LabMonitor";
+import { BlockchainVerification } from "@/components/genetrust/BlockchainVerification";
+import { AIAssistant } from "@/components/genetrust/AIAssistant";
+import { GeneTrustDashboard } from "@/components/genetrust/GeneTrustDashboard";
+
 const queryClient = new QueryClient();
 
 
@@ -102,10 +109,10 @@ const AppContent = () => {
       <Route path="/readmission-risk" element={<ReadmissionRiskModel />} />
       <Route path="/insurance-coverage" element={<InsuranceCoverageModel />} />
       <Route path="/medical-records" element={<MedicalRecordsDashboard />} />
-                      <Route path="/patient-profile" element={<PatientProfile />} />
-              <Route path="/prescriptions" element={<PrescriptionManager />} />
-                    <Route path="/genechain" element={<UnifiedGeneChain />} />
-                    <Route path="/genechain-dashboard" element={<GeneChainDashboard />} />
+      <Route path="/patient-profile" element={<PatientProfile />} />
+      <Route path="/prescriptions" element={<PrescriptionManager />} />
+      <Route path="/genechain" element={<UnifiedGeneChain />} />
+      <Route path="/genechain-dashboard" element={<GeneChainDashboard />} />
       <Route path="/medicine-recommendation" element={<EnhancedMedicineAIDashboard />} />
       <Route path="/fitness-dashboard" element={<FitnessDashboard />} />
       <Route path="/bmi-calculator" element={<BmiCalculator />} />
@@ -116,10 +123,18 @@ const AppContent = () => {
       <Route path="/ai-wellness-planner" element={<AIWellnessPlanner />} />
       <Route path="/drone-delivery" element={<DroneDelivery />} />
       <Route path="/enhanced-drone-delivery" element={<EnhancedDroneDelivery />} />
+      
+      {/* GeneTrust Integration Routes */}
+      <Route path="/genetrust" element={<GeneTrustDashboard />} />
+      <Route path="/gene-predictor" element={<GenePredictor />} />
+      <Route path="/lab-monitor" element={<LabMonitor />} />
+      <Route path="/blockchain-verification" element={<BlockchainVerification />} />
+      <Route path="/ai-assistant" element={<AIAssistant />} />
+      
       <Route path="/mobile-test" element={<MobileTest />} />
       <Route path="/test" element={<AuthDebugger />} />
       <Route path="*" element={<NotFound />} />
-      </Routes>
+    </Routes>
   );
 
   if (isMobile) {

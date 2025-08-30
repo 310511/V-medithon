@@ -70,6 +70,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ className }) => {
 
   const navigationItems = [
     { name: 'Dashboard', path: '/dashboard', icon: Home, color: 'text-blue-600' },
+    { name: 'GeneTrust AI', path: '/genetrust', icon: Shield, color: 'text-cyan-600' },
     { name: 'Medicine AI', path: '/ai-medicine-recommendation', icon: Pill, color: 'text-red-600' },
     { name: 'Infinite Memory', path: '/infinite-memory', icon: Brain, color: 'text-purple-600' },
     { name: 'ML Predictions', path: '/ml-predictions', icon: Activity, color: 'text-green-600' },
@@ -83,6 +84,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ className }) => {
   ];
 
   const quickActions = [
+    { name: 'GeneTrust AI', icon: Shield, action: () => window.location.href = '/genetrust', color: 'bg-cyan-500' },
     { name: 'Add Medicine', icon: Plus, action: () => console.log('Add Medicine'), color: 'bg-blue-500' },
     { name: 'Scan QR Code', icon: QrCode, action: () => console.log('Scan QR'), color: 'bg-green-500' },
     { name: 'Voice Input', icon: Mic, action: () => console.log('Voice Input'), color: 'bg-purple-500' },

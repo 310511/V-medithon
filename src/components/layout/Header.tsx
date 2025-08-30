@@ -57,6 +57,16 @@ export const Header = () => {
       ]
     },
     {
+      title: "GeneTrust AI Studio",
+      items: [
+        { to: "/genetrust", icon: Dna, label: "GeneTrust Dashboard", highlight: true },
+        { to: "/gene-predictor", icon: Dna, label: "AI Gene Predictor" },
+        { to: "/lab-monitor", icon: Activity, label: "Lab Monitor" },
+        { to: "/blockchain-verification", icon: Shield, label: "Blockchain Verification" },
+        { to: "/ai-assistant", icon: Brain, label: "AI Research Assistant" },
+      ]
+    },
+    {
       title: "Health & Fitness",
       items: [
         { to: "/fitness-dashboard", icon: Dumbbell, label: "Fitness Dashboard", highlight: true },
