@@ -35,7 +35,8 @@ import {
   Eye,
   Brain,
   Disc3,
-  Plane
+  Plane,
+  Dna
 } from "lucide-react";
 
 const Index = () => {
@@ -396,6 +397,12 @@ const Index = () => {
                 title: "Wellness Planning",
                 description: "AI-powered diet plans, workout routines, and comprehensive health goal tracking.",
                 color: "from-pink-500 to-pink-600"
+              },
+              {
+                icon: Dna,
+                title: "GeneTrust AI Studio",
+                description: "Advanced CRISPR gene editing with AI prediction, IoT lab monitoring, and blockchain verification.",
+                color: "from-cyan-500 to-cyan-600"
               }
             ].map((feature, index) => (
               <Card 

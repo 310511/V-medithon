@@ -36,6 +36,13 @@ const MobileBottomNav: React.FC = () => {
       description: 'Dashboard'
     },
     { 
+      name: 'GeneTrust', 
+      path: '/genetrust', 
+      icon: '🧬',
+      activeIcon: '🧬',
+      description: 'AI Studio'
+    },
+    { 
       name: 'Fitness', 
       path: '/fitness-dashboard', 
       icon: '💪',
@@ -55,13 +62,6 @@ const MobileBottomNav: React.FC = () => {
       icon: '🧘',
       activeIcon: '🧘',
       description: 'Wellness'
-    },
-    { 
-      name: 'Drone', 
-      path: '/drone-delivery', 
-      icon: '🚁',
-      activeIcon: '🚁',
-      description: 'Delivery'
     },
   ];
 

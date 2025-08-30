@@ -16,7 +16,8 @@ import {
   Brain,
   Camera,
   Mic,
-  Radio
+  Radio,
+  Dna
 } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
@@ -24,6 +25,13 @@ export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   const features = [
+    {
+      title: "GeneTrust AI Studio",
+      description: "Advanced CRISPR gene editing with AI prediction and IoT monitoring",
+      icon: Dna,
+      href: "/genetrust",
+      color: "text-cyan-600"
+    },
     {
       title: "AI Medicine Recommendations",
       description: "Get AI-powered medicine suggestions based on symptoms",
