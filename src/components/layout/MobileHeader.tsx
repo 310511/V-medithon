@@ -26,7 +26,20 @@ import {
   ChevronUp,
   Sun,
   Moon,
-  LogOut
+  LogOut,
+  Utensils,
+  Stethoscope,
+  Heart,
+  Database,
+  BarChart3,
+  Dumbbell,
+  Plane,
+  Link as LinkIcon,
+  Calculator,
+  Calendar,
+  TrendingUp,
+  Music,
+  Target
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -73,18 +86,36 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ className }) => {
     { name: 'Meal Insulin Prediction', path: '/meal-insulin', icon: Utensils, color: 'text-green-600', tier: 1, highlight: true },
     { name: 'Phone Bluetooth Glucose', path: '/eeg-glucose', icon: Brain, color: 'text-blue-600', tier: 1, highlight: true },
     { name: 'Mobile Platform', path: '/dashboard', icon: Activity, color: 'text-purple-600', tier: 1, highlight: true },
+    { name: 'RFID Scanner', path: '/rfid', icon: Radio, color: 'text-indigo-600', tier: 1, highlight: true },
+    { name: 'Marketplace', path: '/marketplace', icon: ShoppingCart, color: 'text-yellow-600', tier: 1, highlight: true },
     
     // Tier 2 - Supporting Features
     { name: 'AI Disease Diagnosis', path: '/disease-diagnosis', icon: Stethoscope, color: 'text-red-600', tier: 2 },
     { name: 'Blockchain Records', path: '/medical-records', icon: FileText, color: 'text-cyan-600', tier: 2 },
     { name: 'Predictive Analytics', path: '/readmission-risk', icon: Activity, color: 'text-orange-600', tier: 2 },
     { name: 'EchoMed AI', path: '/echomed-ai', icon: Heart, color: 'text-pink-600', tier: 2 },
+    { name: 'AI Medicine Recommendation', path: '/ai-medicine-recommendation', icon: Pill, color: 'text-emerald-600', tier: 2 },
+    { name: 'Infinite Memory', path: '/infinite-memory', icon: Database, color: 'text-violet-600', tier: 2 },
+    { name: 'ML Predictions', path: '/ml-predictions', icon: BarChart3, color: 'text-amber-600', tier: 2 },
+    { name: 'Voice Medicine Assistant', path: '/voice-medicine', icon: Mic, color: 'text-rose-600', tier: 2 },
+    { name: 'Skin Analysis', path: '/skin-analysis', icon: Camera, color: 'text-lime-600', tier: 2 },
+    { name: 'Drone Delivery', path: '/drone-delivery', icon: Plane, color: 'text-indigo-600', tier: 2 },
     
     // Tier 3 - Additional Features
     { name: 'GeneTrust AI', path: '/genetrust', icon: Shield, color: 'text-emerald-600', tier: 3 },
     { name: 'Fitness Dashboard', path: '/fitness-dashboard', icon: Dumbbell, color: 'text-teal-600', tier: 3 },
-    { name: 'Drone Delivery', path: '/drone-delivery', icon: Plane, color: 'text-indigo-600', tier: 3 },
-    { name: 'Marketplace', path: '/marketplace', icon: ShoppingCart, color: 'text-yellow-600', tier: 3 },
+    { name: 'Inventory Management', path: '/inventory', icon: Activity, color: 'text-slate-600', tier: 3 },
+    { name: 'Zenith Wellness', path: '/mental-health', icon: Brain, color: 'text-purple-600', tier: 3 },
+    { name: 'Insurance Coverage', path: '/insurance-coverage', icon: Shield, color: 'text-blue-600', tier: 3 },
+    { name: 'Patient Profile', path: '/patient-profile', icon: User, color: 'text-green-600', tier: 3 },
+    { name: 'Prescriptions', path: '/prescriptions', icon: FileText, color: 'text-orange-600', tier: 3 },
+    { name: 'GeneChain Dashboard', path: '/genechain-dashboard', icon: LinkIcon, color: 'text-cyan-600', tier: 3 },
+    { name: 'BMI Calculator', path: '/bmi-calculator', icon: Calculator, color: 'text-pink-600', tier: 3 },
+    { name: 'Period Tracker', path: '/period-tracker', icon: Calendar, color: 'text-red-600', tier: 3 },
+    { name: 'Health Analytics', path: '/health-analytics', icon: TrendingUp, color: 'text-yellow-600', tier: 3 },
+    { name: 'Spotify Integration', path: '/spotify-integration', icon: Music, color: 'text-green-600', tier: 3 },
+    { name: 'AI Wellness Planner', path: '/ai-wellness-planner', icon: Target, color: 'text-indigo-600', tier: 3 },
+    { name: 'Enhanced Drone Delivery', path: '/enhanced-drone-delivery', icon: Plane, color: 'text-blue-600', tier: 3 },
   ];
 
   const quickActions = [

@@ -231,7 +231,7 @@ export function PhoneBluetoothConnector({
   const simulatePhoneConnection = useCallback(() => {
     const simulatedPhone: BluetoothDevice = {
       id: 'simulated-phone-' + Date.now(),
-      name: 'iPhone 15 Pro (Simulated)',
+      name: 'iPhone 15 Pro (SIMULATION MODE)',
       connected: true,
       gatt: null,
       services: [],
@@ -240,7 +240,7 @@ export function PhoneBluetoothConnector({
     
     setConnectedPhone(simulatedPhone);
     onPhoneConnected(simulatedPhone);
-    console.log('📱 Simulated phone connected');
+    console.log('📱 Simulated phone connected - THIS IS NOT A REAL CONNECTION');
   }, [onPhoneConnected]);
 
   // Control phone torch/flashlight
@@ -418,17 +418,24 @@ export function PhoneBluetoothConnector({
 
       {/* Connection Status */}
       {connectedPhone ? (
-        <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+        <Card className={`${connectedPhone.id.startsWith('simulated-') ? 'bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800' : 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'}`}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+                {connectedPhone.id.startsWith('simulated-') ? (
+                  <AlertTriangle className="h-5 w-5 text-orange-600" />
+                ) : (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                )}
                 <div>
-                  <div className="font-medium text-green-900 dark:text-green-100">
+                  <div className={`font-medium ${connectedPhone.id.startsWith('simulated-') ? 'text-orange-900 dark:text-orange-100' : 'text-green-900 dark:text-green-100'}`}>
                     {connectedPhone.name} Connected
                   </div>
-                  <div className="text-sm text-green-700 dark:text-green-300">
-                    Ready for torch control and glucose measurement
+                  <div className={`text-sm ${connectedPhone.id.startsWith('simulated-') ? 'text-orange-700 dark:text-orange-300' : 'text-green-700 dark:text-green-300'}`}>
+                    {connectedPhone.id.startsWith('simulated-') 
+                      ? '⚠️ SIMULATION MODE - No real Bluetooth connection' 
+                      : 'Ready for torch control and glucose measurement'
+                    }
                   </div>
                 </div>
               </div>
@@ -468,20 +475,29 @@ export function PhoneBluetoothConnector({
                 ) : (
                   <>
                     <Search className="h-4 w-4 mr-2" />
-                    Scan for Phones
+                    Scan for Phones (Real Connection)
                   </>
                 )}
               </Button>
               
+              <div className="text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">OR</p>
+              </div>
+              
               <Button
                 onClick={simulatePhoneConnection}
                 variant="outline"
-                className="w-full"
+                className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-950/20"
                 size="lg"
               >
-                <Settings className="h-4 w-4 mr-2" />
-                Simulate Phone Connection (Test)
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                ⚠️ Simulate Connection (TEST ONLY)
               </Button>
+              
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                <p><strong>Real Connection:</strong> Actually connects to your phone via Bluetooth</p>
+                <p><strong>Simulation:</strong> Fake connection for testing - no real Bluetooth</p>
+              </div>
             </div>
           </CardContent>
         </Card>

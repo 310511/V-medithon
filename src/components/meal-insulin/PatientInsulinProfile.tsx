@@ -261,24 +261,24 @@ export function PatientInsulinProfile() {
             </div>
 
             {/* Profile Summary */}
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-blue-900 mb-2">Profile Summary</h3>
+            <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Profile Summary</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-blue-700">Insulin Sensitivity:</span>
-                  <span className="font-semibold ml-2">{profile.insulin_sensitivity_factor} mg/dL/unit</span>
+                  <span className="text-gray-700 dark:text-gray-300">Insulin Sensitivity:</span>
+                  <span className="font-semibold ml-2 text-gray-900 dark:text-white">{profile.insulin_sensitivity_factor} mg/dL/unit</span>
                 </div>
                 <div>
-                  <span className="text-blue-700">Carb Ratio:</span>
-                  <span className="font-semibold ml-2">{profile.carb_ratio}g/unit</span>
+                  <span className="text-gray-700 dark:text-gray-300">Carb Ratio:</span>
+                  <span className="font-semibold ml-2 text-gray-900 dark:text-white">{profile.carb_ratio}g/unit</span>
                 </div>
                 <div>
-                  <span className="text-blue-700">Correction Factor:</span>
-                  <span className="font-semibold ml-2">{profile.correction_factor} units/50mg/dL</span>
+                  <span className="text-gray-700 dark:text-gray-300">Correction Factor:</span>
+                  <span className="font-semibold ml-2 text-gray-900 dark:text-white">{profile.correction_factor} units/50mg/dL</span>
                 </div>
                 <div>
-                  <span className="text-blue-700">Target Range:</span>
-                  <span className="font-semibold ml-2">{profile.target_glucose_min}-{profile.target_glucose_max} mg/dL</span>
+                  <span className="text-gray-700 dark:text-gray-300">Target Range:</span>
+                  <span className="font-semibold ml-2 text-gray-900 dark:text-white">{profile.target_glucose_min}-{profile.target_glucose_max} mg/dL</span>
                 </div>
               </div>
             </div>

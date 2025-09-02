@@ -1,4 +1,4 @@
-import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital, Stethoscope, Activity, Zap, Settings, Dna, AlertTriangle, Dumbbell, Calculator, Calendar, Target, BarChart3, Activity as ActivityIcon, Disc3, Plane, Utensils } from "lucide-react";
+import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital, Stethoscope, Activity, Zap, Settings, Dna, AlertTriangle, Dumbbell, Calculator, Calendar, Target, BarChart3, Activity as ActivityIcon, Disc3, Plane, Utensils, Database, FileText, Link as LinkIcon, Music, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -53,6 +53,8 @@ export const Header = () => {
         { to: "/meal-insulin", icon: Utensils, label: "Meal Insulin Prediction", highlight: true, tier: 1 },
         { to: "/eeg-glucose", icon: Brain, label: "Phone Bluetooth Glucose", highlight: true, tier: 1 },
         { to: "/dashboard", icon: Activity, label: "Mobile-First Platform", highlight: true, tier: 1 },
+        { to: "/rfid", icon: Radio, label: "RFID Scanner", highlight: true, tier: 1 },
+        { to: "/marketplace", icon: Package, label: "Marketplace", highlight: true, tier: 1 },
       ]
     },
     {
@@ -62,6 +64,12 @@ export const Header = () => {
         { to: "/medical-records", icon: User, label: "Blockchain Medical Records", tier: 2 },
         { to: "/readmission-risk", icon: Hospital, label: "Predictive Analytics", tier: 2 },
         { to: "/echomed-ai", icon: Heart, label: "EchoMed AI Assistant", tier: 2 },
+        { to: "/ai-medicine-recommendation", icon: Pill, label: "AI Medicine Recommendation", tier: 2 },
+        { to: "/infinite-memory", icon: Database, label: "Infinite Memory", tier: 2 },
+        { to: "/ml-predictions", icon: BarChart3, label: "ML Predictions", tier: 2 },
+        { to: "/voice-medicine", icon: Mic, label: "Voice Medicine Assistant", tier: 2 },
+        { to: "/skin-analysis", icon: Camera, label: "Skin Analysis", tier: 2 },
+        { to: "/drone-delivery", icon: Plane, label: "Drone Delivery", tier: 2 },
       ]
     },
     {
@@ -69,10 +77,18 @@ export const Header = () => {
       items: [
         { to: "/genetrust", icon: Dna, label: "GeneTrust AI Studio", tier: 3 },
         { to: "/fitness-dashboard", icon: Dumbbell, label: "Fitness Dashboard", tier: 3 },
-        { to: "/drone-delivery", icon: Plane, label: "Drone Delivery", tier: 3 },
-        { to: "/marketplace", icon: Package, label: "Marketplace", tier: 3 },
         { to: "/inventory", icon: Activity, label: "Inventory Management", tier: 3 },
         { to: "/mental-health", icon: Brain, label: "Zenith Wellness", tier: 3 },
+        { to: "/insurance-coverage", icon: Shield, label: "Insurance Coverage Model", tier: 3 },
+        { to: "/patient-profile", icon: UserCheck, label: "Patient Profile", tier: 3 },
+        { to: "/prescriptions", icon: FileText, label: "Prescriptions", tier: 3 },
+        { to: "/genechain-dashboard", icon: LinkIcon, label: "GeneChain Dashboard", tier: 3 },
+        { to: "/bmi-calculator", icon: Calculator, label: "BMI Calculator", tier: 3 },
+        { to: "/period-tracker", icon: Calendar, label: "Period Tracker", tier: 3 },
+        { to: "/health-analytics", icon: TrendingUp, label: "Health Analytics", tier: 3 },
+        { to: "/spotify-integration", icon: Music, label: "Spotify Integration", tier: 3 },
+        { to: "/ai-wellness-planner", icon: Target, label: "AI Wellness Planner", tier: 3 },
+        { to: "/enhanced-drone-delivery", icon: Plane, label: "Enhanced Drone Delivery", tier: 3 },
       ]
     }
   ];
