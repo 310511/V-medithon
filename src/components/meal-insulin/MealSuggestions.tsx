@@ -409,7 +409,7 @@ export function MealSuggestions({ onSelectMeal, selectedCategory = 'breakfast' }
     const filteredMeals = mealOptions.filter(meal => meal.category === category);
     
     return (
-      <div className="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto">
+      <div className="grid grid-cols-1 gap-2 max-h-64 sm:max-h-80 overflow-y-auto">
         {filteredMeals.map((meal, index) => (
           <Card 
             key={index} 
@@ -420,17 +420,17 @@ export function MealSuggestions({ onSelectMeal, selectedCategory = 'breakfast' }
             }`}
             onClick={() => handleSelectMeal(meal)}
           >
-            <CardContent className="p-3">
-              <div className="flex items-center justify-between mb-2">
+            <CardContent className="p-2 sm:p-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   {meal.icon}
-                  <CardTitle className="text-sm">{meal.name}</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm">{meal.name}</CardTitle>
                 </div>
                 {(() => {
                   const health = getHealthRecommendation(meal);
                   const IconComponent = health.icon;
                   return (
-                    <Badge className={`text-xs ${health.color} flex items-center gap-1`}>
+                    <Badge className={`text-xs ${health.color} flex items-center gap-1 self-start sm:self-auto`}>
                       <IconComponent className="w-3 h-3" />
                       {health.status}
                     </Badge>
@@ -448,24 +448,24 @@ export function MealSuggestions({ onSelectMeal, selectedCategory = 'breakfast' }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="breakfast" className="flex items-center gap-2">
-            <Sun className="h-4 w-4" />
-            <span className="hidden sm:inline">Breakfast</span>
+        <TabsList className="grid w-full grid-cols-4 h-auto">
+          <TabsTrigger value="breakfast" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 sm:py-1">
+            <Sun className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-xs sm:text-sm">Breakfast</span>
           </TabsTrigger>
-          <TabsTrigger value="lunch" className="flex items-center gap-2">
-            <Zap className="h-4 w-4" />
-            <span className="hidden sm:inline">Lunch</span>
+          <TabsTrigger value="lunch" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 sm:py-1">
+            <Zap className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-xs sm:text-sm">Lunch</span>
           </TabsTrigger>
-          <TabsTrigger value="dinner" className="flex items-center gap-2">
-            <Moon className="h-4 w-4" />
-            <span className="hidden sm:inline">Dinner</span>
+          <TabsTrigger value="dinner" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 sm:py-1">
+            <Moon className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-xs sm:text-sm">Dinner</span>
           </TabsTrigger>
-          <TabsTrigger value="snack" className="flex items-center gap-2">
-            <Cookie className="h-4 w-4" />
-            <span className="hidden sm:inline">Snack</span>
+          <TabsTrigger value="snack" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 sm:py-1">
+            <Cookie className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-xs sm:text-sm">Snack</span>
           </TabsTrigger>
         </TabsList>
 
@@ -487,7 +487,7 @@ export function MealSuggestions({ onSelectMeal, selectedCategory = 'breakfast' }
       </Tabs>
 
       {/* Custom Food Option */}
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
         <Button 
           variant="outline" 
           size="sm" 
@@ -500,7 +500,7 @@ export function MealSuggestions({ onSelectMeal, selectedCategory = 'breakfast' }
         
         {showCustomForm && (
           <Card className="mt-3">
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="p-3 sm:p-4 space-y-3">
               <div>
                 <Label htmlFor="custom_name">Food Name</Label>
                 <Input
@@ -510,7 +510,7 @@ export function MealSuggestions({ onSelectMeal, selectedCategory = 'breakfast' }
                   placeholder="e.g., Homemade Pizza"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="custom_carbs">Carbs (g)</Label>
                   <Input
@@ -541,6 +541,8 @@ export function MealSuggestions({ onSelectMeal, selectedCategory = 'breakfast' }
                     placeholder="0"
                   />
                 </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="custom_fiber">Fiber (g)</Label>
                   <Input

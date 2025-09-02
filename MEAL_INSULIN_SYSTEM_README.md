@@ -64,7 +64,7 @@ shine2/
 
 ```bash
 # Navigate to the project directory
-cd /Users/utsavgautam/V-Medithon/shine2
+cd /Users/utsavgautam/DoseWise/shine2
 
 # Start the backend server
 python start_meal_insulin_backend.py
@@ -261,7 +261,7 @@ interface MealInsulinPrediction {
 }
 ```
 
-## 🔄 Integration with V-Medithon
+## 🔄 Integration with DoseWise
 
 ### Existing System Integration
 - **Medical Records**: Extends existing patient management

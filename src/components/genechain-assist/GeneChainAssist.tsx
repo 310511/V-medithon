@@ -186,7 +186,7 @@ const GeneChainAssist: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8 }}
               >
-                🔗 MedGENE Assist
+                🔗 DoseWise Assist
               </motion.h1>
               <motion.p 
                 className="text-2xl md:text-3xl font-semibold text-gray-700 dark:text-gray-300 mb-4"
@@ -198,7 +198,7 @@ const GeneChainAssist: React.FC = () => {
                 className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed"
                 variants={fadeInUp}
               >
-                MedGENE Assist ensures transparency, safety, and compliance in genetic engineering treatments using blockchain and AI.
+                DoseWise Assist ensures transparency, safety, and compliance in genetic engineering treatments using blockchain and AI.
               </motion.p>
             </motion.div>
 
@@ -337,7 +337,7 @@ const GeneChainAssist: React.FC = () => {
               <motion.div variants={fadeInUp}>
                 <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
                   <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
-                  How MedGENE Assist Solves Them
+                  How DoseWise Assist Solves Them
                 </h3>
                 <div className="space-y-4">
                   {[
@@ -515,7 +515,7 @@ const GeneChainAssist: React.FC = () => {
                 Stakeholder Benefits
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-400">
-                How MedGENE Assist enhances workflows across the healthcare ecosystem
+                How DoseWise Assist enhances workflows across the healthcare ecosystem
               </p>
             </motion.div>
 
@@ -558,7 +558,7 @@ const GeneChainAssist: React.FC = () => {
           <div className="max-w-4xl mx-auto text-center">
             <motion.div variants={fadeInUp}>
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                MedGENE Assist — building trust in the future of medicine
+                DoseWise Assist — building trust in the future of medicine
               </h2>
               <p className="text-xl text-blue-100 mb-8 leading-relaxed">
                 Join us in revolutionizing genetic therapy with blockchain-powered safety and transparency
