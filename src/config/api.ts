@@ -1,5 +1,10 @@
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+// Backend API URLs
+export const MEAL_INSULIN_API_URL = import.meta.env.VITE_MEAL_INSULIN_API_URL || 'http://localhost:8001';
+export const INFINITE_MEMORY_API_URL = import.meta.env.VITE_INFINITE_MEMORY_API_URL || 'http://localhost:8002';
+export const FLASK_API_URL = import.meta.env.VITE_FLASK_API_URL || 'http://localhost:5000';
+
 export const API_ENDPOINTS = {
   // RFID endpoints
   RFID_TAGS: `${API_BASE_URL}/rfid/tags`,

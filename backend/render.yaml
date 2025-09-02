@@ -1,0 +1,43 @@
+services:
+  # Meal Insulin Prediction API
+  - type: web
+    name: dosewise-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn meal_insulin_prediction_api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  # Infinite Memory API
+  - type: web
+    name: dosewise-infinite-memory
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn infinite_memory_api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: GEMINI_API_KEY
+        value: your-gemini-api-key-here
+
+  # Flask Skin Analysis API
+  - type: web
+    name: dosewise-flask
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python flask_app.py
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FLASK_ENV
+        value: production

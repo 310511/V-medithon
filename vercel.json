@@ -1,48 +1,23 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
-  "headers": [
+  "routes": [
     {
-      "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
-      ]
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
   "env": {
-    "VITE_API_URL": "https://shine2-medical-backend.onrender.com",
-    "VITE_APP_NAME": "SHINE2 Medical Platform"
-  },
-  "functions": {
-    "app/api/**/*.py": {
-      "runtime": "python3.11"
-    }
+    "VITE_MEAL_INSULIN_API_URL": "https://dosewise-backend.onrender.com",
+    "VITE_INFINITE_MEMORY_API_URL": "https://dosewise-infinite-memory.onrender.com",
+    "VITE_FLASK_API_URL": "https://dosewise-flask.onrender.com"
   }
-} 
+}
