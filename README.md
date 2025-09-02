@@ -1,6 +1,6 @@
-# 🏥 MedChain - Blockchain-Powered Medical Inventory Management System
+# 🏥 DoseWise - AI-Powered Insulin Management System
 
-## 🚀 A comprehensive blockchain-powered medical inventory management system combining AI, ML, and healthcare technologies
+## 🚀 A comprehensive AI-powered insulin management system combining machine learning, mobile technology, and healthcare innovation
 ### PPT- https://drive.google.com/drive/folders/1_aAhg2cHAAL7hholZb90YVhnDsgLWZwX?usp=sharing
 ### Demo Link - https://spider11.vercel.app/
 ## 📋 Table of Contents
@@ -23,14 +23,14 @@
 - 📄 License
 
 ## 🎯 Overview
-MedChain is a cutting-edge medical inventory management system that leverages blockchain technology, artificial intelligence, and machine learning to revolutionize healthcare supply chain management. The system provides secure, transparent, and intelligent solutions for medical inventory tracking, demand forecasting, and automated restocking.
+DoseWise is a cutting-edge AI-powered insulin management system that leverages machine learning, mobile technology, and blockchain security to revolutionize diabetes care. The system provides intelligent insulin dosing recommendations, real-time glucose monitoring, and secure patient data management.
 
-### 🌟 Why MedChain?
-- 🔐 **Blockchain Security**: Immutable transaction records and supply chain transparency
-- 🤖 **AI-Powered**: Intelligent medicine recommendations and inventory optimization
-- 📊 **ML Predictions**: Advanced demand forecasting and restocking automation
-- 🏥 **Healthcare Focused**: Purpose-built for medical inventory challenges
-- 🌐 **Comprehensive**: End-to-end solution from procurement to patient care
+### 🌟 Why DoseWise?
+- 🔐 **Blockchain Security**: Immutable medical records and secure patient data
+- 🤖 **AI-Powered**: Intelligent insulin dosing recommendations and glucose prediction
+- 📊 **ML Predictions**: Advanced glucose level forecasting and insulin calculation
+- 🏥 **Healthcare Focused**: Purpose-built for diabetes management challenges
+- 📱 **Mobile-First**: Optimized for mobile devices with Bluetooth connectivity
 
 ## 👥 Team Members
 

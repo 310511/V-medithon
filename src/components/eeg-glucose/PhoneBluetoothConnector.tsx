@@ -371,19 +371,19 @@ export function PhoneBluetoothConnector({
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-0 shadow-2xl">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-              <Smartphone className="h-8 w-8 text-white" />
+        <CardHeader className="text-center p-4 sm:p-6">
+          <div className="flex items-center justify-center mb-3 sm:mb-4">
+            <div className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
+              <Smartphone className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Phone Bluetooth Connector
           </CardTitle>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 px-4">
             Connect to your phone via Bluetooth for torch control and glucose measurement
           </p>
         </CardHeader>
@@ -391,8 +391,8 @@ export function PhoneBluetoothConnector({
 
       {/* Bluetooth Support Check */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-center gap-2">
               {bluetoothSupported ? (
                 <CheckCircle className="h-4 w-4 text-green-600" />
@@ -401,7 +401,7 @@ export function PhoneBluetoothConnector({
               )}
               <span className="text-sm font-medium">Web Bluetooth Support</span>
             </div>
-            <Badge variant={bluetoothSupported ? 'default' : 'destructive'}>
+            <Badge variant={bluetoothSupported ? 'default' : 'destructive'} className="self-start sm:self-auto">
               {bluetoothSupported ? 'Supported' : 'Not Supported'}
             </Badge>
           </div>

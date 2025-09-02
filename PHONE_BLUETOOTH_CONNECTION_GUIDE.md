@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide explains how to connect your phone to the V-Medithon system via Bluetooth for torch control and glucose measurement. Since desktop and Mac computers don't have built-in torches, connecting to your phone allows you to use its camera and torch for glucose monitoring.
+This guide explains how to connect your phone to the DoseWise system via Bluetooth for torch control and glucose measurement. Since desktop and Mac computers don't have built-in torches, connecting to your phone allows you to use its camera and torch for glucose monitoring.
 
 ## Why Connect Your Phone?
 
@@ -43,7 +43,7 @@ This guide explains how to connect your phone to the V-Medithon system via Bluet
 - **Safari** (iOS 11+ only)
 - **Firefox** (Limited functionality)
 
-### 3. **Connect via V-Medithon**
+### 3. **Connect via DoseWise**
 
 #### Navigate to Phone Bluetooth Tab
 1. Go to **EEG Glucose page** (`localhost:3002/eeg-glucose`)

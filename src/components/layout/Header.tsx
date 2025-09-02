@@ -107,7 +107,7 @@ export const Header = () => {
         { to: "/infinite-memory", icon: Zap, label: "Infinite Memory" },
         { to: "/medicine-recommendation", icon: Pill, label: "Medicine AI" },
         { to: "/echomed-ai", icon: Heart, label: "EchoMed AI" },
-        { to: "/genechain", icon: Dna, label: "MedGENE Unified" },
+        { to: "/genechain", icon: Dna, label: "DoseWise Unified" },
         { to: "/marketplace", icon: Package, label: "Marketplace" },
         { to: "/drone-delivery", icon: Plane, label: "Drone Delivery", highlight: true },
       ]
@@ -134,43 +134,43 @@ export const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 border-b bg-card shadow-card h-16 flex items-center justify-between px-4 lg:px-6 z-50 dark:bg-card dark:border-border backdrop-blur-sm bg-card/95">
+      <header className="sticky top-0 border-b bg-card shadow-card h-14 sm:h-16 flex items-center justify-between px-3 sm:px-4 lg:px-6 z-50 dark:bg-card dark:border-border backdrop-blur-sm bg-card/95">
         {/* Left Side - Hamburger Button and Logo */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Hamburger Menu Button - Left side */}
           <Button
             variant="ghost"
             size="icon"
-            className="hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400 transition-all duration-200 rounded-full p-2"
+            className="hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400 transition-all duration-200 rounded-full p-1.5 sm:p-2"
             onClick={toggleMobileMenu}
           >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMobileMenuOpen ? <X className="h-4 w-4 sm:h-5 sm:w-5" /> : <Menu className="h-4 w-4 sm:h-5 sm:w-5" />}
           </Button>
 
           {/* Logo - Clickable to go to landing page */}
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity duration-200 cursor-pointer dark:text-foreground">
-            <Shield className="h-8 w-8 text-primary" />
+          <Link to="/" className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity duration-200 cursor-pointer dark:text-foreground">
+            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             <div>
-              <h1 className="text-xl font-bold text-foreground">MedGENE</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-foreground">DoseWise</h1>
               <p className="text-xs text-muted-foreground hidden sm:block">Healthcare AI Platform</p>
             </div>
           </Link>
         </div>
 
         {/* Right Side - Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <ThemeToggle />
           
           {isAuthenticated && (
             <Button 
               variant="ghost" 
               size="icon" 
-              className="relative hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400 transition-all duration-200 rounded-full p-2"
+              className="relative hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400 transition-all duration-200 rounded-full p-1.5 sm:p-2"
               onClick={openPanel}
             >
-              <Bell className="h-5 w-5" />
+              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
               {(unreadCount > 0 || highPriorityCount > 0) && (
-                <span className="notification-badge absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
+                <span className="notification-badge absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
                   {unreadCount > 0 ? unreadCount : highPriorityCount}
                 </span>
               )}
@@ -181,23 +181,23 @@ export const Header = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              className="hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400 transition-all duration-200 rounded-full p-2"
+              className="hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400 transition-all duration-200 rounded-full p-1.5 sm:p-2"
               onClick={() => setIsProfileOpen(!isProfileOpen)}
             >
-              <User className="h-5 w-5" />
+              <User className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Link to="/signin">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <LogIn className="w-4 h-4" />
-                  Sign In
+                <Button variant="outline" size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <LogIn className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Sign In</span>
                 </Button>
               </Link>
               <Link to="/signup">
-                <Button size="sm" className="gap-2">
-                  <UserPlus className="w-4 h-4" />
-                  Sign Up
+                <Button size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Sign Up</span>
                 </Button>
               </Link>
             </div>
@@ -208,17 +208,17 @@ export const Header = () => {
       {/* Enhanced Navigation Menu */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity duration-300 opacity-100 pointer-events-auto" onClick={closeMobileMenu}>
-          <div className="absolute left-0 top-16 w-80 h-full bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 translate-x-0 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Navigation</h2>
+          <div className="absolute left-0 top-14 sm:top-16 w-72 sm:w-80 h-full bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 translate-x-0 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">Navigation</h2>
                 <Button 
                   variant="ghost" 
                   size="icon"
                   onClick={closeMobileMenu}
-                  className="hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="hover:bg-gray-100 dark:hover:bg-gray-800 p-1.5"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </div>
               

@@ -48,7 +48,7 @@ npm install recharts lucide-react
 
 ```bash
 # In your project directory
-cd /Users/utsavgautam/V-Medithon/shine2
+cd /Users/utsavgautam/DoseWise/shine2
 python start_meal_insulin_backend.py
 ```
 
@@ -59,7 +59,7 @@ python start_meal_insulin_backend.py
 python test_meal_insulin_system.py
 ```
 
-## Integration with Existing V-Medithon Features
+## Integration with Existing DoseWise Features
 
 ### Medical Records Integration
 
@@ -238,7 +238,7 @@ class InsulinInjection(Base):
 
 ```bash
 # Terminal 1: Start the insulin API
-cd /Users/utsavgautam/V-Medithon/shine2
+cd /Users/utsavgautam/DoseWise/shine2
 python start_meal_insulin_backend.py
 
 # Terminal 2: Start your React app

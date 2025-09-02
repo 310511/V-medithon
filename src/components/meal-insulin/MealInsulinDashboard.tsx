@@ -193,20 +193,20 @@ export function MealInsulinDashboard({ eegGlucoseEstimate, onEEGGlucoseRequest }
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
           🍽️ Meal-Based Insulin Prediction
         </h1>
-        <p className="text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 px-4">
           Enter your meal details to get AI-powered insulin dosage recommendations
         </p>
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Left Column - Meal Suggestions */}
-        <div>
+        <div className="order-2 lg:order-1">
           <Card className="h-fit">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -223,15 +223,15 @@ export function MealInsulinDashboard({ eegGlucoseEstimate, onEEGGlucoseRequest }
         </div>
 
         {/* Right Column - Meal Input Form */}
-        <div>
+        <div className="order-1 lg:order-2">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Utensils className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Utensils className="h-4 w-4" />
                 Meal Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
             <div>
               <Label htmlFor="meal_name">Meal Name</Label>
               <Input
@@ -242,7 +242,7 @@ export function MealInsulinDashboard({ eegGlucoseEstimate, onEEGGlucoseRequest }
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="meal_type">Meal Type</Label>
                 <Select value={mealInput.meal_type} onValueChange={(value) => setMealInput({...mealInput, meal_type: value})}>
@@ -269,7 +269,7 @@ export function MealInsulinDashboard({ eegGlucoseEstimate, onEEGGlucoseRequest }
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="carbohydrates">Carbohydrates (g)</Label>
                 <Input
@@ -282,7 +282,7 @@ export function MealInsulinDashboard({ eegGlucoseEstimate, onEEGGlucoseRequest }
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
                   <Label htmlFor="current_glucose">Current Glucose (mg/dL)</Label>
                   {onEEGGlucoseRequest && (
                     <Button
@@ -290,7 +290,7 @@ export function MealInsulinDashboard({ eegGlucoseEstimate, onEEGGlucoseRequest }
                       variant="outline"
                       size="sm"
                       onClick={onEEGGlucoseRequest}
-                      className="flex items-center gap-1"
+                      className="flex items-center gap-1 text-xs"
                     >
                       <Brain className="h-3 w-3" />
                       EEG Measure
@@ -322,7 +322,7 @@ export function MealInsulinDashboard({ eegGlucoseEstimate, onEEGGlucoseRequest }
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="protein">Protein (g)</Label>
                 <Input
@@ -391,61 +391,64 @@ export function MealInsulinDashboard({ eegGlucoseEstimate, onEEGGlucoseRequest }
       {prediction && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Syringe className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Syringe className="h-4 w-4" />
                 AI Recommendation
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
               {/* Insulin Recommendation */}
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-blue-900">Recommended Insulin</h3>
+              <div className="bg-blue-50 dark:bg-blue-950 p-3 sm:p-4 rounded-lg">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100">Recommended Insulin</h3>
                   <Badge className={getSafetyColor(prediction.insulin_recommendation.safety_status)}>
                     {getSafetyIcon(prediction.insulin_recommendation.safety_status)}
                     {prediction.insulin_recommendation.safety_status.toUpperCase()}
                   </Badge>
                 </div>
-                <div className="text-2xl font-bold text-blue-900">
+                <div className="text-xl sm:text-2xl font-bold text-blue-900 dark:text-blue-100">
                   {prediction.insulin_recommendation.recommended_dosage} units
                 </div>
-                <div className="text-sm text-blue-700">
+                <div className="text-sm text-blue-700 dark:text-blue-300">
                   {prediction.insulin_recommendation.insulin_type}
                 </div>
-                <div className="text-xs text-blue-600 mt-1">
-                  Carb insulin: {prediction.insulin_recommendation.carb_insulin} units | 
-                  Correction: {prediction.insulin_recommendation.correction_insulin} units
+                <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                  <div className="block sm:inline">Carb insulin: {prediction.insulin_recommendation.carb_insulin} units</div>
+                  <span className="hidden sm:inline"> | </span>
+                  <div className="block sm:inline">Correction: {prediction.insulin_recommendation.correction_insulin} units</div>
                 </div>
               </div>
 
               {/* Injection Timing */}
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4" />
-                <span>Inject 15 minutes before meal at:</span>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <span>Inject 15 minutes before meal at:</span>
+                </div>
                 <span className="font-semibold">
                   {formatTime(prediction.insulin_recommendation.injection_time)}
                 </span>
               </div>
 
               {/* Glucose Prediction */}
-              <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
+              <div className="bg-green-50 dark:bg-green-950 p-3 sm:p-4 rounded-lg">
                 <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">Glucose Prediction</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                  <div className="flex justify-between">
                     <span className="text-green-700 dark:text-green-300">Current:</span>
-                    <span className="font-semibold ml-2 text-blue-600 dark:text-blue-400">{prediction.glucose_prediction.current_glucose} mg/dL</span>
+                    <span className="font-semibold text-blue-600 dark:text-blue-400">{prediction.glucose_prediction.current_glucose} mg/dL</span>
                   </div>
-                  <div>
+                  <div className="flex justify-between">
                     <span className="text-green-700 dark:text-green-300">Peak:</span>
-                    <span className="font-semibold ml-2 text-orange-600 dark:text-orange-400">{prediction.glucose_prediction.predicted_peak_glucose} mg/dL</span>
+                    <span className="font-semibold text-orange-600 dark:text-orange-400">{prediction.glucose_prediction.predicted_peak_glucose} mg/dL</span>
                   </div>
-                  <div>
+                  <div className="flex justify-between">
                     <span className="text-green-700 dark:text-green-300">After Insulin:</span>
-                    <span className="font-semibold ml-2 text-purple-600 dark:text-purple-400">{prediction.insulin_recommendation.expected_glucose_after} mg/dL</span>
+                    <span className="font-semibold text-purple-600 dark:text-purple-400">{prediction.insulin_recommendation.expected_glucose_after} mg/dL</span>
                   </div>
-                  <div>
+                  <div className="flex justify-between">
                     <span className="text-green-700 dark:text-green-300">Confidence:</span>
-                    <span className="font-semibold ml-2 text-emerald-600 dark:text-emerald-400">{Math.round(prediction.glucose_prediction.confidence_score * 100)}%</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">{Math.round(prediction.glucose_prediction.confidence_score * 100)}%</span>
                   </div>
                 </div>
               </div>
@@ -465,9 +468,9 @@ export function MealInsulinDashboard({ eegGlucoseEstimate, onEEGGlucoseRequest }
               )}
 
               {/* Glucose Curve Chart */}
-              <div className="h-80">
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-green-600" />
+              <div className="h-64 sm:h-80">
+                <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm sm:text-base">
+                  <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                   Predicted Glucose Curve
                 </h3>
                 <ResponsiveContainer width="100%" height="100%">

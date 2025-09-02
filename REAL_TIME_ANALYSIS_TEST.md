@@ -11,7 +11,7 @@
 
 ### **Step 1: Access the Application**
 1. **Open browser** and go to: `http://localhost:3000/`
-2. **Navigate to**: MedGENE → Gene Expression Audit Trail
+2. **Navigate to**: DoseWise → Gene Expression Audit Trail
 3. **Make sure you're on the "Upload & Preprocess" tab**
 
 ### **Step 2: Test with Sample Data**
