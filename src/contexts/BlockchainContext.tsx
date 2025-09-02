@@ -122,8 +122,8 @@ export const BlockchainProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [appNotifications, setAppNotifications] = useState<AppNotification[]>([]);
   const [marketplaceContract, setMarketplaceContract] = useState<ethers.Contract | null>(null);
 
-  // Mock data for demonstration
-  const mockProductListings: ProductListing[] = [
+  // Mock data for demonstration - converted to state for persistence
+  const [mockProductListings, setMockProductListings] = useState<ProductListing[]>([
     {
       id: "1",
       name: "Amoxicillin 500mg",
@@ -436,9 +436,9 @@ export const BlockchainProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       contractAddress: "0x8f012345678901234567890123456789012345678",
       rating: 4.2
     }
-  ];
+  ]);
 
-  const mockOrders: Order[] = [
+  const [mockOrders, setMockOrders] = useState<Order[]>([
     {
       id: "order1",
       productId: "1",
@@ -483,7 +483,7 @@ export const BlockchainProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       transactionHash: "0xdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcde",
       createdAt: Date.now() - 43200000 // 12 hours ago
     }
-  ];
+  ]);
 
   const addAppNotification = useCallback((message: string, type: NotificationType = "info") => {
     const notification: AppNotification = {
@@ -633,11 +633,51 @@ export const BlockchainProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     setIsLoading(true);
     try {
-      // TODO: Implement actual smart contract interaction
-      console.log("Purchasing product:", productId, "quantity:", quantity);
-      
+      // Find the product to purchase
+      const product = mockProductListings.find(p => p.id === productId);
+      if (!product) {
+        addAppNotification("Product not found.", "error");
+        return false;
+      }
+
+      // Check if enough inventory is available
+      if (product.inventoryLevel < quantity) {
+        addAppNotification("Insufficient inventory available.", "error");
+        return false;
+      }
+
       // Simulate blockchain transaction
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      console.log("Purchasing product:", productId, "quantity:", quantity);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Update product inventory
+      setMockProductListings(prevProducts => 
+        prevProducts.map(p => 
+          p.id === productId 
+            ? { ...p, inventoryLevel: p.inventoryLevel - quantity }
+            : p
+        )
+      );
+      
+      // Create new order
+      const newOrder: Order = {
+        id: `order_${Date.now()}`,
+        productId: productId,
+        buyerAddress: address,
+        sellerAddress: product.supplier,
+        quantity: quantity,
+        totalPrice: product.price * quantity,
+        status: 'confirmed',
+        transactionHash: `0x${Math.random().toString(16).substr(2, 64)}`,
+        createdAt: Date.now()
+      };
+      
+      // Add order to mock orders
+      setMockOrders(prevOrders => {
+        const updatedOrders = [newOrder, ...prevOrders];
+        console.log("Updated orders:", updatedOrders);
+        return updatedOrders;
+      });
       
       addAppNotification("Purchase completed successfully!", "success");
       return true;
@@ -658,17 +698,26 @@ export const BlockchainProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       console.error("Error fetching product listings:", error);
       return [];
     }
-  }, []);
+  }, [mockProductListings]);
 
   const getUserOrders = useCallback(async (userAddress: string): Promise<Order[]> => {
     try {
       // TODO: Fetch from blockchain
-      return mockOrders.filter(order => order.buyerAddress === userAddress);
+      console.log("Getting orders for address:", userAddress);
+      console.log("All mock orders:", mockOrders);
+      
+      // For testing: show orders for the connected user OR the test address
+      const filteredOrders = mockOrders.filter(order => 
+        order.buyerAddress === userAddress || 
+        order.buyerAddress === "0x1234567890123456789012345678901234567890"
+      );
+      console.log("Filtered orders:", filteredOrders);
+      return filteredOrders;
     } catch (error) {
       console.error("Error fetching user orders:", error);
       return [];
     }
-  }, []);
+  }, [mockOrders]);
 
   const syncInventoryToMarketplace = useCallback(async (inventoryItem: InventoryItem): Promise<void> => {
     if (!address) {

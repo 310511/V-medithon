@@ -1,4 +1,4 @@
-const BACKEND_API_URL = import.meta.env.VITE_INFINITE_MEMORY_API_URL || "http://localhost:8001";
+const BACKEND_API_URL = import.meta.env.VITE_INFINITE_MEMORY_API_URL || "http://localhost:8002";
 
 export interface ProcessTextRequest {
   user_id: string;

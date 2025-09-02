@@ -19,8 +19,11 @@ import {
   Activity,
   Moon,
   Sun,
-  Zap
+  Zap,
+  ExternalLink
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { spotifyAPI, SpotifyTrack, SpotifyPlaylist } from '@/services/spotifyApi';
 
 interface SpotifyIntegrationProps {
   className?: string;
@@ -55,120 +58,208 @@ export const SpotifyIntegration: React.FC<SpotifyIntegrationProps> = ({ classNam
   const [recommendedTracks, setRecommendedTracks] = useState<Track[]>([]);
   const [moodPlaylists, setMoodPlaylists] = useState<Playlist[]>([]);
   const [recentTracks, setRecentTracks] = useState<Track[]>([]);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Initialize with sample data
+  // Initialize Spotify data
   useEffect(() => {
-    const sampleTracks: Track[] = [
-      {
-        id: '1',
-        name: 'Weightless',
-        artist: 'Marconi Union',
-        album: 'Different Colours',
-        duration: '8:10',
-        image: 'https://via.placeholder.com/150/3B82F6/FFFFFF?text=Weightless',
-        uri: 'spotify:track:1',
-        mood: 'calm'
-      },
-      {
-        id: '2',
-        name: 'Claire de Lune',
-        artist: 'Debussy',
-        album: 'Suite Bergamasque',
-        duration: '5:32',
-        image: 'https://via.placeholder.com/150/8B5CF6/FFFFFF?text=Claire+de+Lune',
-        uri: 'spotify:track:2',
-        mood: 'relaxed'
-      },
-      {
-        id: '3',
-        name: 'River Flows in You',
-        artist: 'Yiruma',
-        album: 'First Love',
-        duration: '3:10',
-        image: 'https://via.placeholder.com/150/10B981/FFFFFF?text=River+Flows',
-        uri: 'spotify:track:3',
-        mood: 'peaceful'
-      },
-      {
-        id: '4',
-        name: 'Gymnopedie No. 1',
-        artist: 'Erik Satie',
-        album: 'Gymnopedies',
-        duration: '3:21',
-        image: 'https://via.placeholder.com/150/F59E0B/FFFFFF?text=Gymnopedie',
-        uri: 'spotify:track:4',
-        mood: 'contemplative'
-      },
-      {
-        id: '5',
-        name: 'The Scientist',
-        artist: 'Coldplay',
-        album: 'A Rush of Blood to the Head',
-        duration: '5:09',
-        image: 'https://via.placeholder.com/150/EF4444/FFFFFF?text=The+Scientist',
-        uri: 'spotify:track:5',
-        mood: 'melancholic'
+    const initializeSpotify = async () => {
+      setIsLoading(true);
+      
+      try {
+        // Check authentication status
+        const authenticated = spotifyAPI.isAuthenticated();
+        setIsAuthenticated(authenticated);
+        
+        // Initialize audio element
+        const audio = new Audio();
+        audio.volume = volume / 100;
+        setAudioElement(audio);
+        
+        // Load initial data
+        await loadMoodRecommendations(currentMood);
+        await loadPlaylists();
+        await loadRecentTracks();
+        
+      } catch (error) {
+        console.error('Error initializing Spotify:', error);
+        toast.error('Failed to load Spotify data. Using offline mode.');
+      } finally {
+        setIsLoading(false);
       }
-    ];
+    };
 
-    const samplePlaylists: Playlist[] = [
-      {
-        id: '1',
-        name: 'Calm & Peaceful',
-        description: 'Soothing melodies for relaxation and stress relief',
-        image: 'https://via.placeholder.com/150/3B82F6/FFFFFF?text=Calm',
-        trackCount: 45,
-        mood: 'calm'
-      },
-      {
-        id: '2',
-        name: 'Focus & Concentration',
-        description: 'Instrumental tracks to enhance productivity',
-        image: 'https://via.placeholder.com/150/10B981/FFFFFF?text=Focus',
-        trackCount: 32,
-        mood: 'focused'
-      },
-      {
-        id: '3',
-        name: 'Energy Boost',
-        description: 'Upbeat tracks to lift your mood and energy',
-        image: 'https://via.placeholder.com/150/F59E0B/FFFFFF?text=Energy',
-        trackCount: 28,
-        mood: 'energetic'
-      },
-      {
-        id: '4',
-        name: 'Sleep & Meditation',
-        description: 'Gentle sounds for better sleep and mindfulness',
-        image: 'https://via.placeholder.com/150/8B5CF6/FFFFFF?text=Sleep',
-        trackCount: 52,
-        mood: 'sleep'
-      }
-    ];
-
-    setRecommendedTracks(sampleTracks);
-    setMoodPlaylists(samplePlaylists);
-    setRecentTracks(sampleTracks.slice(0, 3));
+    initializeSpotify();
   }, []);
+
+  // Load mood-based recommendations
+  const loadMoodRecommendations = async (mood: string) => {
+    try {
+      const spotifyTracks = await spotifyAPI.searchTracksByMood(mood, 20);
+      const tracks = spotifyTracks.map(track => spotifyAPI.convertSpotifyTrack(track));
+      setRecommendedTracks(tracks);
+      
+      // Set first track as current if none is set
+      if (!currentTrack && tracks.length > 0) {
+        setCurrentTrack(tracks[0]);
+      }
+    } catch (error) {
+      console.error('Error loading mood recommendations:', error);
+    }
+  };
+
+  // Load playlists
+  const loadPlaylists = async () => {
+    try {
+      const spotifyPlaylists = await spotifyAPI.getFeaturedPlaylists(20);
+      const playlists = spotifyPlaylists.map(playlist => spotifyAPI.convertSpotifyPlaylist(playlist));
+      setMoodPlaylists(playlists);
+    } catch (error) {
+      console.error('Error loading playlists:', error);
+    }
+  };
+
+  // Load recent tracks
+  const loadRecentTracks = async () => {
+    try {
+      const spotifyTracks = await spotifyAPI.getRecentlyPlayed(10);
+      const tracks = spotifyTracks.map(track => spotifyAPI.convertSpotifyTrack(track));
+      setRecentTracks(tracks);
+    } catch (error) {
+      console.error('Error loading recent tracks:', error);
+    }
+  };
+
+  // Update volume when changed
+  useEffect(() => {
+    if (audioElement) {
+      audioElement.volume = volume / 100;
+    }
+  }, [volume, audioElement]);
+
+  // Cleanup audio element on unmount
+  useEffect(() => {
+    return () => {
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.src = '';
+      }
+    };
+  }, [audioElement]);
+
+  // Reload recommendations when mood changes
+  useEffect(() => {
+    if (currentMood) {
+      loadMoodRecommendations(currentMood);
+    }
+  }, [currentMood]);
 
   const getMoodRecommendations = (mood: string) => {
     const moodTracks = {
-      calm: recommendedTracks.filter(track => ['calm', 'relaxed', 'peaceful'].includes(track.mood)),
-      focused: recommendedTracks.filter(track => ['focused', 'concentrated'].includes(track.mood)),
+      calm: recommendedTracks.filter(track => ['calm', 'relaxed', 'peaceful', 'sleep', 'meditation'].includes(track.mood)),
+      focused: recommendedTracks.filter(track => ['focused', 'concentrated', 'calm', 'peaceful'].includes(track.mood)),
       energetic: recommendedTracks.filter(track => ['energetic', 'upbeat'].includes(track.mood)),
-      sleep: recommendedTracks.filter(track => ['sleep', 'meditation'].includes(track.mood)),
-      melancholic: recommendedTracks.filter(track => ['melancholic', 'contemplative'].includes(track.mood))
+      sleep: recommendedTracks.filter(track => ['sleep', 'meditation', 'calm', 'peaceful', 'relaxed'].includes(track.mood)),
+      melancholic: recommendedTracks.filter(track => ['melancholic', 'contemplative', 'peaceful'].includes(track.mood))
     };
-    return moodTracks[mood as keyof typeof moodTracks] || recommendedTracks;
+    
+    const filteredTracks = moodTracks[mood as keyof typeof moodTracks] || [];
+    
+    // Debug logging
+    console.log(`Mood: ${mood}, Found ${filteredTracks.length} tracks:`, filteredTracks.map(t => t.name));
+    
+    // If no tracks found for the mood, return all tracks as fallback
+    if (filteredTracks.length === 0) {
+      console.log('No tracks found for mood, returning all tracks as fallback');
+      return recommendedTracks;
+    }
+    
+    return filteredTracks;
   };
 
-  const playTrack = (track: Track) => {
-    setCurrentTrack(track);
-    setIsPlaying(true);
+  const playTrack = async (track: Track) => {
+    if (audioElement) {
+      try {
+        // Stop current track if playing
+        audioElement.pause();
+        audioElement.currentTime = 0;
+        
+        // Set new track
+        setCurrentTrack(track);
+        
+        // Use preview URL if available, otherwise use fallback
+        const audioUrl = (track as any).previewUrl || track.uri;
+        audioElement.src = audioUrl;
+        
+        // Play the track
+        await audioElement.play();
+        setIsPlaying(true);
+        
+        // Find track index for navigation
+        const trackIndex = recommendedTracks.findIndex(t => t.id === track.id);
+        setCurrentTrackIndex(trackIndex);
+        
+        // Show notification
+        toast.success(`Now playing: ${track.name} by ${track.artist}`);
+      } catch (error) {
+        console.error('Error playing track:', error);
+        // Fallback: just update UI without actual audio
+        setCurrentTrack(track);
+        setIsPlaying(true);
+        toast.info(`Track loaded: ${track.name} (Preview not available)`);
+      }
+    }
   };
 
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
+  const togglePlayPause = async () => {
+    if (audioElement && currentTrack) {
+      try {
+        if (isPlaying) {
+          audioElement.pause();
+          setIsPlaying(false);
+          toast.info('Music paused');
+        } else {
+          if (audioElement.src) {
+            await audioElement.play();
+            setIsPlaying(true);
+            toast.success('Music resumed');
+          } else {
+            // If no source, play current track
+            await playTrack(currentTrack);
+          }
+        }
+      } catch (error) {
+        console.error('Error toggling play/pause:', error);
+        // Fallback: just toggle UI state
+        setIsPlaying(!isPlaying);
+      }
+    }
+  };
+
+  const skipToNext = () => {
+    const nextIndex = (currentTrackIndex + 1) % recommendedTracks.length;
+    const nextTrack = recommendedTracks[nextIndex];
+    if (nextTrack) {
+      playTrack(nextTrack);
+    }
+  };
+
+  const skipToPrevious = () => {
+    const prevIndex = currentTrackIndex === 0 ? recommendedTracks.length - 1 : currentTrackIndex - 1;
+    const prevTrack = recommendedTracks[prevIndex];
+    if (prevTrack) {
+      playTrack(prevTrack);
+    }
+  };
+
+  const playPlaylist = (playlist: Playlist) => {
+    // Find tracks that match the playlist mood
+    const playlistTracks = recommendedTracks.filter(track => track.mood === playlist.mood);
+    if (playlistTracks.length > 0) {
+      playTrack(playlistTracks[0]);
+    }
   };
 
   const getMoodIcon = (mood: string) => {
@@ -201,6 +292,30 @@ export const SpotifyIntegration: React.FC<SpotifyIntegrationProps> = ({ classNam
           Music for Mental Health
         </h1>
         <p className="text-muted-foreground">AI-powered music recommendations based on your mood and wellbeing</p>
+        
+        {/* Demo Mode Notice */}
+        <div className="mt-4">
+          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Disc3 className="h-4 w-4 text-blue-600" />
+              <h4 className="font-medium text-blue-800 dark:text-blue-200">Demo Mode</h4>
+            </div>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              This is a demo version with sample tracks. In production, this would connect to Spotify's real API for live music data and playback.
+            </p>
+            <div className="mt-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.open('https://developer.spotify.com/dashboard', '_blank')}
+                className="text-blue-600 border-blue-300 hover:bg-blue-100 dark:text-blue-400 dark:border-blue-600 dark:hover:bg-blue-900/20"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Setup Spotify API
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Current Player */}
@@ -219,13 +334,13 @@ export const SpotifyIntegration: React.FC<SpotifyIntegrationProps> = ({ classNam
                 <p className="text-xs text-muted-foreground">{currentTrack.album}</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={skipToPrevious}>
                   <SkipBack className="h-4 w-4" />
                 </Button>
                 <Button onClick={togglePlayPause} size="sm">
                   {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={skipToNext}>
                   <SkipForward className="h-4 w-4" />
                 </Button>
               </div>
@@ -277,7 +392,33 @@ export const SpotifyIntegration: React.FC<SpotifyIntegrationProps> = ({ classNam
         </TabsList>
 
         <TabsContent value="recommendations" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">
+              Recommendations for {currentMood === 'sleep' ? 'Sleep & Meditation' : 
+                                  currentMood === 'calm' ? 'Calm & Relaxed' :
+                                  currentMood === 'focused' ? 'Focused & Productive' :
+                                  currentMood === 'energetic' ? 'Energetic & Motivated' :
+                                  currentMood === 'melancholic' ? 'Melancholic & Contemplative' : currentMood}
+            </h3>
+            <div className="flex items-center gap-2">
+              {isLoading && (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+              )}
+              <Badge variant="outline" className="text-sm">
+                {getMoodRecommendations(currentMood).length} tracks
+              </Badge>
+            </div>
+          </div>
+          
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading recommendations from Spotify...</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {getMoodRecommendations(currentMood).map(track => (
               <Card key={track.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                 <CardContent className="p-4">
@@ -312,7 +453,8 @@ export const SpotifyIntegration: React.FC<SpotifyIntegrationProps> = ({ classNam
                 </CardContent>
               </Card>
             ))}
-          </div>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="playlists" className="space-y-4">
@@ -339,7 +481,7 @@ export const SpotifyIntegration: React.FC<SpotifyIntegrationProps> = ({ classNam
                         </span>
                       </div>
                     </div>
-                    <Button size="sm">
+                    <Button size="sm" onClick={() => playPlaylist(playlist)}>
                       <Play className="h-4 w-4" />
                     </Button>
                   </div>

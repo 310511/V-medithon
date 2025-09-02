@@ -137,8 +137,10 @@ export const MarketplaceDashboard: React.FC = () => {
       if (success) {
         setIsPurchaseDialogOpen(false);
         setSelectedProduct(null);
-        loadMarketplaceData(); // Refresh data
-        addAppNotification("Purchase completed successfully!", "success");
+        // Refresh data immediately to show updated inventory and new order
+        await loadMarketplaceData();
+        // Switch to orders tab to show the new order
+        setActiveTab("orders");
       }
     } catch (error) {
       console.error("Purchase error:", error);

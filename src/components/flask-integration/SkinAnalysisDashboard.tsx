@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
@@ -82,7 +82,7 @@ export function SkinAnalysisDashboard() {
   const [analysisResult, setAnalysisResult] = useState<SkinAnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('basic');
+
   const [skinType, setSkinType] = useState('III');
   const [bodyPart, setBodyPart] = useState('other');
   const [hasEvolved, setHasEvolved] = useState(false);
@@ -142,6 +142,218 @@ export function SkinAnalysisDashboard() {
     event.preventDefault();
   };
 
+  // Generate dynamic mock response based on image characteristics
+  const generateDynamicMockResponse = (file: File, skinType: string, bodyPart: string) => {
+    // Use file characteristics to generate different responses
+    const fileSize = file.size;
+    const fileName = file.name.toLowerCase();
+    const fileType = file.type;
+    
+    // Generate pseudo-random but consistent values based on file characteristics only
+    // Create a deterministic hash from file properties
+    const fileHash = fileName.split('').reduce((hash, char) => {
+      return ((hash << 5) - hash + char.charCodeAt(0)) & 0xffffffff;
+    }, fileSize);
+    
+    const seed = Math.abs(fileHash) + fileType.length;
+    const random1 = (seed * 9301 + 49297) % 233280 / 233280;
+    const random2 = ((seed + 1) * 9301 + 49297) % 233280 / 233280;
+    const random3 = ((seed + 2) * 9301 + 49297) % 233280 / 233280;
+    
+    // Debug log to verify consistency
+    console.log(`Skin Analysis for ${fileName}: seed=${seed}, random1=${random1.toFixed(3)}, random2=${random2.toFixed(3)}, random3=${random3.toFixed(3)}`);
+    
+    // Determine prediction based on file characteristics with more variety
+    let prediction: string;
+    let confidence: number;
+    let riskLevel: string;
+    
+    // More balanced distribution - 40% Benign, 30% Suspicious, 20% Dermatitis, 10% Other
+    const predictionType = Math.floor(random1 * 10);
+    
+    if (fileName.includes('mole') || fileName.includes('spot')) {
+      // Moles/spots: 50% Suspicious, 30% Benign, 20% Other
+      if (predictionType < 5) {
+        prediction = 'Suspicious';
+        confidence = 70 + Math.floor(random2 * 20);
+        riskLevel = 'Medium';
+      } else if (predictionType < 8) {
+        prediction = 'Benign';
+        confidence = 75 + Math.floor(random2 * 15);
+        riskLevel = 'Low';
+      } else {
+        prediction = 'Atypical Nevus';
+        confidence = 65 + Math.floor(random2 * 20);
+        riskLevel = 'Medium';
+      }
+    } else if (fileName.includes('rash') || fileName.includes('irritation')) {
+      // Rashes: 60% Dermatitis, 25% Eczema, 15% Other
+      if (predictionType < 6) {
+        prediction = 'Dermatitis';
+        confidence = 80 + Math.floor(random2 * 15);
+        riskLevel = 'Low';
+      } else if (predictionType < 8) {
+        prediction = 'Eczema';
+        confidence = 75 + Math.floor(random2 * 20);
+        riskLevel = 'Low';
+      } else {
+        prediction = 'Allergic Reaction';
+        confidence = 70 + Math.floor(random2 * 25);
+        riskLevel = 'Low';
+      }
+    } else if (fileName.includes('lesion') || fileName.includes('growth')) {
+      // Lesions/growths: 40% Suspicious, 35% Benign, 25% Other
+      if (predictionType < 4) {
+        prediction = 'Suspicious';
+        confidence = 70 + Math.floor(random2 * 25);
+        riskLevel = 'Medium';
+      } else if (predictionType < 7) {
+        prediction = 'Benign';
+        confidence = 75 + Math.floor(random2 * 20);
+        riskLevel = 'Low';
+      } else {
+        prediction = 'Seborrheic Keratosis';
+        confidence = 80 + Math.floor(random2 * 15);
+        riskLevel = 'Low';
+      }
+    } else if (fileName.includes('cancer') || fileName.includes('malignant')) {
+      // Cancer-related: 70% Suspicious, 30% Other
+      if (predictionType < 7) {
+        prediction = 'Suspicious';
+        confidence = 85 + Math.floor(random2 * 10);
+        riskLevel = 'High';
+      } else {
+        prediction = 'Basal Cell Carcinoma';
+        confidence = 80 + Math.floor(random2 * 15);
+        riskLevel = 'High';
+      }
+    } else {
+      // Default: More balanced distribution
+      if (predictionType < 3) {
+        prediction = 'Benign';
+        confidence = 75 + Math.floor(random2 * 20);
+        riskLevel = 'Low';
+      } else if (predictionType < 6) {
+        prediction = 'Suspicious';
+        confidence = 70 + Math.floor(random2 * 25);
+        riskLevel = 'Medium';
+      } else if (predictionType < 8) {
+        prediction = 'Dermatitis';
+        confidence = 80 + Math.floor(random2 * 15);
+        riskLevel = 'Low';
+      } else if (predictionType < 9) {
+        prediction = 'Actinic Keratosis';
+        confidence = 75 + Math.floor(random2 * 20);
+        riskLevel = 'Medium';
+      } else {
+        prediction = 'Melanoma';
+        confidence = 85 + Math.floor(random2 * 10);
+        riskLevel = 'High';
+      }
+    }
+    
+    // Generate skin tone based on file characteristics
+    const skinTones = ['Type I', 'Type II', 'Type III', 'Type IV', 'Type V'];
+    const skinToneIndex = Math.floor(random3 * skinTones.length);
+    const detectedSkinTone = skinTones[skinToneIndex];
+    
+    // Generate features based on prediction
+    const baseFeatures = {
+      asymmetry: 0.1 + random1 * 0.4,
+      border: 0.1 + random2 * 0.4,
+      color: 0.1 + random3 * 0.4,
+      diameter: 0.2 + (1 - random1) * 0.3
+    };
+    
+    // Adjust features based on prediction
+    if (prediction === 'Suspicious') {
+      baseFeatures.asymmetry += 0.2;
+      baseFeatures.border += 0.1;
+      baseFeatures.color += 0.1;
+    }
+    
+    // Generate recommendations based on prediction and risk level
+    let recommendations: string[] = [];
+    
+    if (prediction === 'Benign' && riskLevel === 'Low') {
+      recommendations = [
+        'Continue regular skin monitoring',
+        'Use sunscreen with SPF 30+',
+        'Schedule annual dermatologist visit'
+      ];
+    } else if (prediction === 'Suspicious' || riskLevel === 'Medium') {
+      recommendations = [
+        'Schedule dermatologist appointment within 2-4 weeks',
+        'Monitor for changes in size, color, or shape',
+        'Use broad-spectrum sunscreen daily',
+        'Consider dermoscopy for detailed examination'
+      ];
+    } else if (prediction === 'Dermatitis' || prediction === 'Eczema' || prediction === 'Allergic Reaction') {
+      recommendations = [
+        'Apply gentle, fragrance-free moisturizer',
+        'Avoid harsh soaps and irritants',
+        'Consider over-the-counter hydrocortisone cream',
+        'See dermatologist if symptoms persist'
+      ];
+    } else if (prediction === 'Atypical Nevus') {
+      recommendations = [
+        'Regular monitoring every 6 months',
+        'Document with photos for tracking',
+        'Consider mole mapping with dermatologist',
+        'Use sun protection religiously'
+      ];
+    } else if (prediction === 'Seborrheic Keratosis') {
+      recommendations = [
+        'No treatment needed unless bothersome',
+        'Can be removed for cosmetic reasons',
+        'Continue regular skin checks',
+        'Use sunscreen to prevent new lesions'
+      ];
+    } else if (prediction === 'Actinic Keratosis') {
+      recommendations = [
+        'Schedule dermatologist appointment within 1-2 weeks',
+        'Consider cryotherapy or topical treatment',
+        'Strict sun protection essential',
+        'Regular follow-up appointments needed'
+      ];
+    } else if (prediction === 'Melanoma' || prediction === 'Basal Cell Carcinoma' || riskLevel === 'High') {
+      recommendations = [
+        'Immediate dermatologist consultation required',
+        'Document with photos for tracking changes',
+        'Avoid sun exposure until evaluation',
+        'Consider biopsy for definitive diagnosis',
+        'May require surgical excision'
+      ];
+    } else {
+      recommendations = [
+        'Schedule dermatologist appointment within 2-4 weeks',
+        'Monitor for changes in size, color, or shape',
+        'Use broad-spectrum sunscreen daily',
+        'Consider dermoscopy for detailed examination'
+      ];
+    }
+    
+    return {
+      success: true,
+      prediction,
+      confidence,
+      analysis: {
+        detected_skin_tone: detectedSkinTone,
+        features: baseFeatures,
+        analysis_type: 'dynamic_mock_analysis',
+        file_info: {
+          name: file.name,
+          size: fileSize,
+          type: fileType
+        }
+      },
+      recommendations,
+      risk_level: riskLevel,
+      timestamp: new Date().toISOString(),
+      note: 'This is a dynamic mock analysis based on image characteristics. For real medical analysis, consult a dermatologist.'
+    };
+  };
+
   const analyzeSkin = async () => {
     if (!selectedFile) {
       setError('Please select an image first');
@@ -172,7 +384,7 @@ export function SkinAnalysisDashboard() {
       formData.append('evolution_weeks', evolutionWeeks.toString());
       formData.append('user_id', 'demo-user-1');
 
-      const endpoint = activeTab === 'enhanced' ? '/api/enhanced-skin-analysis' : '/api/skin-analysis';
+      const endpoint = '/api/skin-analysis';
       
       const response = await fetch(`${FLASK_API_URL}${endpoint}`, {
         method: 'POST',
@@ -191,31 +403,10 @@ export function SkinAnalysisDashboard() {
       }
     } catch (error) {
       clearInterval(progressInterval);
-      console.log('Flask backend not available, using mock response');
+      console.log('Flask backend not available, using dynamic mock response');
       
-      // Provide mock response when Flask backend is not available
-      const mockResult = {
-        success: true,
-        prediction: 'Benign',
-        confidence: 85,
-        analysis: {
-          detected_skin_tone: 'Type III',
-          features: {
-            asymmetry: 0.2,
-            border: 0.3,
-            color: 0.1,
-            diameter: 0.4
-          },
-          analysis_type: 'mock_analysis'
-        },
-        recommendations: [
-          'Continue regular skin monitoring',
-          'Use sunscreen with SPF 30+',
-          'Schedule annual dermatologist visit'
-        ],
-        risk_level: 'Low',
-        timestamp: new Date().toISOString()
-      };
+      // Generate dynamic mock response based on image characteristics
+      const mockResult = generateDynamicMockResponse(selectedFile, skinType, bodyPart);
       
       setAnalysisResult(mockResult);
     } finally {
@@ -226,12 +417,14 @@ export function SkinAnalysisDashboard() {
 
   const getRiskColor = (prediction: string) => {
     const lowerPrediction = prediction.toLowerCase();
-    if (lowerPrediction.includes('malignant') || lowerPrediction.includes('high_risk')) {
+    if (lowerPrediction.includes('melanoma') || lowerPrediction.includes('carcinoma') || lowerPrediction.includes('malignant') || lowerPrediction.includes('high_risk')) {
       return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950';
-    } else if (lowerPrediction.includes('benign') || lowerPrediction.includes('low_risk')) {
+    } else if (lowerPrediction.includes('benign') || lowerPrediction.includes('dermatitis') || lowerPrediction.includes('eczema') || lowerPrediction.includes('keratosis') || lowerPrediction.includes('allergic') || lowerPrediction.includes('low_risk')) {
       return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950';
-    } else {
+    } else if (lowerPrediction.includes('suspicious') || lowerPrediction.includes('atypical') || lowerPrediction.includes('actinic') || lowerPrediction.includes('medium_risk')) {
       return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950';
+    } else {
+      return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950';
     }
   };
 
@@ -360,19 +553,7 @@ export function SkinAnalysisDashboard() {
           </Alert>
         )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-            <TabsTrigger value="basic" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
-              <Brain className="h-4 w-4 mr-2" />
-              Basic Analysis
-            </TabsTrigger>
-            <TabsTrigger value="enhanced" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Enhanced AI
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="basic" className="space-y-6">
+        <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Image Upload */}
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
@@ -551,6 +732,17 @@ export function SkinAnalysisDashboard() {
                         )}
                       </div>
 
+                      {/* Dynamic Mock Analysis Notice */}
+                      {analysisResult.analysis?.analysis_type === 'dynamic_mock_analysis' && (
+                        <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20">
+                          <Info className="h-4 w-4 text-blue-600" />
+                          <AlertDescription className="text-blue-800 dark:text-blue-200">
+                            <strong>Dynamic Mock Analysis:</strong> This analysis varies based on your image characteristics (filename, size, type). 
+                            Different images will produce different results. For real medical analysis, consult a dermatologist.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
                       {/* Analysis Details */}
                       {analysisResult.analysis && (
                         <div className="space-y-4">
@@ -609,35 +801,7 @@ export function SkinAnalysisDashboard() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="enhanced" className="space-y-6">
-            <div className="text-center py-12">
-              <Sparkles className="h-16 w-16 text-purple-600 dark:text-purple-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Enhanced AI Analysis</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Advanced skin analysis using state-of-the-art AI models with enhanced accuracy and detailed insights.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-lg">
-                  <Brain className="h-8 w-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">Advanced AI</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">State-of-the-art neural networks</p>
-                </div>
-                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 rounded-lg">
-                  <Target className="h-8 w-8 text-green-600 dark:text-green-400 mx-auto mb-2" />
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">High Accuracy</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Enhanced prediction confidence</p>
-                </div>
-                <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 rounded-lg">
-                  <ActivityIcon className="h-8 w-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">Real-time</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Instant analysis results</p>
-                </div>
-              </div>
-            </div>
-                     </TabsContent>
-         </Tabs>
+        </div>
        </div>
 
        {/* Settings Dialog */}

@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
   Plus, 
   Package, 
@@ -28,11 +29,13 @@ import {
   Clock,
   AlertCircle,
   BarChart3,
-  Settings,
   RefreshCw,
   MoreHorizontal,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  ChevronDown,
+  FileText,
+  FileSpreadsheet
 } from "lucide-react";
 import { useBlockchain } from "@/contexts/BlockchainContext";
 import { ProductListing, Order } from "@/contexts/BlockchainContext";
@@ -228,6 +231,100 @@ export const SupplierDashboard: React.FC = () => {
     }
   };
 
+  const handleExportData = (format: 'json' | 'csv' = 'json') => {
+    try {
+      const dateStr = new Date().toISOString().split('T')[0];
+      
+      if (format === 'json') {
+        // Create export data object
+        const exportData = {
+          supplier: address,
+          exportDate: new Date().toISOString(),
+          stats: stats,
+          products: products,
+          orders: orders,
+          summary: {
+            totalProducts: products.length,
+            totalOrders: orders.length,
+            totalRevenue: stats.totalRevenue,
+            averageRating: stats.averageRating,
+            activeProducts: stats.activeProducts,
+            pendingOrders: stats.pendingOrders,
+            completedOrders: stats.completedOrders
+          }
+        };
+
+        // Convert to JSON
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        // Create download link
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `supplier-data-${dateStr}.json`;
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up
+        URL.revokeObjectURL(url);
+      } else if (format === 'csv') {
+        // Create CSV for products
+        const productsCsv = [
+          ['Product ID', 'Name', 'Description', 'Category', 'Price', 'Inventory', 'Rating', 'Supplier'],
+          ...products.map(p => [
+            p.id,
+            p.name,
+            p.description,
+            p.category,
+            p.price,
+            p.inventoryLevel,
+            p.rating || 0,
+            p.supplier
+          ])
+        ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
+
+        // Create CSV for orders
+        const ordersCsv = [
+          ['Order ID', 'Product ID', 'Buyer', 'Seller', 'Quantity', 'Total Price', 'Status', 'Date'],
+          ...orders.map(o => [
+            o.id,
+            o.productId,
+            o.buyerAddress,
+            o.sellerAddress,
+            o.quantity,
+            o.totalPrice,
+            o.status,
+            new Date(o.createdAt).toLocaleDateString()
+          ])
+        ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
+
+        // Combine both CSVs
+        const combinedCsv = `PRODUCTS\n${productsCsv}\n\nORDERS\n${ordersCsv}`;
+        
+        const dataBlob = new Blob([combinedCsv], { type: 'text/csv' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `supplier-data-${dateStr}.csv`;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+      }
+      
+      addAppNotification(`Data exported successfully as ${format.toUpperCase()}!`, "success");
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      addAppNotification("Failed to export data", "error");
+    }
+  };
+
   if (!address) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -268,14 +365,25 @@ export const SupplierDashboard: React.FC = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export Data
-              </Button>
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Data
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleExportData('json')}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export as JSON
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExportData('csv')}>
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Export as CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button onClick={loadSupplierData} variant="outline" size="sm">
                 <RefreshCw className="h-4 w-4" />
               </Button>
