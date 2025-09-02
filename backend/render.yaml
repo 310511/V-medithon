@@ -25,7 +25,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: GEMINI_API_KEY
-        value: your-gemini-api-key-here
+        value: AIzaSyByWvWkLKedG2WKnxtVhefQBRLZyrwf-tE
 
   # Flask Skin Analysis API
   - type: web

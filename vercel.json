@@ -12,6 +12,7 @@
   "env": {
     "VITE_MEAL_INSULIN_API_URL": "https://dosewise-backend.onrender.com",
     "VITE_INFINITE_MEMORY_API_URL": "https://dosewise-infinite-memory.onrender.com",
-    "VITE_FLASK_API_URL": "https://dosewise-flask.onrender.com"
+    "VITE_FLASK_API_URL": "https://dosewise-flask.onrender.com",
+    "VITE_GEMINI_API_KEY": "AIzaSyByWvWkLKedG2WKnxtVhefQBRLZyrwf-tE"
   }
 }

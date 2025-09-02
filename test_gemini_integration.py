@@ -1,115 +1,149 @@
 #!/usr/bin/env python3
 """
-Test script for Gemini API integration with Infinite Memory
+Test Gemini API integration with infinite memory system
 """
 
+import os
+import sys
 import requests
 import json
-import time
+from datetime import datetime
 
-def test_gemini_integration():
-    """Test the Gemini-powered query endpoint"""
-    base_url = "http://localhost:8001"
+# Test configuration
+GEMINI_API_KEY = "AIzaSyByWvWkLKedG2WKnxtVhefQBRLZyrwf-tE"
+INFINITE_MEMORY_URL = "https://dosewise-infinite-memory.onrender.com"
+
+def test_gemini_api_direct():
+    """Test Gemini API directly"""
+    print("🧪 Testing Gemini API directly...")
     
-    print("🤖 Testing Gemini API Integration...")
-    print("=" * 50)
-    
-    # Test 1: Health Check
-    print("1. Testing Health Check...")
     try:
-        response = requests.get(f"{base_url}/")
-        if response.status_code == 200:
-            print("✅ Health Check: OK")
-        else:
-            print(f"❌ Health Check: Status {response.status_code}")
-            return
+        import google.generativeai as genai
+        
+        # Configure Gemini
+        genai.configure(api_key=GEMINI_API_KEY)
+        
+        # Create model
+        model = genai.GenerativeModel('gemini-pro')
+        
+        # Test prompt
+        prompt = "Hello, this is a test of the Gemini API integration. Please respond with a simple greeting."
+        
+        # Generate response
+        response = model.generate_content(prompt)
+        
+        print(f"✅ Gemini API Response: {response.text}")
+        return True
+        
     except Exception as e:
-        print(f"❌ Health Check: {e}")
-        return
+        print(f"❌ Gemini API Error: {e}")
+        return False
+
+def test_infinite_memory_api():
+    """Test infinite memory API with Gemini integration"""
+    print("\n🧪 Testing Infinite Memory API...")
     
-    # Test 2: Add some test data first
-    print("\n2. Adding test data...")
-    test_user_id = "gemini_test_user"
-    
-    # Add some memories
-    test_texts = [
-        "I love working on AI projects and machine learning",
-        "My favorite programming language is Python",
-        "I'm planning to learn more about natural language processing",
-        "I have a meeting tomorrow at 2 PM about the new project",
-        "I need to finish the documentation by Friday"
-    ]
-    
-    for text in test_texts:
-        try:
-            response = requests.post(f"{base_url}/process-text", json={
-                "user_id": test_user_id,
-                "text": text
-            })
-            if response.status_code == 200:
-                print(f"✅ Added memory: {text[:30]}...")
+    try:
+        # Test health endpoint
+        health_url = f"{INFINITE_MEMORY_URL}/health"
+        response = requests.get(health_url, timeout=10)
+        
+        if response.status_code == 200:
+            print("✅ Infinite Memory API is healthy")
+        else:
+            print(f"⚠️ Infinite Memory API health check failed: {response.status_code}")
+            return False
+            
+        # Test memory storage with AI analysis
+        memory_url = f"{INFINITE_MEMORY_URL}/memories"
+        test_memory = {
+            "content": "Patient John Doe has diabetes and needs insulin monitoring",
+            "category": "medical",
+            "tags": ["diabetes", "insulin", "patient"],
+            "user_id": "test_user_123"
+        }
+        
+        response = requests.post(memory_url, json=test_memory, timeout=30)
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"✅ Memory stored successfully: {result.get('id', 'Unknown ID')}")
+            
+            # Test AI analysis
+            if 'ai_analysis' in result:
+                print(f"✅ AI Analysis: {result['ai_analysis']}")
             else:
-                print(f"❌ Failed to add memory: {response.status_code}")
-        except Exception as e:
-            print(f"❌ Error adding memory: {e}")
+                print("⚠️ No AI analysis in response")
+                
+            return True
+        else:
+            print(f"❌ Memory storage failed: {response.status_code} - {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Infinite Memory API Error: {e}")
+        return False
+
+def test_gemini_infinite_memory_integration():
+    """Test the complete integration"""
+    print("\n🚀 Testing Complete Gemini + Infinite Memory Integration...")
     
-    # Test 3: Test regular query (without Gemini)
-    print("\n3. Testing regular query...")
     try:
-        response = requests.post(f"{base_url}/query", json={
-            "user_id": test_user_id,
-            "query": "What programming languages do I like?"
-        })
+        # Test conversation endpoint
+        conversation_url = f"{INFINITE_MEMORY_URL}/conversations"
+        test_conversation = {
+            "message": "What are the symptoms of diabetes?",
+            "user_id": "test_user_123",
+            "context": "medical_consultation"
+        }
+        
+        response = requests.post(conversation_url, json=test_conversation, timeout=30)
+        
         if response.status_code == 200:
             result = response.json()
-            print(f"✅ Regular Query: {result['answer'][:100]}...")
+            print(f"✅ Conversation processed successfully")
+            print(f"✅ AI Response: {result.get('response', 'No response')}")
+            
+            if 'memory_id' in result:
+                print(f"✅ Memory ID: {result['memory_id']}")
+                
+            return True
         else:
-            print(f"❌ Regular Query: Status {response.status_code}")
+            print(f"❌ Conversation failed: {response.status_code} - {response.text}")
+            return False
+            
     except Exception as e:
-        print(f"❌ Regular Query Error: {e}")
+        print(f"❌ Integration Error: {e}")
+        return False
+
+def main():
+    """Run all tests"""
+    print("🔬 DoseWise Healthcare AI - Gemini API Integration Test")
+    print("=" * 60)
     
-    # Test 4: Test Gemini-powered query
-    print("\n4. Testing Gemini-powered query...")
-    try:
-        response = requests.post(f"{base_url}/query-gemini", json={
-            "user_id": test_user_id,
-            "query": "What are my main interests and upcoming tasks?",
-            "include_summary": True
-        })
-        if response.status_code == 200:
-            result = response.json()
-            print(f"✅ Gemini Query Answer: {result['answer'][:200]}...")
-            if result.get('summary'):
-                print(f"📊 Gemini Summary: {result['summary'][:200]}...")
-            if result.get('data_points'):
-                print(f"📈 Data Points: {result['data_points']}")
-        elif response.status_code == 503:
-            print("⚠️  Gemini API not configured (GEMINI_API_KEY not set)")
-            print("   This is expected if you haven't set up the API key yet")
-        else:
-            print(f"❌ Gemini Query: Status {response.status_code}")
-            print(f"   Response: {response.text}")
-    except Exception as e:
-        print(f"❌ Gemini Query Error: {e}")
+    # Test 1: Direct Gemini API
+    gemini_ok = test_gemini_api_direct()
     
-    # Test 5: Test conversation history
-    print("\n5. Testing conversation history...")
-    try:
-        response = requests.get(f"{base_url}/conversation-history/{test_user_id}")
-        if response.status_code == 200:
-            result = response.json()
-            print(f"✅ Conversation History: {len(result['conversations'])} conversations")
-        else:
-            print(f"❌ Conversation History: Status {response.status_code}")
-    except Exception as e:
-        print(f"❌ Conversation History Error: {e}")
+    # Test 2: Infinite Memory API
+    memory_ok = test_infinite_memory_api()
     
-    print("\n" + "=" * 50)
-    print("🎉 Gemini Integration Test Complete!")
-    print("\nTo use Gemini features:")
-    print("1. Get a Gemini API key from: https://makersuite.google.com/app/apikey")
-    print("2. Set environment variable: GEMINI_API_KEY=AIzaSyA8dKcom49mGUHTPZSl326gJNRiXvgoQy0
-    print("3. Restart the backend")
+    # Test 3: Complete Integration
+    integration_ok = test_gemini_infinite_memory_integration()
+    
+    # Summary
+    print("\n" + "=" * 60)
+    print("📊 Test Results Summary:")
+    print(f"   Gemini API Direct: {'✅ PASS' if gemini_ok else '❌ FAIL'}")
+    print(f"   Infinite Memory API: {'✅ PASS' if memory_ok else '❌ FAIL'}")
+    print(f"   Complete Integration: {'✅ PASS' if integration_ok else '❌ FAIL'}")
+    
+    if all([gemini_ok, memory_ok, integration_ok]):
+        print("\n🎉 All tests passed! Gemini API is fully integrated!")
+    else:
+        print("\n⚠️ Some tests failed. Check the errors above.")
+    
+    return all([gemini_ok, memory_ok, integration_ok])
 
 if __name__ == "__main__":
-    test_gemini_integration()
+    success = main()
+    sys.exit(0 if success else 1)
