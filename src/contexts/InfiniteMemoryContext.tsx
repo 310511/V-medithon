@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { infiniteMemoryAPI, MemoryAnalysis, Task, MemoryReport } from '@/services/infiniteMemoryApi';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import { infiniteMemoryAPI, MemoryAnalysis, Task, MemoryReport, EnhancedQueryResponse } from '@/services/infiniteMemoryApi';
 
 interface InfiniteMemoryState {
   currentUserId: string | null;
@@ -9,6 +9,7 @@ interface InfiniteMemoryState {
     type: 'user' | 'ai';
     content: string;
     analysis?: MemoryAnalysis;
+    queryResponse?: EnhancedQueryResponse;
   }>;
   tasks: Task[];
   memoryReport: MemoryReport | null;
@@ -19,7 +20,8 @@ interface InfiniteMemoryState {
 
 type InfiniteMemoryAction =
   | { type: 'SET_USER_ID'; payload: string }
-  | { type: 'ADD_CONVERSATION_ENTRY'; payload: { type: 'user' | 'ai'; content: string; analysis?: MemoryAnalysis } }
+  | { type: 'ADD_CONVERSATION_ENTRY'; payload: { type: 'user' | 'ai'; content: string; analysis?: MemoryAnalysis; queryResponse?: EnhancedQueryResponse } }
+  | { type: 'LOAD_CONVERSATION_HISTORY'; payload: Array<{ id: string; timestamp: Date; type: 'user' | 'ai'; content: string; analysis?: MemoryAnalysis; queryResponse?: EnhancedQueryResponse }> }
   | { type: 'SET_TASKS'; payload: Task[] }
   | { type: 'ADD_TASK'; payload: Task }
   | { type: 'COMPLETE_TASK'; payload: string }
@@ -29,8 +31,16 @@ type InfiniteMemoryAction =
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'CLEAR_ERROR' };
 
+// Get initial user ID from localStorage
+const getInitialUserId = (): string | null => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('infinite_memory_user_id');
+  }
+  return null;
+};
+
 const initialState: InfiniteMemoryState = {
-  currentUserId: null,
+  currentUserId: getInitialUserId(),
   conversationHistory: [],
   tasks: [],
   memoryReport: null,
@@ -54,8 +64,14 @@ function infiniteMemoryReducer(state: InfiniteMemoryState, action: InfiniteMemor
             type: action.payload.type,
             content: action.payload.content,
             analysis: action.payload.analysis,
+            queryResponse: action.payload.queryResponse,
           },
         ],
+      };
+    case 'LOAD_CONVERSATION_HISTORY':
+      return {
+        ...state,
+        conversationHistory: action.payload,
       };
     case 'SET_TASKS':
       return { ...state, tasks: action.payload };
@@ -87,11 +103,13 @@ interface InfiniteMemoryContextType {
   state: InfiniteMemoryState;
   processText: (text: string) => Promise<void>;
   queryMemory: (query: string) => Promise<void>;
+  queryMemoryWithGemini: (query: string, includeSummary?: boolean) => Promise<void>;
   processImage: (image: File, caption?: string) => Promise<void>;
   createTask: (task: Omit<Task, 'task_id' | 'created_at'>) => Promise<void>;
   completeTask: (taskId: string) => Promise<void>;
   loadTasks: () => Promise<void>;
   loadMemoryReport: (days?: number) => Promise<void>;
+  loadConversationHistory: () => Promise<void>;
   setUserId: (userId: string) => void;
   clearError: () => void;
 }
@@ -101,8 +119,52 @@ const InfiniteMemoryContext = createContext<InfiniteMemoryContextType | undefine
 export function InfiniteMemoryProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(infiniteMemoryReducer, initialState);
 
+  const loadConversationHistory = async (userId?: string) => {
+    const targetUserId = userId || state.currentUserId;
+    if (!targetUserId) {
+      return;
+    }
+
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'CLEAR_ERROR' });
+
+    try {
+      const response = await infiniteMemoryAPI.getConversationHistory(targetUserId);
+      const conversations = response.conversations || [];
+      
+      // Convert backend conversation format to frontend format
+      const formattedConversations = conversations.map((conv: any) => ({
+        id: conv.id,
+        timestamp: new Date(conv.created_at),
+        type: conv.message_type,
+        content: conv.content,
+        analysis: undefined, // Analysis data is not stored in conversations table
+      }));
+
+      dispatch({ type: 'LOAD_CONVERSATION_HISTORY', payload: formattedConversations });
+    } catch (error) {
+      console.error('Failed to load conversation history:', error);
+      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to load conversation history' });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
+  // Load conversation history when component mounts if user ID is already set
+  useEffect(() => {
+    if (state.currentUserId) {
+      loadConversationHistory();
+    }
+  }, [state.currentUserId]);
+
   const setUserId = (userId: string) => {
     dispatch({ type: 'SET_USER_ID', payload: userId });
+    // Save user ID to localStorage for persistence across page reloads
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('infinite_memory_user_id', userId);
+    }
+    // Automatically load conversation history when user ID is set
+    loadConversationHistory(userId);
   };
 
   const processText = async (text: string) => {
@@ -165,14 +227,62 @@ export function InfiniteMemoryProvider({ children }: { children: ReactNode }) {
         query,
       });
 
-      // Add AI response to conversation
+      // Add AI response to conversation with enhanced query response
       dispatch({
         type: 'ADD_CONVERSATION_ENTRY',
         payload: {
           type: 'ai',
-          content: response.answer,
+          content: response.final_answer,
+          queryResponse: response,
         },
       });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
+  const queryMemoryWithGemini = async (query: string, includeSummary: boolean = true) => {
+    if (!state.currentUserId) {
+      dispatch({ type: 'SET_ERROR', payload: 'No user ID set' });
+      return;
+    }
+
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'CLEAR_ERROR' });
+
+    try {
+      // Add user query to conversation
+      dispatch({
+        type: 'ADD_CONVERSATION_ENTRY',
+        payload: { type: 'user', content: query },
+      });
+
+      // Query memory with Gemini
+      const response = await infiniteMemoryAPI.queryWithGemini({
+        user_id: state.currentUserId,
+        query,
+        include_summary: includeSummary,
+      });
+
+      // Add AI response to conversation with enhanced query response
+      dispatch({
+        type: 'ADD_CONVERSATION_ENTRY',
+        payload: {
+          type: 'ai',
+          content: response.final_answer,
+          queryResponse: response,
+        },
+      });
+
+      // Log summary if available
+      if (response.summary) {
+        console.log('📊 Gemini Summary:', response.summary);
+      }
+
+      // Log data points
+      console.log('📈 Data Points:', response.data_points);
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
@@ -302,11 +412,13 @@ export function InfiniteMemoryProvider({ children }: { children: ReactNode }) {
     state,
     processText,
     queryMemory,
+    queryMemoryWithGemini,
     processImage,
     createTask,
     completeTask,
     loadTasks,
     loadMemoryReport,
+    loadConversationHistory,
     setUserId,
     clearError,
   };

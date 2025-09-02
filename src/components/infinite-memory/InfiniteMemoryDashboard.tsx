@@ -120,7 +120,7 @@ import {
 import { format } from 'date-fns';
 
 export function InfiniteMemoryDashboard() {
-  const { state, processText, queryMemory, processImage, createTask, completeTask, loadTasks, loadMemoryReport, setUserId, clearError } = useInfiniteMemory();
+  const { state, processText, queryMemory, queryMemoryWithGemini, processImage, createTask, completeTask, loadTasks, loadMemoryReport, setUserId, clearError } = useInfiniteMemory();
   const [inputText, setInputText] = useState('');
   const [queryText, setQueryText] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -174,6 +174,14 @@ export function InfiniteMemoryDashboard() {
     
     console.log('🔍 Querying memory:', queryText);
     await queryMemory(queryText);
+    setQueryText('');
+  };
+
+  const handleQueryMemoryWithGemini = async () => {
+    if (!queryText.trim()) return;
+    
+    console.log('🤖 Querying memory with Gemini:', queryText);
+    await queryMemoryWithGemini(queryText);
     setQueryText('');
   };
 
@@ -413,7 +421,7 @@ export function InfiniteMemoryDashboard() {
                           <p className="text-slate-400 text-sm">Start by processing some information!</p>
                         </div>
                       ) : (
-                        state.conversationHistory.map((entry) => (
+                        state.conversationHistory.slice().reverse().map((entry) => (
                           <div key={entry.id} className="flex space-x-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
                             <Avatar className="h-10 w-10">
                               <AvatarFallback className={entry.type === 'user' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}>
@@ -439,6 +447,57 @@ export function InfiniteMemoryDashboard() {
                                 )}
                               </div>
                               <p className="text-slate-700 leading-relaxed">{entry.content}</p>
+                              
+                              {/* Enhanced Query Response Display */}
+                              {entry.queryResponse && (
+                                <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                                  <div className="space-y-3">
+                                    {/* Matched Keywords */}
+                                    {entry.queryResponse.matched_keywords && entry.queryResponse.matched_keywords.length > 0 && (
+                                      <div>
+                                        <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center">
+                                          <Search className="h-4 w-4 mr-1" />
+                                          Matched Keywords
+                                        </h4>
+                                        <div className="flex flex-wrap gap-1">
+                                          {entry.queryResponse.matched_keywords.map((keyword, index) => (
+                                            <Badge key={index} variant="secondary" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                              {keyword}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Retrieved Memory */}
+                                    {entry.queryResponse.retrieved_memory && (
+                                      <div>
+                                        <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-2 flex items-center">
+                                          <Brain className="h-4 w-4 mr-1" />
+                                          Retrieved Memory
+                                        </h4>
+                                        <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-800">
+                                          <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                                            {entry.queryResponse.retrieved_memory.summary}
+                                          </p>
+                                          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                            <span>Relevance: {entry.queryResponse.retrieved_memory.relevance_score}/3</span>
+                                            <span>Importance: {Math.round(entry.queryResponse.retrieved_memory.importance_score * 100)}%</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Total Matches */}
+                                    {entry.queryResponse.total_matches > 0 && (
+                                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                                        Found {entry.queryResponse.total_matches} relevant {entry.queryResponse.total_matches === 1 ? 'memory' : 'memories'}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              
                               {entry.analysis && (
                                 <div className="space-y-2">
                                   <div className="flex items-center space-x-3 text-sm">
@@ -509,6 +568,11 @@ export function InfiniteMemoryDashboard() {
                       value={queryText}
                       onChange={(e) => setQueryText(e.target.value)}
                       className="flex-1 border-green-200 focus:border-green-400 focus:ring-green-400"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleQueryMemory();
+                        }
+                      }}
                     />
                     <Button 
                       onClick={handleQueryMemory}
@@ -522,9 +586,112 @@ export function InfiniteMemoryDashboard() {
                         </>
                       )}
                     </Button>
+                    <Button 
+                      onClick={handleQueryMemoryWithGemini}
+                      disabled={state.isLoading || backendStatus !== 'connected'}
+                      className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg"
+                    >
+                      {state.isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Gemini
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <div className="text-sm text-green-600 dark:text-green-400">
+                    💡 <strong>Enhanced Query System:</strong> Shows matched keywords, retrieved memories, and structured answers
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Query Results Display */}
+              {state.conversationHistory.filter(entry => entry.type === 'ai' && entry.queryResponse).length > 0 && (
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-blue-900 dark:text-blue-100">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Brain className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <span>Recent Query Results</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-64">
+                      <div className="space-y-4">
+                        {state.conversationHistory
+                          .filter(entry => entry.type === 'ai' && entry.queryResponse)
+                          .slice(-3) // Show last 3 query results
+                          .reverse() // Show most recent first
+                          .map((entry) => (
+                            <div key={entry.id} className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800">
+                              <div className="space-y-3">
+                                {/* Final Answer */}
+                                <div>
+                                  <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center">
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    Final Answer
+                                  </h4>
+                                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                                    {entry.content}
+                                  </p>
+                                </div>
+
+                                {/* Enhanced Query Response Details */}
+                                {entry.queryResponse && (
+                                  <div className="space-y-2">
+                                    {/* Matched Keywords */}
+                                    {entry.queryResponse.matched_keywords && entry.queryResponse.matched_keywords.length > 0 && (
+                                      <div>
+                                        <h5 className="text-xs font-semibold text-blue-800 dark:text-blue-200 mb-1 flex items-center">
+                                          <Search className="h-3 w-3 mr-1" />
+                                          Matched Keywords
+                                        </h5>
+                                        <div className="flex flex-wrap gap-1">
+                                          {entry.queryResponse.matched_keywords.map((keyword, index) => (
+                                            <Badge key={index} variant="secondary" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                              {keyword}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Retrieved Memory */}
+                                    {entry.queryResponse.retrieved_memory && (
+                                      <div>
+                                        <h5 className="text-xs font-semibold text-purple-800 dark:text-purple-200 mb-1 flex items-center">
+                                          <Brain className="h-3 w-3 mr-1" />
+                                          Retrieved Memory
+                                        </h5>
+                                        <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded border border-purple-200 dark:border-purple-800">
+                                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                                            {entry.queryResponse.retrieved_memory.summary}
+                                          </p>
+                                          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500">
+                                            <span>Relevance: {entry.queryResponse.retrieved_memory.relevance_score}/3</span>
+                                            <span>Importance: {Math.round(entry.queryResponse.retrieved_memory.importance_score * 100)}%</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Total Matches */}
+                                    {entry.queryResponse.total_matches > 0 && (
+                                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                                        Found {entry.queryResponse.total_matches} relevant {entry.queryResponse.total_matches === 1 ? 'memory' : 'memories'}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             {/* Enhanced Tasks Tab */}

@@ -1,4 +1,4 @@
-const BACKEND_API_URL = "http://localhost:8000";
+const BACKEND_API_URL = import.meta.env.VITE_INFINITE_MEMORY_API_URL || "http://localhost:8001";
 
 export interface ProcessTextRequest {
   user_id: string;
@@ -8,6 +8,27 @@ export interface ProcessTextRequest {
 export interface QueryRequest {
   user_id: string;
   query: string;
+}
+
+export interface GeminiQueryRequest {
+  user_id: string;
+  query: string;
+  include_summary?: boolean;
+}
+
+export interface EnhancedQueryResponse {
+  matched_keywords: string[];
+  retrieved_memory?: {
+    summary: string;
+    content: string;
+    topics: string[];
+    entities: string[];
+    importance_score: number;
+    relevance_score: number;
+    created_at: string;
+  };
+  final_answer: string;
+  total_matches: number;
 }
 
 export interface ProcessAudioRequest {
@@ -112,9 +133,17 @@ class InfiniteMemoryAPI {
     });
   }
 
-  async query(request: QueryRequest): Promise<{ answer: string; context: any }> {
+  async query(request: QueryRequest): Promise<EnhancedQueryResponse> {
     console.log('🔍 Querying memory:', request.query);
     return this.makeRequest('/query', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async queryWithGemini(request: GeminiQueryRequest): Promise<EnhancedQueryResponse> {
+    console.log('🤖 Querying memory with Gemini:', request.query);
+    return this.makeRequest('/query-gemini', {
       method: 'POST',
       body: JSON.stringify(request),
     });
@@ -208,6 +237,11 @@ class InfiniteMemoryAPI {
     await this.makeRequest(`/admin/acknowledge-alert/${alertId}`, {
       method: 'POST',
     });
+  }
+
+  async getConversationHistory(userId: string, limit: number = 50): Promise<{ conversations: any[] }> {
+    console.log('💬 Getting conversation history for:', userId);
+    return this.makeRequest(`/conversation-history/${userId}?limit=${limit}`);
   }
 
   // Test connection method

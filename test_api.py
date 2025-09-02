@@ -1,36 +1,55 @@
+#!/usr/bin/env python3
+"""
+Simple test script for the infinite memory API
+"""
+
 import requests
+import json
 
-# Test the API
-try:
-    # Test health endpoint
-    print("Testing health endpoint...")
-    response = requests.get('http://localhost:8002/health')
-    print(f"Health Status: {response.status_code}")
-    print(f"Health Response: {response.json()}")
+def test_api():
+    base_url = "http://localhost:8001"
     
-    # Test promoter validation
-    print("\nTesting promoter validation...")
-    data = {
-        'sequence': 'TATAAAATCGATCGATCG',
-        'patient_id': 'TEST001',
-        'analyst_id': 'TEST_ANALYST',
-        'user_role': 'Doctor'
-    }
+    print("🧪 Testing Infinite Memory API...")
     
-    response = requests.post('http://localhost:8002/promoter/validate', data=data)
-    print(f"Validation Status: {response.status_code}")
+    # Test 1: Health Check
+    print("\n1. Testing Health Check...")
+    try:
+        response = requests.get(f"{base_url}/")
+        print(f"Status: {response.status_code}")
+        print(f"Response: {response.json()}")
+    except Exception as e:
+        print(f"Error: {e}")
     
-    if response.status_code == 200:
-        result = response.json()
-        print(f"Validation Response: {result}")
-        print(f"Prediction: {result.get('prediction')}")
-        print(f"Confidence: {result.get('probability')}")
-    else:
-        print(f"Error: {response.text}")
+    # Test 2: Process Text
+    print("\n2. Testing Text Processing...")
+    try:
+        payload = {
+            "user_id": "test_user_123",
+            "text": "Hello, this is a test message for infinite memory"
+        }
         
-except Exception as e:
-    print(f"Error: {e}")
+        response = requests.post(f"{base_url}/process-text", json=payload)
+        print(f"Status: {response.status_code}")
+        if response.status_code == 200:
+            data = response.json()
+            print(f"Success: {data}")
+        else:
+            print(f"Error: {response.text}")
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    # Test 3: Get Conversation History
+    print("\n3. Testing Conversation History...")
+    try:
+        response = requests.get(f"{base_url}/conversation-history/test_user_123")
+        print(f"Status: {response.status_code}")
+        if response.status_code == 200:
+            data = response.json()
+            print(f"Conversations: {len(data.get('conversations', []))}")
+        else:
+            print(f"Error: {response.text}")
+    except Exception as e:
+        print(f"Error: {e}")
 
-
-
-
+if __name__ == "__main__":
+    test_api()

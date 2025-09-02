@@ -36,8 +36,8 @@ YOUTUBE_API_KEY=AIzaSyCKZvQBqIJPzQbT9jo4w2Huzp5V7z715QU
 GROQ_API_KEY=your_groq_api_key_here
 
 # Google Gemini API Configuration (for other projects)
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
-NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY=your_gemini_api_key_here
+NEXT_PUBLIC_GEMINI_API_KEY=AIzaSyA8dKcom49mGUHTPZSl326gJNRiXvgoQy0
+NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY=AIzaSyA8dKcom49mGUHTPZSl326gJNRiXvgoQy0
 
 # Backend Configuration
 BACKEND_HOST=localhost
