@@ -548,13 +548,11 @@ async def query_memory(request: QueryRequest):
             
             # Generate a clear, concise answer
             if len(memories) == 1:
-                final_answer = f"Based on your memory: {best_memory['summary']}"
+                final_answer = best_memory['summary']
             else:
-                # Multiple relevant memories found
-                answer_parts = [f"Based on your memories, I found {len(memories)} relevant entries:"]
-                for i, memory in enumerate(memories[:3], 1):
-                    answer_parts.append(f"{i}. {memory['summary']}")
-                final_answer = " ".join(answer_parts)
+                # Multiple relevant memories found - keep it concise
+                summaries = [memory['summary'] for memory in memories[:2]]
+                final_answer = f"{summaries[0]}. Also: {summaries[1]}" if len(summaries) > 1 else summaries[0]
         
         # Save query to conversation
         save_conversation(
@@ -643,18 +641,27 @@ USER DATA:
 
 USER QUESTION: {request.query}
 
-Please provide a comprehensive and helpful response based on the available data. If the question requires information not in the data, please say so clearly. If you can provide insights or patterns from the data, please do so.
+Provide a brief, helpful response based on the available data. Keep your answer short and to the point - maximum 2 sentences. If no relevant information is found, say so clearly.
 
 Format your response as:
 - Matched Keywords: {matched_keywords}
 - Retrieved Memory: (if any relevant memory found)
-- Final Answer: (clear, concise, and direct answer to the question)
+- Final Answer: (clear, concise, and direct answer - keep it brief)
 
 If no relevant memory is found, say: "I couldn't find anything in memory related to that."""
 
         # Generate response with Gemini
         response = gemini_model.generate_content(prompt)
-        answer = response.text
+        full_response = response.text
+        
+        # Extract just the final answer from the structured response
+        answer = full_response
+        if "- Final Answer:" in full_response:
+            final_answer_section = full_response.split("- Final Answer:")[-1].strip()
+            # Take only the first line or first sentence
+            answer = final_answer_section.split('\n')[0].strip()
+            if not answer:
+                answer = final_answer_section
         
         # Prepare retrieved memory information
         retrieved_memory = None
@@ -694,7 +701,9 @@ If no relevant memory is found, say: "I couldn't find anything in memory related
 Please provide a concise summary highlighting:
 1. Main topics of interest
 2. Recent activities or concerns
-3. Any notable patterns or trends"""
+3. Any notable patterns or trends
+
+Keep the summary brief and to the point."""
 
             summary_response = gemini_model.generate_content(summary_prompt)
             summary = summary_response.text

@@ -54,6 +54,8 @@ import { SpotifyIntegration } from "@/components/zenith/SpotifyIntegration";
 import { AIWellnessPlanner } from "@/components/zenith/AIWellnessPlanner";
 import { DroneDelivery } from "@/components/delivery/DroneDelivery";
 import { EnhancedDroneDelivery } from "@/components/delivery/EnhancedDroneDelivery";
+import { MealInsulinPage } from "@/pages/MealInsulinPage";
+import { EEGGlucosePage } from "@/pages/EEGGlucosePage";
 
 // GeneTrust Integration Components
 import { GenePredictor } from "@/components/genetrust/GenePredictor";
@@ -123,6 +125,8 @@ const AppContent = () => {
       <Route path="/ai-wellness-planner" element={<AIWellnessPlanner />} />
       <Route path="/drone-delivery" element={<DroneDelivery />} />
       <Route path="/enhanced-drone-delivery" element={<EnhancedDroneDelivery />} />
+      <Route path="/meal-insulin" element={<MealInsulinPage />} />
+      <Route path="/eeg-glucose" element={<EEGGlucosePage />} />
       
       {/* GeneTrust Integration Routes */}
       <Route path="/genetrust" element={<GeneTrustDashboard />} />

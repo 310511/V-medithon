@@ -51,5 +51,11 @@ def test_api():
     except Exception as e:
         print(f"Error: {e}")
 
+<<<<<<< HEAD
 if __name__ == "__main__":
     test_api()
+=======
+
+
+
+>>>>>>> a3d3a2fa81e70fb302e38c467b80d9eb68b2d9af
