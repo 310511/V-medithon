@@ -11,6 +11,7 @@ import {
   Activity
 } from 'lucide-react';
 import { PhoneBluetoothConnector } from '@/components/eeg-glucose/PhoneBluetoothConnector';
+import { MobileEEGOptimized } from '@/components/eeg-glucose/MobileEEGOptimized';
 import { MealInsulinDashboard } from '@/components/meal-insulin/MealInsulinDashboard';
 
 interface GlucoseEstimate {
@@ -99,13 +100,20 @@ export function EEGGlucosePage() {
         <div className="container mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <div className="flex justify-center">
-              <TabsList className="grid w-full max-w-2xl grid-cols-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-0 shadow-2xl">
+              <TabsList className="grid w-full max-w-3xl grid-cols-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-0 shadow-2xl">
                 <TabsTrigger 
                   value="phone-bluetooth" 
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-600 data-[state=active]:text-white"
                 >
                   <Bluetooth className="h-4 w-4 mr-2" />
                   Phone Bluetooth
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="mobile-eeg" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white"
+                >
+                  <Activity className="h-4 w-4 mr-2" />
+                  Mobile EEG
                 </TabsTrigger>
                 <TabsTrigger 
                   value="insulin" 
@@ -129,6 +137,33 @@ export function EEGGlucosePage() {
                   <PhoneBluetoothConnector 
                     onPhoneConnected={handleBluetoothDeviceConnected}
                     onPhoneDisconnected={handleBluetoothDeviceDisconnected}
+                    onError={handleBluetoothError}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="mobile-eeg" className="mt-8">
+              <Card className="border-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-2xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-2xl">
+                    <Activity className="h-6 w-6" />
+                    Mobile-Optimized EEG Interface
+                  </CardTitle>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Touch-optimized interface for mobile EEG glucose measurement with gesture controls
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <MobileEEGOptimized 
+                    onMeasurementComplete={(glucose, confidence) => {
+                      setCurrentGlucose({
+                        estimated_glucose: glucose,
+                        confidence: confidence,
+                        method: 'mobile-eeg',
+                        timestamp: new Date().toISOString()
+                      });
+                    }}
                     onError={handleBluetoothError}
                   />
                 </CardContent>
