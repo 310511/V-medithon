@@ -85,7 +85,7 @@ The server now handles Unicode encoding properly for Windows console.
 
 For Gemini AI features:
 ```bash
-set GEMINI_API_KEY=AIzaSyA8dKcom49mGUHTPZSl326gJNRiXvgoQy0
+set GEMINI_API_KEY=AIzaSyByWvWkLKedG2WKnxtVhefQBRLZyrwf-tE
 cd backend && python main.py
 ```
 

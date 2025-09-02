@@ -40,7 +40,7 @@ Deploy each service separately on Render:
 #### Meal Insulin Prediction API
 - **Name**: `dosewise-backend`
 - **Environment**: Python 3.11
-- **Build Command**: `pip install -r requirements.txt`
+- **Build Command**: `epip install -r requirements.txt`
 - **Start Command**: `python -m uvicorn meal_insulin_prediction_api:app --host 0.0.0.0 --port $PORT`
 
 #### Infinite Memory API

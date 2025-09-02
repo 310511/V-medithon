@@ -21,7 +21,7 @@ def test_env_vars():
                 # Extract the key (without showing the full key)
                 lines = content.split('\n')
                 for line in lines:
-                    if line.startswith('GEMINI_API_KEY=AIzaSyA8dKcom49mGUHTPZSl326gJNRiXvgoQy0'):                      key = line.split('=', 1)[1]
+                    if line.startswith('GEMINI_API_KEY=AIzaSyByWvWkLKedG2WKnxtVhefQBRLZyrwf-tE'):                      key = line.split('=', 1)[1]
                         print(f"   Key length: {len(key)} characters")
                         print(f"   Key starts with: {key[:10]}...")
                         break

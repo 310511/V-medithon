@@ -1,0 +1,5 @@
+# Deployment Trigger
+# Generated at: 2025-09-02T23:25:33.345503
+# This file forces Render to redeploy with updated environment variables
+
+DEPLOYMENT_TRIGGER = "gemini_api_key_update_20250902_232533"
