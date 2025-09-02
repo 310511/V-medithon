@@ -1,4 +1,4 @@
-import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital, Stethoscope, Activity, Zap, Settings, Dna, AlertTriangle, Dumbbell, Calculator, Calendar, Target, BarChart3, Activity as ActivityIcon, Disc3, Plane } from "lucide-react";
+import { Bell, Shield, User, Brain, TrendingUp, Pill, Package, Radio, Camera, Mic, Heart, Menu, X, Sparkles, LogIn, UserPlus, Hospital, Stethoscope, Activity, Zap, Settings, Dna, AlertTriangle, Dumbbell, Calculator, Calendar, Target, BarChart3, Activity as ActivityIcon, Disc3, Plane, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -70,6 +70,8 @@ export const Header = () => {
       title: "Health & Fitness",
       items: [
         { to: "/fitness-dashboard", icon: Dumbbell, label: "Fitness Dashboard", highlight: true },
+        { to: "/meal-insulin", icon: Utensils, label: "Meal Insulin Prediction", highlight: true },
+        { to: "/eeg-glucose", icon: Brain, label: "EEG Glucose Monitoring", highlight: true },
         { to: "/bmi-calculator", icon: Calculator, label: "BMI Calculator" },
         { to: "/period-tracker", icon: Calendar, label: "Period Tracker" },
         { to: "/health-analytics", icon: BarChart3, label: "Health Analytics" },
