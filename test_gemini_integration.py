@@ -23,8 +23,8 @@ def test_gemini_api_direct():
         # Configure Gemini
         genai.configure(api_key=GEMINI_API_KEY)
         
-        # Create model
-        model = genai.GenerativeModel('gemini-pro')
+        # Create model (updated model name)
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Test prompt
         prompt = "Hello, this is a test of the Gemini API integration. Please respond with a simple greeting."
@@ -55,11 +55,9 @@ def test_infinite_memory_api():
             return False
             
         # Test memory storage with AI analysis
-        memory_url = f"{INFINITE_MEMORY_URL}/memories"
+        memory_url = f"{INFINITE_MEMORY_URL}/process-text"
         test_memory = {
-            "content": "Patient John Doe has diabetes and needs insulin monitoring",
-            "category": "medical",
-            "tags": ["diabetes", "insulin", "patient"],
+            "text": "Patient John Doe has diabetes and needs insulin monitoring",
             "user_id": "test_user_123"
         }
         
@@ -90,11 +88,10 @@ def test_gemini_infinite_memory_integration():
     
     try:
         # Test conversation endpoint
-        conversation_url = f"{INFINITE_MEMORY_URL}/conversations"
+        conversation_url = f"{INFINITE_MEMORY_URL}/query-gemini"
         test_conversation = {
-            "message": "What are the symptoms of diabetes?",
-            "user_id": "test_user_123",
-            "context": "medical_consultation"
+            "query": "What are the symptoms of diabetes?",
+            "user_id": "test_user_123"
         }
         
         response = requests.post(conversation_url, json=test_conversation, timeout=30)
