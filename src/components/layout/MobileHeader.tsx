@@ -69,18 +69,22 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ className }) => {
   }, []);
 
   const navigationItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: Home, color: 'text-blue-600' },
-    { name: 'GeneTrust AI', path: '/genetrust', icon: Shield, color: 'text-cyan-600' },
-    { name: 'Medicine AI', path: '/ai-medicine-recommendation', icon: Pill, color: 'text-red-600' },
-    { name: 'Infinite Memory', path: '/infinite-memory', icon: Brain, color: 'text-purple-600' },
-    { name: 'ML Predictions', path: '/ml-predictions', icon: Activity, color: 'text-green-600' },
-    { name: 'RFID Management', path: '/rfid', icon: Radio, color: 'text-orange-600' },
-    { name: 'Skin Analysis', path: '/skin-analysis', icon: Camera, color: 'text-teal-600' },
-    { name: 'Voice Assistant', path: '/voice-medicine', icon: Mic, color: 'text-indigo-600' },
-    { name: 'Marketplace', path: '/marketplace', icon: ShoppingCart, color: 'text-pink-600' },
-    { name: 'Medical Records', path: '/medical-records', icon: FileText, color: 'text-cyan-600' },
-    { name: 'DoseWise', path: '/genechain', icon: Shield, color: 'text-emerald-600' },
-    { name: 'Mobile Test', path: '/mobile-test', icon: Shield, color: 'text-violet-600' },
+    // Tier 1 - Core Features (Highlighted)
+    { name: 'Meal Insulin Prediction', path: '/meal-insulin', icon: Utensils, color: 'text-green-600', tier: 1, highlight: true },
+    { name: 'Phone Bluetooth Glucose', path: '/eeg-glucose', icon: Brain, color: 'text-blue-600', tier: 1, highlight: true },
+    { name: 'Mobile Platform', path: '/dashboard', icon: Activity, color: 'text-purple-600', tier: 1, highlight: true },
+    
+    // Tier 2 - Supporting Features
+    { name: 'AI Disease Diagnosis', path: '/disease-diagnosis', icon: Stethoscope, color: 'text-red-600', tier: 2 },
+    { name: 'Blockchain Records', path: '/medical-records', icon: FileText, color: 'text-cyan-600', tier: 2 },
+    { name: 'Predictive Analytics', path: '/readmission-risk', icon: Activity, color: 'text-orange-600', tier: 2 },
+    { name: 'EchoMed AI', path: '/echomed-ai', icon: Heart, color: 'text-pink-600', tier: 2 },
+    
+    // Tier 3 - Additional Features
+    { name: 'GeneTrust AI', path: '/genetrust', icon: Shield, color: 'text-emerald-600', tier: 3 },
+    { name: 'Fitness Dashboard', path: '/fitness-dashboard', icon: Dumbbell, color: 'text-teal-600', tier: 3 },
+    { name: 'Drone Delivery', path: '/drone-delivery', icon: Plane, color: 'text-indigo-600', tier: 3 },
+    { name: 'Marketplace', path: '/marketplace', icon: ShoppingCart, color: 'text-yellow-600', tier: 3 },
   ];
 
   const quickActions = [
@@ -287,20 +291,28 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ className }) => {
                   {navigationItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = location.pathname === item.path;
+                    const tierBadge = item.tier === 1 ? '🎯' : item.tier === 2 ? '💡' : '📝';
+                    const tierColor = item.tier === 1 ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 
+                                     item.tier === 2 ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20' : 
+                                     'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/20';
+                    
                     return (
                       <Link
                         key={item.name}
                         to={item.path}
-                        className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 border ${
                           isActive 
-                            ? 'bg-gradient-to-r from-primary/10 to-primary/5 text-primary border border-primary/20 shadow-sm' 
-                            : 'text-foreground hover:bg-muted/50 hover:scale-[1.02]'
+                            ? 'bg-gradient-to-r from-primary/10 to-primary/5 text-primary border-primary/20 shadow-sm' 
+                            : `${tierColor} text-foreground hover:bg-muted/50 hover:scale-[1.02]`
                         }`}
                       >
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isActive ? 'bg-primary' : 'bg-muted'}`}>
                           <Icon className={`h-4 w-4 ${isActive ? 'text-primary-foreground' : item.color}`} />
                         </div>
-                        <span className="text-sm font-medium">{item.name}</span>
+                        <div className="flex-1 flex items-center justify-between">
+                          <span className="text-sm font-medium">{item.name}</span>
+                          {item.highlight && <span className="text-xs">{tierBadge}</span>}
+                        </div>
                       </Link>
                     );
                   })}

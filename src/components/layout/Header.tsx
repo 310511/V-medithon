@@ -45,78 +45,34 @@ export const Header = () => {
     clearAll
   } = useNotifications();
 
-  // Organized navigation items by category
+  // Tier-based navigation structure for hackathon focus
   const navigationCategories = [
     {
-      title: "AI Diagnostics",
+      title: "🎯 TIER 1 - Core Features",
       items: [
-        { to: "/disease-diagnosis", icon: Stethoscope, label: "Disease Diagnosis" },
-        { to: "/mental-health", icon: Brain, label: "Mental Health" },
-        { to: "/skin-analysis", icon: Camera, label: "Skin Analysis" },
-        { to: "/voice-medicine", icon: Mic, label: "Voice Medicine" },
+        { to: "/meal-insulin", icon: Utensils, label: "Meal Insulin Prediction", highlight: true, tier: 1 },
+        { to: "/eeg-glucose", icon: Brain, label: "Phone Bluetooth Glucose", highlight: true, tier: 1 },
+        { to: "/dashboard", icon: Activity, label: "Mobile-First Platform", highlight: true, tier: 1 },
       ]
     },
     {
-      title: "GeneTrust AI Studio",
+      title: "💡 TIER 2 - Supporting Features",
       items: [
-        { to: "/genetrust", icon: Dna, label: "GeneTrust Dashboard", highlight: true },
-        { to: "/gene-predictor", icon: Dna, label: "AI Gene Predictor" },
-        { to: "/lab-monitor", icon: Activity, label: "Lab Monitor" },
-        { to: "/blockchain-verification", icon: Shield, label: "Blockchain Verification" },
-        { to: "/ai-assistant", icon: Brain, label: "AI Research Assistant" },
+        { to: "/disease-diagnosis", icon: Stethoscope, label: "AI Disease Diagnosis", tier: 2 },
+        { to: "/medical-records", icon: User, label: "Blockchain Medical Records", tier: 2 },
+        { to: "/readmission-risk", icon: Hospital, label: "Predictive Analytics", tier: 2 },
+        { to: "/echomed-ai", icon: Heart, label: "EchoMed AI Assistant", tier: 2 },
       ]
     },
     {
-      title: "Health & Fitness",
+      title: "📝 TIER 3 - Additional Features",
       items: [
-        { to: "/fitness-dashboard", icon: Dumbbell, label: "Fitness Dashboard", highlight: true },
-        { to: "/meal-insulin", icon: Utensils, label: "Meal Insulin Prediction", highlight: true },
-        { to: "/eeg-glucose", icon: Brain, label: "EEG Glucose Monitoring", highlight: true },
-        { to: "/bmi-calculator", icon: Calculator, label: "BMI Calculator" },
-        { to: "/period-tracker", icon: Calendar, label: "Period Tracker" },
-        { to: "/health-analytics", icon: BarChart3, label: "Health Analytics" },
-      ]
-    },
-    {
-      title: "Zenith Wellness",
-      items: [
-        { to: "/mental-health", icon: Brain, label: "Mental Health" },
-        { to: "/spotify-integration", icon: Disc3, label: "Music Therapy" },
-        { to: "/ai-wellness-planner", icon: Target, label: "AI Wellness Planner" },
-      ]
-    },
-    {
-      title: "Medical Records",
-      items: [
-        { to: "/medical-records", icon: User, label: "Medical Records" },
-        { to: "/patient-profile", icon: User, label: "Patient Profile" },
-        { to: "/prescriptions", icon: Pill, label: "Prescriptions" },
-      ]
-    },
-    {
-      title: "Predictive Analytics",
-      items: [
-        { to: "/readmission-risk", icon: Hospital, label: "Readmission Risk" },
-        { to: "/insurance-coverage", icon: Shield, label: "Insurance Coverage" },
-        { to: "/ml-predictions", icon: TrendingUp, label: "ML Predictions" },
-      ]
-    },
-    {
-      title: "Core Features",
-      items: [
-        { to: "/infinite-memory", icon: Zap, label: "Infinite Memory" },
-        { to: "/medicine-recommendation", icon: Pill, label: "Medicine AI" },
-        { to: "/echomed-ai", icon: Heart, label: "EchoMed AI" },
-        { to: "/genechain", icon: Dna, label: "DoseWise Unified" },
-        { to: "/marketplace", icon: Package, label: "Marketplace" },
-        { to: "/drone-delivery", icon: Plane, label: "Drone Delivery", highlight: true },
-      ]
-    },
-    {
-      title: "Management",
-      items: [
-        { to: "/inventory", icon: Activity, label: "Inventory" },
-        { to: "/rfid", icon: Radio, label: "RFID Tracking" },
+        { to: "/genetrust", icon: Dna, label: "GeneTrust AI Studio", tier: 3 },
+        { to: "/fitness-dashboard", icon: Dumbbell, label: "Fitness Dashboard", tier: 3 },
+        { to: "/drone-delivery", icon: Plane, label: "Drone Delivery", tier: 3 },
+        { to: "/marketplace", icon: Package, label: "Marketplace", tier: 3 },
+        { to: "/inventory", icon: Activity, label: "Inventory Management", tier: 3 },
+        { to: "/mental-health", icon: Brain, label: "Zenith Wellness", tier: 3 },
       ]
     }
   ];
