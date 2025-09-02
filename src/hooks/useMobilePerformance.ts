@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 interface PerformanceMetrics {
   connectionType: string;
@@ -212,7 +212,7 @@ export const useLazyComponent = (componentName: string, shouldLoad: boolean) => 
           
           // For now, we'll just simulate loading
           await new Promise(resolve => setTimeout(resolve, 1000));
-          setComponent(() => () => <div>Loaded: {componentName}</div>);
+          setComponent(() => () => React.createElement('div', null, `Loaded: ${componentName}`));
         } catch (err) {
           setError(err as Error);
         } finally {
